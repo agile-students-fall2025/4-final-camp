@@ -1,7 +1,7 @@
 # UX Design
 
 ## Interactive Prototype
-👉 **[View the mobile prototype](https://www.figma.com/proto/1ZvQrSffAvZ4PEpCATDmaz/CAMP-Wireframe?node-id=24-1356_Prototype link will be added after publishing in Figma._p=f_Prototype link will be added after publishing in Figma._t=tyV3M1MsOIwmPgH7-0_Prototype link will be added after publishing in Figma._scaling=scale-down_Prototype link will be added after publishing in Figma._content-scaling=fixed_Prototype link will be added after publishing in Figma._page-id=0%3A1_Prototype link will be added after publishing in Figma._starting-point-node-id=24%3A1356)**
+👉 **[View the mobile prototype](https://www.figma.com/proto/1ZvQrSffAvZ4PEpCATDmaz/CAMP-Wireframe?node-id=24-1356&p=f&t=tyV3M1MsOIwmPgH7-0&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=24%3A1356)**
 
 This prototype demonstrates the MVP flows:
 - Authentication & entry
