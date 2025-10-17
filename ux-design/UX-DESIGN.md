@@ -14,7 +14,7 @@ This prototype demonstrates the MVP flows:
 ## App Map
 **Figma (source):** [https://www.figma.com/board/OfJD2N2mf5sBN2t7kEPEP8/CAMP?node-id=34-965&p=f&t=tyV3M1MsOIwmPgH7-0](https://www.figma.com/board/OfJD2N2mf5sBN2t7kEPEP8/CAMP?node-id=34-965&p=f&t=tyV3M1MsOIwmPgH7-0)
 
-![App Map](4-final-camp/ux-design/png/CAMP-App-Map.png)
+![App Map](ux-design/png/CAMP-App-Map.png)
 
 ---
 
