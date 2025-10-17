@@ -92,7 +92,7 @@ Details will be updated as the project progresses to the development and deploym
 
 ## Documentation
 
-- [**Product Backlog**]([../../projects?query=is%3Aopen+sort%3Aupdated-desc](https://github.com/orgs/agile-students-fall2025/projects/16/views/1?filterQuery=))  
+- [**Product Backlog**](../../projects?query=is%3Aopen+sort%3Aupdated-desc) 
 - [**Sprint 0 Backlog**](../../projects?query=is%3Aopen+sort%3Aupdated-desc)  
 - [**Contributing Guidelines**](./CONTRIBUTING.md)
 
