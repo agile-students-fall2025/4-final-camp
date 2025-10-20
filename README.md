@@ -10,10 +10,9 @@ Unlike traditional or department-specific systems that rely on spreadsheets or m
 
 ## Project Description
 
-University campuses often manage hundreds of items — from cameras and lab kits to musical instruments and sports gear — using disjointed or manual systems. This leads to misplaced assets, missed deadlines, and communication breakdowns between students and staff.  
+University campuses often manage hundreds of items from cameras and lab kits to musical instruments and sports gear using disjointed or manual systems. This leads to misplaced assets, missed deadlines, and communication breakdowns between students and staff.  
 
-**CAMP** solves these issues by offering a centralized, intelligent platform where students can easily reserve and borrow items, and staff can efficiently track inventory, manage returns, and monitor overdue items — all in real time.
-
+**CAMP** solves these issues by offering a centralized, intelligent platform where students can easily reserve and borrow items, and staff can efficiently track inventory, manage returns, and monitor overdue items.
 ---
 
 ## Key Features
@@ -43,11 +42,11 @@ University campuses often manage hundreds of items — from cameras and lab kits
 
 ##  Example Use Case
 
-A photography student needs a DSLR camera for a weekend project. Using **CAMP**, they log in with their NetID, browse available items, and reserve a camera from the Arts Centre. They receive automated reminders before pickup and return deadlines. Meanwhile, staff can view real-time borrowing records, send overdue alerts, and track all transactions in one dashboard — no spreadsheets or manual emails required.
+A photography student needs a DSLR camera for a weekend project. Using **CAMP**, they log in with their NetID, browse available items, and reserve a camera from the Arts Centre. They receive automated reminders before pickup and return deadlines. Meanwhile, staff can view real-time borrowing records, send overdue alerts, and track all transactions in one dashboard with no need for spreadsheets or manual emails.
 
 ---
 
-## 👨‍💻 Team Members
+## Team Members
 
 - [Saad Iftikhar](https://github.com/saad-iftikhar)  
 - [Talal Naveed](https://github.com/TalalNaveed)  
@@ -61,7 +60,7 @@ A photography student needs a DSLR camera for a weekend project. Using **CAMP**,
 
 **CAMP** was born out of a shared observation: many university facilities rely on separate or outdated systems for asset management. This leads to inefficiency, confusion, and wasted time for both students and staff.  
 
-Our team set out to create a unified, easy-to-use platform that not only simplifies borrowing and reservations but also automates the most tedious parts of the process — like reminders and overdue tracking — while keeping data secure and transparent.  
+Our team set out to create a unified, easy-to-use platform that not only simplifies borrowing and reservations but also automates the most tedious parts of the process like reminders and overdue tracking while keeping data secure and transparent.  
 
 By centralizing inventory data and integrating modern features like SSO, payment processing, and notifications, **CAMP** aims to become the campus-wide standard for asset management and resource sharing.
 
