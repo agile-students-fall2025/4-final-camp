@@ -10,15 +10,14 @@ Unlike traditional or department-specific systems that rely on spreadsheets or m
 
 ## Project Description
 
-University campuses often manage hundreds of items from cameras and lab kits to musical instruments and sports gear using disjointed or manual systems. This leads to misplaced assets, missed deadlines, and communication breakdowns between students and staff.  
+University campuses often manage hundreds of items from cameras and lab kits to musical instruments and sports gear using disjointed or manual systems. This leads to misplaced assets, missed deadlines, and communication breakdowns between students and staff. CAMP solves these issues by offering a centralized, intelligent platform where students can easily reserve and borrow items, and staff can efficiently track inventory, manage returns, and monitor overdue items.
 
-CAMP solves these issues by offering a centralized, intelligent platform where students can easily reserve and borrow items, and staff can efficiently track inventory, manage returns, and monitor overdue items.
 ---
 
 ## Key Features
 
 - **Single Sign-On (SSO):** Seamless login with university NetID credentials.  
-- **Centralized Inventory Management:** Unified view of all available items across departments and facilities.  
+- **Centralized Inventory Management:** Unified view of all available items across departments and facilitis.  
 - **Pre-Booking System:** Students can reserve items in advance with transparent availability.  
 - **Real-Time Notifications:**  
   - Automated reminders before due dates.  
