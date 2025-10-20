@@ -53,6 +53,19 @@ A photography student needs a DSLR camera for a weekend project. Using **CAMP**,
 - [Akshith Karthik](https://github.com/Ak1016-stack)  
 - [Ashmit Mukherjee](https://github.com/ansester)  
 
+## Sprint 0 Roles
+
+- Product Owner: [Shaf Khalid](https://github.com/Shaf5)  
+- Scrum Master: [Akshith Karthik](https://github.com/Ak1016-stack)
+
+Developers  
+- [Saad Iftikhar](https://github.com/saad-iftikhar)
+- [Talal Naveed](https://github.com/TalalNaveed)
+- [Shaf Khalid](https://github.com/Shaf5)
+- [Akshith Karthik](https://github.com/Ak1016-stack)
+- [Ashmit Mukherjee](https://github.com/ansester)
+
+_Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets experience in each role._
 ---
 
 ## Project History
