@@ -9,7 +9,7 @@ export default function LandingPage({ onSelectRole }) {
           <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
             <Package className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900">CAMP</span>
+          <span className="text-xl font-bold text-gray-900">C.A.M.P</span>
         </div>
       </header>
 
@@ -27,7 +27,7 @@ export default function LandingPage({ onSelectRole }) {
             Borrow campus equipment,
             <br />
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              simplified.
+              simplified!.
             </span>
           </h1>
 
@@ -91,7 +91,7 @@ export default function LandingPage({ onSelectRole }) {
 
       {/* Footer */}
       <footer className="px-6 py-8 text-center text-gray-500 text-sm">
-        <p>Powered by your university's NetID • Secure • Real-time availability</p>
+        <p>Powered by your NetID • Secure • Real-time availability</p>
       </footer>
     </div>
   );
