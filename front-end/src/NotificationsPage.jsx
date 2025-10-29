@@ -132,7 +132,7 @@ export default function NotificationsPage({ onNavigate }) {
                 onChange={(e) => setReminderTiming(e.target.value)}
                 className="w-5 h-5 text-blue-500 cursor-pointer"
               />
-              <span className="text-gray-900">48 hours before.</span>
+              <span className="text-gray-900">48 hours before</span>
             </label>
 
             <label className="flex items-center space-x-3 cursor-pointer">
