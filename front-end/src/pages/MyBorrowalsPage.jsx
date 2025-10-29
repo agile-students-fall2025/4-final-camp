@@ -97,12 +97,12 @@ export default function MyBorrowalsPage({ onNavigate }) {
                   </span>
                 </div>
                 <div className="flex space-x-3">
-                  <button className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                  {/* <button className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
                     Extend
                   </button>
                   <button className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
                     Return
-                  </button>
+                  </button> */}
                 </div>
               </div>
             ))}
@@ -110,7 +110,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
         )}
 
         {/* Upcoming Borrowals */}
-        {activeTab === 'upcoming' && (
+        {/* /* {activeTab === 'upcoming' && (
           <div className="space-y-3">
             {upcomingBorrowals.map(item => (
               <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
@@ -138,7 +138,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
               </div>
             ))}
           </div>
-        )}
+        )} */
 
         {/* History */}
         {activeTab === 'history' && (
