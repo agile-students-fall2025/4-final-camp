@@ -10,10 +10,10 @@ export default function MyBorrowalsPage({ onNavigate }) {
     { id: 3, name: 'Tripod', dueDate: 'Oct 18, 1:00 PM', location: 'Library', status: 'Active' },
   ];
 
-  const upcomingBorrowals = [
-    { id: 4, name: 'Audio Recorder', pickupDate: 'Oct 20, 10:00 AM', location: 'IM Lab', status: 'Reserved' },
-    { id: 5, name: 'Lighting Kit', pickupDate: 'Oct 22, 2:00 PM', location: 'Media Center', status: 'Reserved' },
-  ];
+  // const upcomingBorrowals = [
+  //   { id: 4, name: 'Audio Recorder', pickupDate: 'Oct 20, 10:00 AM', location: 'IM Lab', status: 'Reserved' },
+  //   { id: 5, name: 'Lighting Kit', pickupDate: 'Oct 22, 2:00 PM', location: 'Media Center', status: 'Reserved' },
+  // ];
 
   const historyBorrowals = [
     { id: 6, name: 'DSLR Camera', returnDate: 'Oct 01, 2025', location: 'IM Lab', status: 'Returned' },
