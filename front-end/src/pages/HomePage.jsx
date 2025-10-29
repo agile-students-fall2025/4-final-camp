@@ -6,8 +6,8 @@ export default function HomePage({ onNavigate }) {
 
   const stats = [
     { label: 'Active Borrowals', value: '3', color: 'text-blue-600' },
-    { label: 'Upcoming Bookings', value: '2', color: 'text-green-600' },
-    { label: 'Overdue Items', value: '0', color: 'text-red-600' },
+    // { label: 'Upcoming Bookings', value: '2', color: 'text-green-600' },
+    { label: 'Overdue Items', value: '2', color: 'text-red-600' },
   ];
 
   const quickLinks = [
@@ -134,9 +134,9 @@ export default function HomePage({ onNavigate }) {
                     </span>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                {/* <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
                   Extend
-                </button>
+                </button> */}
               </div>
             ))}
           </div>

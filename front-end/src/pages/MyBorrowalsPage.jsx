@@ -51,7 +51,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
           >
             Current
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveTab('upcoming')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
               activeTab === 'upcoming'
@@ -60,7 +60,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
             }`}
           >
             Upcoming
-          </button>
+          </button> */}
           <button
             onClick={() => setActiveTab('history')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
