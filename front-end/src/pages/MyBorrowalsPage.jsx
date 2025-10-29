@@ -110,7 +110,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
         )}
 
         {/* Upcoming Borrowals */}
-        {/* /* {activeTab === 'upcoming' && (
+        {/* {activeTab === 'upcoming' && (
           <div className="space-y-3">
             {upcomingBorrowals.map(item => (
               <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
@@ -138,7 +138,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
               </div>
             ))}
           </div>
-        )}  */ */}
+        )} */}
 
         {/* History */}
         {activeTab === 'history' && (
