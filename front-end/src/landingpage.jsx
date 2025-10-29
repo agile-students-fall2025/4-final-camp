@@ -91,7 +91,7 @@ export default function LandingPage({ onSelectRole }) {
 
       {/* Footer */}
       <footer className="px-6 py-8 text-center text-gray-500 text-sm">
-        <p>Powered by your university's NetID • Secure • Real-time availability</p>
+        <p>Powered by your university's NetID • Secure • Real-time availability.</p>
       </footer>
     </div>
   );
