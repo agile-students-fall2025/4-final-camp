@@ -56,9 +56,13 @@ export default function App() {
     return <LandingPage onSelectRole={setRole} />;
   }
 
+  // 👇 STAFF interface
   if (role === "staff") {
     const onNavigate = (page, data) => {
-      if (data?.item) setSelectedItem(data.item);
+      // Handle data passed from components
+      if (data) {
+        setSelectedItem(data);
+      }
       setCurrentPage(page);
     };
 
@@ -68,12 +72,9 @@ export default function App() {
       <div className="min-h-screen bg-gray-50">
         {/* 🔙 Logout button */}
         <div className="p-4 bg-white shadow-sm flex justify-between items-center">
-          <h2 className="font-bold text-lg text-gray-800">C.A.M.P</h2>
+          <h2 className="font-bold text-lg text-gray-800">C.A.M.P Staff Portal</h2>
           <button
-            onClick={() => {
-              setRole(null);
-              setCurrentPage("home");
-            }}
+            onClick={handleLogout}
             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
             Logout
@@ -90,8 +91,10 @@ export default function App() {
           {currentPage === "overdue" && <Overdue {...shared} />}
           {currentPage === "alerts" && <AutomatedAlerts {...shared} />}
           {currentPage === "fines" && <ManageFines {...shared} />}
-          {currentPage === "addItem" && <AddItem {...shared} />}
-          {currentPage === "editItem" && <EditItem {...shared} />}
+          
+          {/* Fixed: lowercase routing to match Inventory.jsx calls */}
+          {currentPage === "additem" && <AddItem {...shared} />}
+          {currentPage === "edititem" && <EditItem {...shared} itemData={selectedItem} />}
 
           {/* Default (fallback) */}
           {currentPage === "home" && <StaffDashboard {...shared} />}
@@ -99,102 +102,89 @@ export default function App() {
       </div>
     );
   }
-  // 👇 STAFF interface
-  if (role === "staff") {
-    const onNavigate = (page, data) => {
-      if (data?.item) setSelectedItem(data.item);
-      setCurrentPage(page);
-    };
-
-    const shared = { onNavigate, selectedItem, setSelectedItem };
-
-    return (
-      <div className="min-h-screen relative">
-        <button
-          onClick={handleLogout}
-          className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
-        >
-          Logout
-        </button>
-
-        {currentPage === "inventory" && <Inventory {...shared} />}
-        {currentPage === "checkout" && <CheckOut {...shared} />}
-        {currentPage === "checkin" && <CheckIn {...shared} />}
-        {currentPage === "reservations" && <Reservations {...shared} />}
-        {currentPage === "overdue" && <Overdue {...shared} />}
-        {currentPage === "alerts" && <AutomatedAlerts {...shared} />}
-        {currentPage === "fines" && <ManageFines {...shared} />}
-        {currentPage === "addItem" && <AddItem {...shared} />}
-        {currentPage === "editItem" && <EditItem {...shared} />}
-        {currentPage === "dashboard" && <StaffDashboard {...shared} />}
-      </div>
-    );
-  }
 
   // 👇 STUDENT interface
   if (role === "student") {
-    return (
-      <div className="min-h-screen relative">
-        <button
-          onClick={handleLogout}
-          className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
-        >
-          Logout
-        </button>
+    const onNavigate = (page, data) => {
+      setCurrentPage(page);
+      if (data?.item) setSelectedItem(data.item);
+      if (data?.reservation) setReservationData(data.reservation);
+      if (data?.waitlist) setWaitlistData(data.waitlist);
+      if (data?.facility) setSelectedFacility(data.facility);
+      if (data?.fine) setSelectedFine(data.fine);
+      if (data?.payment) setPaymentResult(data.payment);
+    };
 
-        {currentPage === "home" && <HomePage onNavigate={setCurrentPage} />}
-        {currentPage === "filter" && (
-          <FilterAndSearchPage onNavigate={setCurrentPage} setSelectedItem={setSelectedItem} />
-        )}
-        {currentPage === "itemDetail" && (
-          <ItemDetailPage
-            onNavigate={setCurrentPage}
-            selectedItem={selectedItem}
-            setWaitlistData={setWaitlistData}
-          />
-        )}
-        {currentPage === "reserveDateTime" && (
-          <ReserveDateTimePage
-            onNavigate={setCurrentPage}
-            selectedItem={selectedItem}
-            setReservationData={setReservationData}
-          />
-        )}
-        {currentPage === "reservationConfirmed" && (
-          <ReservationConfirmedPage onNavigate={setCurrentPage} reservationData={reservationData} />
-        )}
-        {currentPage === "waitlistConfirmed" && (
-          <WaitlistConfirmedPage onNavigate={setCurrentPage} waitlistData={waitlistData} />
-        )}
-        {currentPage === "catalogue" && (
-          <BrowserCataloguePage onNavigate={setCurrentPage} setSelectedFacility={setSelectedFacility} />
-        )}
-        {currentPage === "facilityItems" && (
-          <FacilityItemsPage
-            onNavigate={setCurrentPage}
-            selectedFacility={selectedFacility}
-            setSelectedItem={setSelectedItem}
-          />
-        )}
-        {currentPage === "borrowals" && <MyBorrowalsPage onNavigate={setCurrentPage} />}
-        {currentPage === "profile" && <ProfileAndSettingsPage onNavigate={setCurrentPage} />}
-        {currentPage === "notifications" && <NotificationsPage onNavigate={setCurrentPage} />}
-        {currentPage === "fines" && (
-          <FinesPage onNavigate={setCurrentPage} setSelectedFine={setSelectedFine} />
-        )}
-        {currentPage === "payFine" && (
-          <PayFinePage
-            onNavigate={setCurrentPage}
-            selectedFine={selectedFine}
-            setPaymentResult={setPaymentResult}
-          />
-        )}
-        {currentPage === "paymentSuccess" && (
-          <PaymentSuccessPage onNavigate={setCurrentPage} paymentResult={paymentResult} />
-        )}
-        {currentPage === "paymentHistory" && <PaymentHistoryPage onNavigate={setCurrentPage} />}
-        {currentPage === "help" && <HelpAndPoliciesPage onNavigate={setCurrentPage} />}
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* 🔙 Logout button */}
+        <div className="p-4 bg-white shadow-sm flex justify-between items-center">
+          <h2 className="font-bold text-lg text-gray-800">C.A.M.P Student Portal</h2>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* Page Routing */}
+        <div className="p-4">
+          {currentPage === "home" && <HomePage onNavigate={onNavigate} />}
+          {currentPage === "browse" && <BrowserCataloguePage onNavigate={onNavigate} />}
+          {currentPage === "filter" && <FilterAndSearchPage onNavigate={onNavigate} />}
+          {currentPage === "itemDetail" && (
+            <ItemDetailPage
+              onNavigate={onNavigate}
+              item={selectedItem}
+            />
+          )}
+          {currentPage === "facility" && (
+            <FacilityItemsPage
+              onNavigate={onNavigate}
+              facility={selectedFacility}
+            />
+          )}
+          {currentPage === "reserveDateTime" && (
+            <ReserveDateTimePage
+              onNavigate={onNavigate}
+              item={selectedItem}
+            />
+          )}
+          {currentPage === "reservationConfirmed" && (
+            <ReservationConfirmedPage
+              onNavigate={onNavigate}
+              reservation={reservationData}
+            />
+          )}
+          {currentPage === "waitlistConfirmed" && (
+            <WaitlistConfirmedPage
+              onNavigate={onNavigate}
+              waitlist={waitlistData}
+            />
+          )}
+          {currentPage === "myBorrowals" && <MyBorrowalsPage onNavigate={onNavigate} />}
+          {currentPage === "profile" && <ProfileAndSettingsPage onNavigate={onNavigate} />}
+          {currentPage === "notifications" && <NotificationsPage onNavigate={onNavigate} />}
+          {currentPage === "fines" && <FinesPage onNavigate={onNavigate} />}
+          {currentPage === "payFine" && (
+            <PayFinePage
+              onNavigate={onNavigate}
+              fine={selectedFine}
+            />
+          )}
+          {currentPage === "paymentSuccess" && (
+            <PaymentSuccessPage
+              onNavigate={onNavigate}
+              payment={paymentResult}
+            />
+          )}
+          {currentPage === "paymentHistory" && <PaymentHistoryPage onNavigate={onNavigate} />}
+          {currentPage === "help" && <HelpAndPoliciesPage onNavigate={onNavigate} />}
+        </div>
       </div>
     );
   }
+
+  return null;
 }
