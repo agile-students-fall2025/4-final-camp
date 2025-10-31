@@ -3,23 +3,18 @@ import { Camera, BookOpen, Dumbbell } from "lucide-react";
 export default function LandingPage({ onSelectRole }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50">
-      {/* Header (removed CAMP logo) */}
       <header className="px-6 py-6 md:px-12"></header>
 
-      {/* Main Content */}
       <main className="px-6 py-12 md:py-20 max-w-6xl mx-auto text-center">
-        {/* Big Title */}
         <h1 className="text-5xl md:text-6xl font-bold text-purple-800 mb-6 leading-tight">
           Campus Asset Management Platform
         </h1>
 
-        {/* Subheading */}
         <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
           One platform for all your campus borrowing needs. From cameras to lab kits,
           reserve equipment across all facilities in seconds.
         </p>
 
-        {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
           <button
             onClick={() => onSelectRole("student")}
@@ -36,7 +31,6 @@ export default function LandingPage({ onSelectRole }) {
           </button>
         </div>
 
-        {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
           <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
@@ -70,7 +64,6 @@ export default function LandingPage({ onSelectRole }) {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-8 text-center text-gray-500 text-sm">
         <p>Powered by your NetID • Secure • Real-time availability</p>
       </footer>
