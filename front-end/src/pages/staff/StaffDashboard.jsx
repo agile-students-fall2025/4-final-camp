@@ -76,7 +76,7 @@ const StaffDashboard = ({ onNavigate }) => {
         {/* Go to Inventory Button */}
         <button
           onClick={() => onNavigate('inventory')}
-          className="w-full mt-6 bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+          className="w-full mt-6 bg-[#57068C] text-white py-4 rounded-lg font-semibold hover:bg-[#460573] transition-colors"
         >
           Go to Inventory
         </button>

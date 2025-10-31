@@ -53,11 +53,11 @@ const CheckOut = ({ onNavigate }) => {
               placeholder="Scan ID / Enter NetID"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 ring-[#57068C]"
             />
             <button
               onClick={handleStudentScan}
-              className="flex-shrink-0 px-4 sm:px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+              className="flex-shrink-0 px-4 sm:px-6 py-3 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
             >
               Search
             </button>
@@ -82,7 +82,7 @@ const CheckOut = ({ onNavigate }) => {
               value={itemSearch}
               onChange={(e) => setItemSearch(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleItemSearch()}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
           {selectedItem && (
@@ -90,8 +90,8 @@ const CheckOut = ({ onNavigate }) => {
               <p className="text-sm text-gray-600 mb-2">
                 Availability: <span className="text-green-600 font-medium">{selectedItem.availability}</span>
               </p>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm font-medium text-blue-900">
+              <div className="p-3 bg-violet-50 border border-violet-200 rounded-lg">
+                <p className="text-sm font-medium text-violet-900">
                   Selected: {selectedItem.name} ({selectedItem.id})
                 </p>
               </div>
@@ -112,7 +112,7 @@ const CheckOut = ({ onNavigate }) => {
             disabled={!selectedStudent || !selectedItem}
             className={`w-full py-4 rounded-lg font-semibold transition-colors ${
               selectedStudent && selectedItem
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                ? 'bg-violet-500 text-white hover:bg-violet-600'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >

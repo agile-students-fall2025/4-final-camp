@@ -43,7 +43,7 @@ export default function BrowserCataloguePage({ onNavigate, setSelectedFacility }
               <button
                 key={index}
                 onClick={() => handleFacilityClick(facility.name)}
-                className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-blue-300 hover:bg-blue-50 transition-all text-center"
+                className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-violet-300 hover:bg-violet-50 transition-all text-center"
               >
                 {facility.name}
               </button>
@@ -52,7 +52,7 @@ export default function BrowserCataloguePage({ onNavigate, setSelectedFacility }
             {/* Filter & Search Button */}
             <button
               onClick={() => onNavigate('filter')}
-              className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-blue-300 hover:bg-blue-50 transition-all text-center"
+              className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-violet-300 hover:bg-violet-50 transition-all text-center"
             >
               Filter & Search
             </button>

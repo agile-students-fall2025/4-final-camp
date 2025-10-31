@@ -24,8 +24,8 @@ export default function HelpAndPolicies({ onNavigate }) {
       icon: FileText,
       title: "Borrowing Policies",
       description: "Pickup windows, returns, late fees.",
-      color: "from-blue-100 to-indigo-100",
-      iconColor: "text-blue-600",
+      color: "from-violet-100 to-purple-100",
+      iconColor: "text-[#57068C]",
       content: (
         <>
           <p className="mb-2 text-sm text-gray-700">
@@ -211,7 +211,7 @@ export default function HelpAndPolicies({ onNavigate }) {
       icon: HelpCircle,
       title: "FAQs",
       description: "Common questions and answers.",
-      color: "from-cyan-100 to-blue-100",
+      color: "from-purple-100 to-violet-100",
       iconColor: "text-cyan-600",
       content: (
         <>
@@ -254,7 +254,7 @@ export default function HelpAndPolicies({ onNavigate }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-violet-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -332,14 +332,14 @@ export default function HelpAndPolicies({ onNavigate }) {
         </div>
 
         {/* Contact Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg mb-6">
+        <div className="bg-gradient-to-r from-[#57068C] to-purple-600 rounded-2xl p-8 text-white shadow-lg mb-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
               <Mail className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-semibold mb-2">Need More Help?</h3>
-              <p className="text-blue-100 mb-4">
+              <p className="text-violet-100 mb-4">
                 Our support team is here to assist you with any questions or concerns.
               </p>
               <a

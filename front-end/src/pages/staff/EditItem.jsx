@@ -72,7 +72,7 @@ const AddItem = ({ onNavigate }) => {
               value={formData.itemName}
               onChange={(e) => handleInputChange('itemName', e.target.value)}
               placeholder="e.g., DSLR Camera Kit"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -85,7 +85,7 @@ const AddItem = ({ onNavigate }) => {
               <select
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
                 <option value="Camera">Camera</option>
                 <option value="Audio">Audio</option>
@@ -118,7 +118,7 @@ const AddItem = ({ onNavigate }) => {
               <select
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
                 <option value="">Select location</option>
                 <option value="IM Lab">IM Lab</option>
@@ -134,7 +134,7 @@ const AddItem = ({ onNavigate }) => {
               <select
                 value={formData.condition}
                 onChange={(e) => handleInputChange('condition', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
                 <option value="Excellent">Excellent</option>
                 <option value="Good">Good</option>
@@ -155,7 +155,7 @@ const AddItem = ({ onNavigate }) => {
                 value={formData.serialId}
                 onChange={(e) => handleInputChange('serialId', e.target.value)}
                 placeholder="e.g., CAM-201"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
               <p className="text-xs text-gray-500 mt-1">Must be unique</p>
             </div>
@@ -185,7 +185,7 @@ const AddItem = ({ onNavigate }) => {
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={4}
               placeholder="Add details about the item, included accessories, specifications..."
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -214,15 +214,15 @@ const AddItem = ({ onNavigate }) => {
                   onChange={(e) => handleInputChange('available', e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
               </label>
             </div>
           </div>
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-900">
+        <div className="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-violet-900">
             <strong>Note:</strong> Make sure to double-check the asset ID before adding. All fields marked with * are required.
           </p>
         </div>
@@ -237,7 +237,7 @@ const AddItem = ({ onNavigate }) => {
           </button>
           <button
             onClick={handleAddItem}
-            className="bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+            className="bg-violet-500 text-white py-4 rounded-lg font-semibold hover:bg-violet-600 transition-colors"
           >
             Add Item
           </button>

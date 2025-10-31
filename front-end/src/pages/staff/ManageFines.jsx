@@ -60,12 +60,12 @@ const ManageFines = ({ onNavigate }) => {
                 placeholder="Search by NetID or Name"
                 value={studentSearch}
                 onChange={(e) => setStudentSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <button
               onClick={handleStudentSearch}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+              className="px-6 py-3 bg-violet-500 text-white rounded-lg font-medium hover:bg-violet-600 transition-colors"
             >
               Search
             </button>
@@ -117,7 +117,7 @@ const ManageFines = ({ onNavigate }) => {
             <select
               value={fineReason}
               onChange={(e) => setFineReason(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
               <option value="late">Late / Damage / Other</option>
               <option value="damage">Damage</option>
@@ -140,7 +140,7 @@ const ManageFines = ({ onNavigate }) => {
                 placeholder="0.00"
                 value={fineAmount}
                 onChange={(e) => setFineAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ const ManageFines = ({ onNavigate }) => {
             {/* Select fine */}
             <div className="mb-3">
               <label className="block text-sm text-gray-600 mb-2">Select fine</label>
-              <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+              <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
                 <option>Choose...</option>
                 <option>Overdue – Audio Recorder ($5.00)</option>
                 <option>Damage – Tripod ($12.00)</option>
@@ -165,7 +165,7 @@ const ManageFines = ({ onNavigate }) => {
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
               >
                 <option value="cash">Cash / Online</option>
                 <option value="card">Card</option>
@@ -182,7 +182,7 @@ const ManageFines = ({ onNavigate }) => {
             disabled={!fineAmount || !selectedStudent}
             className={`w-full py-4 rounded-lg font-semibold transition-colors ${
               fineAmount && selectedStudent
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                ? 'bg-violet-500 text-white hover:bg-violet-600'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >

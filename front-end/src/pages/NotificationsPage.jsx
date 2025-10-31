@@ -42,7 +42,7 @@ export default function NotificationsPage({ onNavigate }) {
               <button
                 onClick={() => setEmailEnabled(!emailEnabled)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  emailEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  emailEnabled ? 'bg-[#57068C]' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -61,7 +61,7 @@ export default function NotificationsPage({ onNavigate }) {
               <button
                 onClick={() => setSmsEnabled(!smsEnabled)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  smsEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  smsEnabled ? 'bg-[#57068C]' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -80,7 +80,7 @@ export default function NotificationsPage({ onNavigate }) {
               <button
                 onClick={() => setAppEnabled(!appEnabled)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  appEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  appEnabled ? 'bg-[#57068C]' : 'bg-gray-300'
                 }`}
               >
                 <span

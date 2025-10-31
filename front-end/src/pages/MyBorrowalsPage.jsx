@@ -45,7 +45,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
             onClick={() => setActiveTab('current')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
               activeTab === 'current'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-[#57068C] text-white'
                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -65,7 +65,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
             onClick={() => setActiveTab('history')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
               activeTab === 'history'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-[#57068C] text-white'
                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
             }`}
           >

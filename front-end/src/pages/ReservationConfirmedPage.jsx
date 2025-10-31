@@ -68,7 +68,7 @@ export default function ReservationConfirmedPage({ onNavigate, reservationData }
             </p>
           </div>
 
-          <div className="flex space-x-4 text-blue-600">
+          <div className="flex space-x-4 text-[#57068C]">
             <button className="text-sm hover:underline">Add to calendar</button>
             <button className="text-sm hover:underline">Directions</button>
           </div>

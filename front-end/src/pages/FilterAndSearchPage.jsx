@@ -64,7 +64,7 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
               placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 ring-[#57068C] focus:border-transparent"
             />
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#57068C] transition-colors">
                         {item.name}
                       </h3>
                       <div className="flex items-center space-x-4 mt-2">

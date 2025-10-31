@@ -40,7 +40,7 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
               <p className="text-3xl font-bold text-green-600">${campusCash}</p>
               <p className="text-sm text-gray-600 mt-1">Available balance</p>
             </div>
-            <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+            <button className="px-6 py-3 bg-[#57068C] text-white rounded-lg hover:bg-[#460573] transition-colors font-medium">
               Add Funds
             </button>
           </div>
@@ -62,7 +62,7 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
               <button
                 onClick={() => setEmailNotifications(!emailNotifications)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  emailNotifications ? 'bg-blue-500' : 'bg-gray-300'
+                  emailNotifications ? 'bg-[#57068C]' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -81,7 +81,7 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
               <button
                 onClick={() => setSmsNotifications(!smsNotifications)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  smsNotifications ? 'bg-blue-500' : 'bg-gray-300'
+                  smsNotifications ? 'bg-[#57068C]' : 'bg-gray-300'
                 }`}
               >
                 <span
@@ -109,7 +109,7 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
             <button
               onClick={() => setShareData(!shareData)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                shareData ? 'bg-blue-500' : 'bg-gray-300'
+                shareData ? 'bg-[#57068C]' : 'bg-gray-300'
               }`}
             >
               <span

@@ -80,7 +80,7 @@ const Reservations = ({ onNavigate }) => {
             onClick={() => setViewFilter('today')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               viewFilter === 'today'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-violet-500 text-white'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -90,7 +90,7 @@ const Reservations = ({ onNavigate }) => {
             onClick={() => setViewFilter('upcoming')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               viewFilter === 'upcoming'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-violet-500 text-white'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -100,7 +100,7 @@ const Reservations = ({ onNavigate }) => {
             onClick={() => setViewFilter('past')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
               viewFilter === 'past'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-violet-500 text-white'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -136,7 +136,7 @@ const Reservations = ({ onNavigate }) => {
                 )}
                 <button
                   onClick={() => handleFastCheckout(reservation.id)}
-                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                  className="flex-1 px-4 py-2 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
                 >
                   Fast Checkout
                 </button>

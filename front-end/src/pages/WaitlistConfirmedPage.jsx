@@ -31,7 +31,7 @@ export default function WaitlistConfirmedPage({ onNavigate, waitlistData }) {
             Added to Waitlist
           </h2>
 
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+          <div className="bg-violet-50 border-2 border-violet-200 rounded-xl p-6 mb-6">
             <p className="text-xl font-bold text-gray-900 mb-2">
               You're on the list! 📋
             </p>

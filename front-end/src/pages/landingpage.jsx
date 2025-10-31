@@ -2,11 +2,11 @@ import { Camera, BookOpen, Dumbbell, Package } from "lucide-react";
 
 export default function LandingPage({ onSelectRole }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50">
       {/* Header */}
       <header className="px-6 py-6 md:px-12">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#57068C] to-purple-600 rounded-lg flex items-center justify-center">
             <Package className="w-6 h-6 text-white" />
           </div>
           <span className="text-xl font-bold text-gray-900">CAMP</span>
@@ -17,8 +17,8 @@ export default function LandingPage({ onSelectRole }) {
       <main className="px-6 py-12 md:py-20 max-w-6xl mx-auto">
         <div className="text-center mb-16">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 text-[#57068C] rounded-full text-sm font-medium mb-6">
+            <div className="w-2 h-2 bg-[#57068C] rounded-full animate-pulse"></div>
             Campus Asset Management Platform
           </div>
 
@@ -26,7 +26,7 @@ export default function LandingPage({ onSelectRole }) {
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Borrow campus equipment,
             <br />
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#57068C] to-purple-600 bg-clip-text text-transparent">
               simplified.
             </span>
           </h1>
@@ -41,7 +41,7 @@ export default function LandingPage({ onSelectRole }) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
             <button
               onClick={() => onSelectRole("student")}
-              className="w-full sm:w-64 py-4 px-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200"
+              className="w-full sm:w-64 py-4 px-8 bg-gradient-to-r from-[#57068C] to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-105 transition-all duration-200"
             >
               Student Portal
             </button>
@@ -57,8 +57,8 @@ export default function LandingPage({ onSelectRole }) {
           {/* Feature Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
             <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                <Camera className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                <Camera className="w-6 h-6 text-[#57068C]" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Arts Centre</h3>
               <p className="text-gray-600 text-sm">

@@ -52,7 +52,7 @@ const Inventory = ({ onNavigate }) => {
             placeholder="Search items"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
         </div>
 
@@ -62,7 +62,7 @@ const Inventory = ({ onNavigate }) => {
             onClick={() => setActiveFilter('all')}
             className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
               activeFilter === 'all'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-violet-500 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -74,7 +74,7 @@ const Inventory = ({ onNavigate }) => {
               onClick={() => setActiveFilter(filter.toLowerCase())}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeFilter === filter.toLowerCase()
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-violet-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -100,7 +100,7 @@ const Inventory = ({ onNavigate }) => {
                       item.status === 'available'
                         ? 'bg-green-100 text-green-700'
                         : item.status === 'reserved'
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-violet-100 text-violet-700'
                         : item.status === 'maintenance'
                         ? 'bg-orange-100 text-orange-700'
                         : 'bg-yellow-100 text-yellow-700'
@@ -146,7 +146,7 @@ const Inventory = ({ onNavigate }) => {
         {/* Add New Item Button */}
         <button
           onClick={() => onNavigate('additem')}
-          className="w-full mt-6 bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+          className="w-full mt-6 bg-[#57068C] text-white py-4 rounded-lg font-semibold hover:bg-[#460573] transition-colors"
         >
           + Add New Item
         </button>
