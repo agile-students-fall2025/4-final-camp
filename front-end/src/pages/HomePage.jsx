@@ -34,7 +34,7 @@ export default function HomePage({ onNavigate }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center items-start sm:justify-between gap-3">
           <h1 className="text-3xl font-bold text-blue-800">C.A.M.P</h1>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
