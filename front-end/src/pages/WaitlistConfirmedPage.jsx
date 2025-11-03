@@ -69,7 +69,7 @@ export default function WaitlistConfirmedPage({ onNavigate, waitlistData }) {
           </div>
         </div>
 
-        {/* Action Button */}
+        {/* action button */}
         <button
           onClick={() => onNavigate('home')}
           className="w-full py-4 bg-gray-300 text-gray-700 font-bold text-lg rounded-xl hover:bg-gray-400 transition-colors shadow-sm"
