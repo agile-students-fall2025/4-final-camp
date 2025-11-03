@@ -1,13 +1,18 @@
 import { ArrowRight } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const StaffDashboard = ({ onNavigate }) => {
-  const inventoryStats = {
-    available: 126,
-    out: 34,
-    reserved: 18,
-    checkouts: 22,
-    returns: 19,
-    overdue: 12
+  const { data, loading, error, refetch } = useMockData('staffDashboard', {
+    initialData: { inventoryStats: null }
+  });
+
+  const inventoryStats = data?.inventoryStats ?? {
+    available: 0,
+    out: 0,
+    reserved: 0,
+    checkouts: 0,
+    returns: 0,
+    overdue: 0
   };
 
   const menuItems = [
@@ -30,28 +35,40 @@ const StaffDashboard = ({ onNavigate }) => {
 
         {/* Inventory Stats Card */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-              <span className="font-semibold text-gray-900">Inventory</span>
-              <span className="text-sm text-gray-600">
-                Avail {inventoryStats.available} • Out {inventoryStats.out} • Res {inventoryStats.reserved}
-              </span>
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+              Unable to load staff metrics.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
             </div>
-            
-            <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-              <span className="font-semibold text-gray-900">Today</span>
-              <span className="text-sm text-gray-600">
-                Checkouts {inventoryStats.checkouts} • Returns {inventoryStats.returns}
-              </span>
+          )}
+          {loading && !data?.inventoryStats ? (
+            <p className="text-sm text-gray-600">Loading metrics…</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                <span className="font-semibold text-gray-900">Inventory</span>
+                <span className="text-sm text-gray-600">
+                  Avail {inventoryStats.available} • Out {inventoryStats.out} • Res {inventoryStats.reserved}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                <span className="font-semibold text-gray-900">Today</span>
+                <span className="text-sm text-gray-600">
+                  Checkouts {inventoryStats.checkouts} • Returns {inventoryStats.returns}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-gray-900">Overdue</span>
+                <span className="text-sm text-red-600 font-medium">
+                  {inventoryStats.overdue} items
+                </span>
+              </div>
             </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Overdue</span>
-              <span className="text-sm text-red-600 font-medium">
-                {inventoryStats.overdue} items
-              </span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Navigation Menu */}

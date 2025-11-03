@@ -1,25 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChevronLeft, Package } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function FacilityItemsPage({ onNavigate, selectedFacility, setSelectedItem }) {
-  const allItems = [
-    { id: 1, name: 'Canon EOS R5 Camera', category: 'Electronics', facility: 'Arts Centre', availability: 'Available', description: 'Professional camera with 18-55mm lens, battery, charger' },
-    { id: 2, name: 'DSLR Camera Kit', category: 'Electronics', facility: 'IM Lab', availability: 'Reserved', description: 'Includes body, 18-55mm lens, battery, charger', expectedBack: 'Oct 16, 2:00 PM' },
-    { id: 3, name: 'MacBook Pro 16-inch', category: 'Electronics', facility: 'IM Lab', availability: 'Reserved', description: 'High-performance laptop', expectedBack: 'Oct 18, 4:00 PM' },
-    { id: 4, name: 'Audio Recorder', category: 'Electronics', facility: 'IM Lab', availability: 'Available', description: 'Professional audio recording device' },
-    { id: 5, name: 'Microphone', category: 'Electronics', facility: 'Library', availability: 'Available', description: 'High-quality microphone for recording' },
-    { id: 6, name: 'Tripod', category: 'Tools', facility: 'Library', availability: 'Available', description: 'Sturdy tripod for cameras' },
-    { id: 7, name: 'Painting Easel', category: 'Art Supplies', facility: 'Arts Centre', availability: 'Available', description: 'Adjustable painting easel' },
-    { id: 8, name: 'Acrylic Paint Set', category: 'Art Supplies', facility: 'Arts Centre', availability: 'Available', description: 'Complete set of acrylic paints' },
-    { id: 9, name: 'Power Drill', category: 'Tools', facility: 'IM Lab', availability: 'Reserved', description: 'Cordless power drill', expectedBack: 'Oct 20, 1:00 PM' },
-    { id: 10, name: 'Soldering Iron', category: 'Electronics', facility: 'IM Lab', availability: 'Available', description: 'Electronic soldering tool' },
-    { id: 11, name: 'Video Camera', category: 'Electronics', facility: 'Media Center', availability: 'Available', description: 'HD video camera with accessories' },
-    { id: 12, name: 'Lighting Kit', category: 'Electronics', facility: 'Media Center', availability: 'Available', description: 'Professional lighting equipment' },
-    { id: 13, name: 'Green Screen', category: 'Equipment', facility: 'Media Center', availability: 'Reserved', description: 'Portable green screen backdrop', expectedBack: 'Oct 17, 3:00 PM' },
-    { id: 14, name: 'Wireless Microphone Set', category: 'Electronics', facility: 'Media Center', availability: 'Available', description: 'Wireless lavalier microphone system' },
-  ];
+  const { data, loading, error, refetch } = useMockData('items', {
+    initialData: { items: [] }
+  });
 
-  const facilityItems = allItems.filter(item => item.facility === selectedFacility);
+  const allItems = useMemo(() => data?.items ?? [], [data]);
+
+  const facilityItems = useMemo(
+    () => allItems.filter(item => item.facility === selectedFacility),
+    [allItems, selectedFacility]
+  );
 
   if (!selectedFacility) {
     onNavigate('catalogue');
@@ -52,7 +45,20 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-        {facilityItems.length === 0 ? (
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
+            Unable to load items right now.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Retry
+            </button>
+          </div>
+        )}
+
+        {loading && allItems.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-600">
+            Loading items…
+          </div>
+        ) : facilityItems.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
             <Package className="w-12 h-12 mx-auto text-gray-400 mb-2" />
             <p className="text-gray-600 font-medium">No items found at this facility</p>

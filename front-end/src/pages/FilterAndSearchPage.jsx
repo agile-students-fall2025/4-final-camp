@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, Search } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -7,30 +8,53 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
   const [selectedFacility, setSelectedFacility] = useState('All');
   const [selectedAvailability, setSelectedAvailability] = useState('All');
 
-  const allItems = [
-    { id: 1, name: 'Canon EOS R5 Camera', category: 'Electronics', facility: 'Arts Centre', availability: 'Available', description: 'Professional camera with 18-55mm lens, battery, charger' },
-    { id: 2, name: 'DSLR Camera Kit', category: 'Electronics', facility: 'IM Lab', availability: 'Reserved', description: 'Includes body, 18-55mm lens, battery, charger', expectedBack: 'Oct 16, 2:00 PM' },
-    { id: 3, name: 'MacBook Pro 16-inch', category: 'Electronics', facility: 'IM Lab', availability: 'Reserved', description: 'High-performance laptop', expectedBack: 'Oct 18, 4:00 PM' },
-    { id: 4, name: 'Audio Recorder', category: 'Electronics', facility: 'IM Lab', availability: 'Available', description: 'Professional audio recording device' },
-    { id: 5, name: 'Microphone', category: 'Electronics', facility: 'Library', availability: 'Available', description: 'High-quality microphone for recording' },
-    { id: 6, name: 'Tripod', category: 'Tools', facility: 'Library', availability: 'Available', description: 'Sturdy tripod for cameras' },
-    { id: 7, name: 'Painting Easel', category: 'Art Supplies', facility: 'Arts Centre', availability: 'Available', description: 'Adjustable painting easel' },
-    { id: 8, name: 'Acrylic Paint Set', category: 'Art Supplies', facility: 'Arts Centre', availability: 'Available', description: 'Complete set of acrylic paints' },
-    { id: 9, name: 'Power Drill', category: 'Tools', facility: 'IM Lab', availability: 'Reserved', description: 'Cordless power drill', expectedBack: 'Oct 20, 1:00 PM' },
-    { id: 10, name: 'Soldering Iron', category: 'Electronics', facility: 'IM Lab', availability: 'Available', description: 'Electronic soldering tool' },
-  ];
-
-  const categories = ['All', 'Electronics', 'Tools', 'Art Supplies'];
-  const facilities = ['All', 'IM Lab', 'Media Center', 'Library', 'Arts Centre'];
-  const availabilities = ['All', 'Available', 'Reserved'];
-
-  const filteredItems = allItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesFacility = selectedFacility === 'All' || item.facility === selectedFacility;
-    const matchesAvailability = selectedAvailability === 'All' || item.availability === selectedAvailability;
-    return matchesSearch && matchesCategory && matchesFacility && matchesAvailability;
+  const { data, loading, error, refetch } = useMockData('items', {
+    initialData: {
+      items: [],
+      filters: { categories: ['All'], facilities: ['All'], availabilities: ['All'] }
+    }
   });
+
+  const allItems = useMemo(() => data?.items ?? [], [data]);
+  const filterConfig = useMemo(
+    () => data?.filters ?? { categories: ['All'], facilities: ['All'], availabilities: ['All'] },
+    [data]
+  );
+
+  const categories = useMemo(
+    () => filterConfig.categories ?? ['All'],
+    [filterConfig]
+  );
+  const facilities = useMemo(
+    () => filterConfig.facilities ?? ['All'],
+    [filterConfig]
+  );
+  const availabilities = useMemo(
+    () => filterConfig.availabilities ?? ['All'],
+    [filterConfig]
+  );
+
+  useEffect(() => {
+    if (!categories.includes(selectedCategory)) {
+      setSelectedCategory('All');
+    }
+    if (!facilities.includes(selectedFacility)) {
+      setSelectedFacility('All');
+    }
+    if (!availabilities.includes(selectedAvailability)) {
+      setSelectedAvailability('All');
+    }
+  }, [categories, facilities, availabilities, selectedCategory, selectedFacility, selectedAvailability]);
+
+  const filteredItems = useMemo(() => {
+    return allItems.filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesFacility = selectedFacility === 'All' || item.facility === selectedFacility;
+      const matchesAvailability = selectedAvailability === 'All' || item.availability === selectedAvailability;
+      return matchesSearch && matchesCategory && matchesFacility && matchesAvailability;
+    });
+  }, [allItems, searchTerm, selectedCategory, selectedFacility, selectedAvailability]);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -121,8 +145,21 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             Results ({filteredItems.length})
           </h2>
+
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              Unable to load items.{' '}
+              <button onClick={refetch} className="underline hover:text-red-800">
+                Try again
+              </button>
+            </div>
+          )}
           
-          {filteredItems.length === 0 ? (
+          {loading && allItems.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              Loading catalogue…
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               No items found matching your criteria
             </div>

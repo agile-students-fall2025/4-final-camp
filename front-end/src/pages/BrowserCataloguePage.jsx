@@ -1,13 +1,13 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function BrowserCataloguePage({ onNavigate, setSelectedFacility }) {
-  const facilities = [
-    { name: 'IM Lab' },
-    { name: 'Media Center' },
-    { name: 'Library' },
-    { name: 'Arts Centre' },
-  ];
+  const { data, loading, error, refetch } = useMockData('items', {
+    initialData: { facilities: [] }
+  });
+
+  const facilities = data?.facilities ?? [];
 
   const handleFacilityClick = (facilityName) => {
     setSelectedFacility(facilityName);
@@ -38,17 +38,33 @@ export default function BrowserCataloguePage({ onNavigate, setSelectedFacility }
             Campus Asset Management
           </h2>
 
-          <div className="space-y-3">
-            {facilities.map((facility, index) => (
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load facilities.
               <button
-                key={index}
-                onClick={() => handleFacilityClick(facility.name)}
-                className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-violet-300 hover:bg-violet-50 transition-all text-center"
+                onClick={refetch}
+                className="ml-1 underline hover:text-red-800"
               >
-                {facility.name}
+                Retry
               </button>
-            ))}
-            
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {loading && facilities.length === 0 ? (
+              <p className="text-center text-gray-500 text-sm">Loading facilities…</p>
+            ) : (
+              facilities.map((facility) => (
+                <button
+                  key={facility.id ?? facility.name}
+                  onClick={() => handleFacilityClick(facility.name)}
+                  className="w-full py-4 px-6 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:border-violet-300 hover:bg-violet-50 transition-all text-center"
+                >
+                  {facility.name}
+                </button>
+              ))
+            )}
+
             {/* Filter & Search Button */}
             <button
               onClick={() => onNavigate('filter')}

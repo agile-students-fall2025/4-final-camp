@@ -1,27 +1,90 @@
 import React, { useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const CheckOut = ({ onNavigate }) => {
   const [studentId, setStudentId] = useState('');
   const [itemSearch, setItemSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [studentLookupError, setStudentLookupError] = useState(null);
+  const [itemLookupError, setItemLookupError] = useState(null);
+
+  const {
+    data: studentsPayload,
+    loading: studentsLoading,
+    error: studentsError,
+    refetch: refetchStudents
+  } = useMockData('students', { initialData: { students: [] } });
+
+  const {
+    data: inventoryPayload,
+    loading: inventoryLoading,
+    error: inventoryError,
+    refetch: refetchInventory
+  } = useMockData('staffInventory', { initialData: { items: [] } });
+
+  const students = studentsPayload?.students ?? [];
+  const inventoryItems = inventoryPayload?.items ?? [];
 
   const handleStudentScan = () => {
-    // Simulate student lookup
+    if (!studentId.trim()) {
+      setStudentLookupError('Enter a NetID to search.');
+      setSelectedStudent(null);
+      return;
+    }
+    const query = studentId.trim().toLowerCase();
+    const match = students.find(
+      (student) =>
+        student.netId.toLowerCase() === query ||
+        student.name.toLowerCase().includes(query)
+    );
+    if (!match) {
+      setStudentLookupError('No student found.');
+      setSelectedStudent(null);
+      return;
+    }
+    setStudentLookupError(null);
     setSelectedStudent({
-      id: 'si2356',
-      name: 'Sarah Johnson',
-      netId: 'si2356'
+      id: match.id,
+      name: match.name,
+      netId: match.netId
     });
   };
 
   const handleItemSearch = () => {
-    // Simulate item lookup
+    if (!itemSearch.trim()) {
+      setItemLookupError('Enter an item name or asset ID.');
+      setSelectedItem(null);
+      return;
+    }
+
+    const query = itemSearch.trim().toLowerCase();
+    const match = inventoryItems.find(
+      (item) =>
+        item.assetId.toLowerCase() === query ||
+        item.name.toLowerCase().includes(query)
+    );
+
+    if (!match) {
+      setItemLookupError('No matching inventory item found.');
+      setSelectedItem(null);
+      return;
+    }
+
+    setItemLookupError(null);
+    const availability =
+      match.status === 'available'
+        ? 'In stock'
+        : match.status === 'reserved'
+        ? 'Reserved'
+        : match.status === 'checked-out'
+        ? 'Checked out'
+        : 'Maintenance';
     setSelectedItem({
-      name: 'DSLR Camera Kit',
-      id: 'CAM-201',
-      availability: 'In stock'
+      name: match.name,
+      id: match.assetId,
+      availability
     });
   };
 
@@ -62,6 +125,20 @@ const CheckOut = ({ onNavigate }) => {
               Search
             </button>
           </div>
+          {studentsLoading && students.length === 0 && (
+            <p className="mt-3 text-sm text-gray-600">Loading student directory…</p>
+          )}
+          {studentsError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load students.
+              <button onClick={refetchStudents} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {studentLookupError && (
+            <p className="mt-3 text-sm text-red-600">{studentLookupError}</p>
+          )}
           {selectedStudent && (
             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm font-medium text-green-900">
@@ -85,6 +162,20 @@ const CheckOut = ({ onNavigate }) => {
               className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
+          {inventoryLoading && inventoryItems.length === 0 && (
+            <p className="mt-3 text-sm text-gray-600">Loading inventory…</p>
+          )}
+          {inventoryError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load inventory items.
+              <button onClick={refetchInventory} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {itemLookupError && (
+            <p className="mt-3 text-sm text-red-600">{itemLookupError}</p>
+          )}
           {selectedItem && (
             <div className="mt-4">
               <p className="text-sm text-gray-600 mb-2">

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult }) {
   const [paymentMethod, setPaymentMethod] = useState('campus');
-  const billingDetails = {
-    name: 'Student Name',
-    email: 'netid@univ.edu'
-  };
+  const { data, loading, error, refetch } = useMockData('profile', {
+    initialData: { student: { name: '', email: '' } }
+  });
+
+  const billingDetails = data?.student ?? { name: '', email: '' };
 
   const handlePayment = () => {
     const result = {
@@ -97,15 +99,28 @@ export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult
         {/* Billing Details */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Billing details</h3>
+
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load your billing profile.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
           
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-gray-700 font-medium">Name</span>
-              <span className="text-gray-900">{billingDetails.name}</span>
+              <span className="text-gray-900">
+                {loading && !billingDetails.name ? 'Loading…' : billingDetails.name}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-700 font-medium">Email</span>
-              <span className="text-gray-900">{billingDetails.email}</span>
+              <span className="text-gray-900">
+                {loading && !billingDetails.email ? 'Loading…' : billingDetails.email}
+              </span>
             </div>
           </div>
         </div>

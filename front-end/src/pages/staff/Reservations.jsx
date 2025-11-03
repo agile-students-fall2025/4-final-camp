@@ -1,51 +1,31 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const Reservations = ({ onNavigate }) => {
   const [viewFilter, setViewFilter] = useState('today');
+  const { data, loading, error, refetch } = useMockData('staffReservations', {
+    initialData: { reservations: [] }
+  });
 
-  const reservations = [
-    {
-      id: 1,
-      item: 'DSLR Camera',
-      time: '2:30 PM',
-      student: 'Akash M.',
-      location: 'IM Lab',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      item: 'Tripod',
-      time: '3:00 PM',
-      student: 'Leah S.',
-      location: 'Library',
-      status: 'ready'
-    },
-    {
-      id: 3,
-      item: 'Audio Recorder',
-      time: '4:15 PM',
-      student: 'Mike T.',
-      location: 'Media Center',
-      status: 'pending'
-    },
-    {
-      id: 4,
-      item: 'Lighting Kit',
-      time: '5:00 PM',
-      student: 'Emma W.',
-      location: 'IM Lab',
-      status: 'ready'
-    },
-    {
-      id: 5,
-      item: 'Microphone Stand',
-      time: '5:30 PM',
-      student: 'David K.',
-      location: 'Media Center',
-      status: 'pending'
+  const reservations = useMemo(() => data?.reservations ?? [], [data]);
+
+  const filteredReservations = useMemo(() => {
+    if (viewFilter === 'today') {
+      return reservations;
     }
-  ];
+
+    // Placeholder filtering rules; replace with actual backend filters later
+    if (viewFilter === 'upcoming') {
+      return reservations.filter((reservation) => reservation.status === 'pending');
+    }
+
+    if (viewFilter === 'past') {
+      return reservations.filter((reservation) => reservation.status === 'ready');
+    }
+
+    return reservations;
+  }, [reservations, viewFilter]);
 
   const handleMarkPrepared = (id) => {
     alert(`Reservation ${id} marked as prepared`);
@@ -110,47 +90,61 @@ const Reservations = ({ onNavigate }) => {
 
         {/* Reservations List */}
         <div className="space-y-4">
-          {reservations.map((reservation) => (
-            <div key={reservation.id} className="bg-white rounded-lg shadow-sm p-5">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">
-                    {reservation.item} – {reservation.time}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {reservation.student}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Pickup at {reservation.location} • Status: {reservation.status === 'pending' ? 'Pending' : 'Ready'}
-                  </p>
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load reservations.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {loading && reservations.length === 0 ? (
+            <p className="text-center text-gray-600">Loading reservations…</p>
+          ) : filteredReservations.length === 0 ? (
+            <p className="text-center text-gray-600">No reservations for this view.</p>
+          ) : (
+            filteredReservations.map((reservation) => (
+              <div key={reservation.id} className="bg-white rounded-lg shadow-sm p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {reservation.item} – {reservation.time}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {reservation.student}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Pickup at {reservation.location} • Status: {reservation.status === 'pending' ? 'Pending' : 'Ready'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  {reservation.status === 'pending' && (
+                    <button
+                      onClick={() => handleMarkPrepared(reservation.id)}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    >
+                      Mark Prepared
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleFastCheckout(reservation.id)}
+                    className="flex-1 px-4 py-2 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
+                  >
+                    Fast Checkout
+                  </button>
+                  {reservation.status === 'ready' && (
+                    <button
+                      onClick={() => handleNoShow(reservation.id)}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    >
+                      No Show
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-2">
-                {reservation.status === 'pending' && (
-                  <button
-                    onClick={() => handleMarkPrepared(reservation.id)}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                  >
-                    Mark Prepared
-                  </button>
-                )}
-                <button
-                  onClick={() => handleFastCheckout(reservation.id)}
-                  className="flex-1 px-4 py-2 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
-                >
-                  Fast Checkout
-                </button>
-                {reservation.status === 'ready' && (
-                  <button
-                    onClick={() => handleNoShow(reservation.id)}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                  >
-                    No Show
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Back Button */}

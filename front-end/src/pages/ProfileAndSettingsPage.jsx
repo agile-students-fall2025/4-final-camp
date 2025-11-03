@@ -1,11 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, CreditCard, Bell, Shield } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function ProfileAndSettingsPage({ onNavigate }) {
-  const [campusCash, setCampusCash] = useState('125.50');
-  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [campusCash, setCampusCash] = useState('0.00');
+  const [emailNotifications, setEmailNotifications] = useState(false);
   const [smsNotifications, setSmsNotifications] = useState(false);
-  const [shareData, setShareData] = useState(true);
+  const [shareData, setShareData] = useState(false);
+
+  const { data, loading, error, refetch } = useMockData('profile', {
+    initialData: { student: null }
+  });
+
+  useEffect(() => {
+    const student = data?.student;
+    if (!student) {
+      return;
+    }
+
+    if (typeof student.campusCashBalance === 'number') {
+      setCampusCash(student.campusCashBalance.toFixed(2));
+    }
+
+    if (student.notificationPreferences) {
+      setEmailNotifications(!!student.notificationPreferences.email);
+      setSmsNotifications(!!student.notificationPreferences.sms);
+      setShareData(!!student.notificationPreferences.shareData);
+    }
+  }, [data]);
 
   const handleSave = () => {
     alert('Preferences saved successfully!');
@@ -29,6 +51,15 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
+            Unable to load your profile.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* Campus Cash Balance */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-3 mb-4">
@@ -37,7 +68,9 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-3xl font-bold text-green-600">${campusCash}</p>
+              <p className="text-3xl font-bold text-green-600">
+                {loading && campusCash === '0.00' ? 'Loading…' : `$${campusCash}`}
+              </p>
               <p className="text-sm text-gray-600 mt-1">Available balance</p>
             </div>
             <button className="px-6 py-3 bg-[#57068C] text-white rounded-lg hover:bg-[#460573] transition-colors font-medium">

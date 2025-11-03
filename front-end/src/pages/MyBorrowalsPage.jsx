@@ -1,25 +1,21 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Clock, MapPin } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function MyBorrowalsPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('current');
 
-  const currentBorrowals = [
-    { id: 1, name: 'Canon EOS R5', dueDate: 'Oct 15, 2:00 PM', location: 'Arts Centre', status: 'Active' },
-    { id: 2, name: 'MacBook Pro 16"', dueDate: 'Oct 16, 4:00 PM', location: 'IM Lab', status: 'Active' },
-    { id: 3, name: 'Tripod', dueDate: 'Oct 18, 1:00 PM', location: 'Library', status: 'Active' },
-  ];
+  const { data, loading, error, refetch } = useMockData('borrowals', {
+    initialData: { current: [], history: [] }
+  });
 
-  // const upcomingBorrowals = [
-  //   { id: 4, name: 'Audio Recorder', pickupDate: 'Oct 20, 10:00 AM', location: 'IM Lab', status: 'Reserved' },
-  //   { id: 5, name: 'Lighting Kit', pickupDate: 'Oct 22, 2:00 PM', location: 'Media Center', status: 'Reserved' },
-  // ];
+  const currentBorrowals = data?.current ?? [];
+  const historyBorrowals = data?.history ?? [];
 
-  const historyBorrowals = [
-    { id: 6, name: 'DSLR Camera', returnDate: 'Oct 01, 2025', location: 'IM Lab', status: 'Returned' },
-    { id: 7, name: 'Microphone', returnDate: 'Sep 28, 2025', location: 'Library', status: 'Returned' },
-    { id: 8, name: 'Power Drill', returnDate: 'Sep 25, 2025', location: 'IM Lab', status: 'Returned' },
-  ];
+  const hasData = useMemo(() => ({
+    current: currentBorrowals.length > 0,
+    history: historyBorrowals.length > 0
+  }), [currentBorrowals.length, historyBorrowals.length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -73,39 +69,50 @@ export default function MyBorrowalsPage({ onNavigate }) {
           </button>
         </div>
 
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
+            Unable to load borrowals.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* Current Borrowals */}
         {activeTab === 'current' && (
           <div className="space-y-3">
-            {currentBorrowals.map(item => (
-              <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        Due: {item.dueDate}
-                      </span>
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {item.location}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                    {item.status}
-                  </span>
-                </div>
-                <div className="flex space-x-3">
-                  {/* <button className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
-                    Extend
-                  </button>
-                  <button className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
-                    Return
-                  </button> */}
-                </div>
+            {loading && !hasData.current ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-center text-gray-600">
+                Loading current borrowals…
               </div>
-            ))}
+            ) : !hasData.current ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-center text-gray-600">
+                You have no active borrowals.
+              </div>
+            ) : (
+              currentBorrowals.map(item => (
+                <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Due: {item.dueDate}
+                        </span>
+                        <span className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {item.location}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
@@ -143,28 +150,38 @@ export default function MyBorrowalsPage({ onNavigate }) {
         {/* History */}
         {activeTab === 'history' && (
           <div className="space-y-3">
-            {historyBorrowals.map(item => (
-              <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        Returned: {item.returnDate}
-                      </span>
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {item.location}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
-                    {item.status}
-                  </span>
-                </div>
+            {loading && !hasData.history ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-center text-gray-600">
+                Loading history…
               </div>
-            ))}
+            ) : !hasData.history ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-center text-gray-600">
+                No prior borrowals recorded yet.
+              </div>
+            ) : (
+              historyBorrowals.map(item => (
+                <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className="text-sm text-gray-600 flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Returned: {item.returnDate}
+                        </span>
+                        <span className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {item.location}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 

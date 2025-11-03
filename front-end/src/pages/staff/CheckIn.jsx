@@ -1,17 +1,44 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const CheckIn = ({ onNavigate }) => {
   const [itemId, setItemId] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [condition, setCondition] = useState('good');
+  const [lookupError, setLookupError] = useState(null);
+
+  const { data, loading, error, refetch } = useMockData('staffInventory', {
+    initialData: { items: [] }
+  });
+
+  const inventoryItems = data?.items ?? [];
 
   const handleItemScan = () => {
-    // Simulate item lookup
+    if (!itemId.trim()) {
+      setLookupError('Enter an item ID.');
+      setSelectedItem(null);
+      return;
+    }
+
+    const query = itemId.trim().toLowerCase();
+    const match = inventoryItems.find(
+      (item) =>
+        item.assetId.toLowerCase() === query ||
+        item.name.toLowerCase().includes(query)
+    );
+
+    if (!match) {
+      setLookupError('Item not found in inventory.');
+      setSelectedItem(null);
+      return;
+    }
+
+    setLookupError(null);
     setSelectedItem({
-      name: 'DSLR Camera Kit',
-      id: 'CAM-201',
-      borrower: 'Sarah Johnson (si2356)'
+      name: match.name,
+      id: match.assetId,
+      borrower: 'Assign borrower from circulation system'
     });
   };
 
@@ -56,6 +83,20 @@ const CheckIn = ({ onNavigate }) => {
               Search
             </button>
           </div>
+          {loading && inventoryItems.length === 0 && (
+            <p className="mt-3 text-sm text-gray-600">Loading inventory…</p>
+          )}
+          {error && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load inventory items.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {lookupError && (
+            <p className="mt-3 text-sm text-red-600">{lookupError}</p>
+          )}
           {selectedItem && (
             <div className="mt-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
               <p className="text-sm font-medium text-violet-900">

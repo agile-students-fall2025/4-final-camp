@@ -1,23 +1,13 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function PaymentHistoryPage({ onNavigate }) {
-  const paymentHistory = [
-    {
-      id: 1,
-      receipt: 'R-58231',
-      amount: 5.00,
-      date: 'Oct 13, 2025',
-      method: 'Campus Cash'
-    },
-    {
-      id: 2,
-      receipt: 'R-1012',
-      amount: 3.00,
-      date: 'Oct 01, 2025',
-      method: 'Campus Cash'
-    }
-  ];
+  const { data, loading, error, refetch } = useMockData('paymentHistory', {
+    initialData: { payments: [] }
+  });
+
+  const paymentHistory = data?.payments ?? [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -38,24 +28,41 @@ export default function PaymentHistoryPage({ onNavigate }) {
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Payment History List */}
-        <div className="space-y-3">
-          {paymentHistory.map((payment) => (
-            <div
-              key={payment.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-5"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-bold text-gray-900">{payment.receipt}</h3>
-                <span className="text-xl font-bold text-gray-900">
-                  ${payment.amount.toFixed(2)}
-                </span>
-              </div>
-              <p className="text-gray-600">
-                {payment.date} - {payment.method}
-              </p>
-            </div>
-          ))}
-        </div>
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            Unable to load your payment history.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Try again
+            </button>
+          </div>
+        )}
+
+        {loading && paymentHistory.length === 0 ? (
+          <div className="text-center text-gray-600 py-6">Loading payments…</div>
+        ) : (
+          <div className="space-y-3">
+            {paymentHistory.length === 0 ? (
+              <p className="text-center text-gray-600">No payments recorded yet.</p>
+            ) : (
+              paymentHistory.map((payment) => (
+                <div
+                  key={payment.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 p-5"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-gray-900">{payment.receipt}</h3>
+                    <span className="text-xl font-bold text-gray-900">
+                      ${payment.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    {payment.date} - {payment.method}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Back Button */}
         <button

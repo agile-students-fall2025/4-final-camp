@@ -1,0 +1,10 @@
+{
+  "inventoryStats": {
+    "available": 126,
+    "out": 34,
+    "reserved": 18,
+    "checkouts": 22,
+    "returns": 19,
+    "overdue": 12
+  }
+}

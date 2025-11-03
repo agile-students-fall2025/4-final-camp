@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const ManageFines = ({ onNavigate }) => {
   const [studentSearch, setStudentSearch] = useState('');
@@ -7,27 +8,46 @@ const ManageFines = ({ onNavigate }) => {
   const [fineReason, setFineReason] = useState('late');
   const [fineAmount, setFineAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [lookupError, setLookupError] = useState(null);
+
+  const { data, loading, error, refetch } = useMockData('students', {
+    initialData: { students: [] }
+  });
+
+  const students = data?.students ?? [];
+
+  const studentPaymentOptions = useMemo(() => {
+    if (!selectedStudent?.activeFines) {
+      return [];
+    }
+    return selectedStudent.activeFines.map((fine) => ({
+      id: fine.id,
+      label: `${fine.reason} ($${fine.amount.toFixed(2)})`
+    }));
+  }, [selectedStudent]);
 
   const handleStudentSearch = () => {
-    // Simulate student lookup
-    setSelectedStudent({
-      netId: 'si2356',
-      name: 'Sarah Johnson',
-      fines: [
-        {
-          id: 1,
-          reason: 'Overdue – Audio Recorder',
-          amount: 5.00,
-          status: 'unpaid'
-        },
-        {
-          id: 2,
-          reason: 'Damage – Tripod',
-          amount: 12.00,
-          status: 'unpaid'
-        }
-      ]
-    });
+    if (!studentSearch.trim()) {
+      setLookupError('Enter a NetID or name to search.');
+      setSelectedStudent(null);
+      return;
+    }
+
+    const query = studentSearch.trim().toLowerCase();
+    const match = students.find(
+      (student) =>
+        student.netId.toLowerCase() === query ||
+        student.name.toLowerCase().includes(query)
+    );
+
+    if (!match) {
+      setSelectedStudent(null);
+      setLookupError('No matching student found.');
+      return;
+    }
+
+    setLookupError(null);
+    setSelectedStudent(match);
   };
 
   const handleSaveApply = () => {
@@ -70,6 +90,20 @@ const ManageFines = ({ onNavigate }) => {
               Search
             </button>
           </div>
+          {lookupError && (
+            <p className="mt-3 text-sm text-red-600">{lookupError}</p>
+          )}
+          {error && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load student records.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {loading && students.length === 0 && (
+            <p className="mt-3 text-sm text-gray-600">Loading student directory…</p>
+          )}
         </div>
 
         {/* Student Fines Section */}
@@ -79,7 +113,7 @@ const ManageFines = ({ onNavigate }) => {
               Student fines - {selectedStudent.name}
             </h2>
             <div className="space-y-3">
-              {selectedStudent.fines.map((fine) => (
+              {selectedStudent.activeFines?.length ? selectedStudent.activeFines.map((fine) => (
                 <div
                   key={fine.id}
                   className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
@@ -100,7 +134,9 @@ const ManageFines = ({ onNavigate }) => {
                     {fine.status === 'unpaid' ? 'Unpaid' : 'Paid'}
                   </span>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-gray-600">No outstanding fines for this student.</p>
+              )}
             </div>
           </div>
         )}
@@ -153,9 +189,12 @@ const ManageFines = ({ onNavigate }) => {
             <div className="mb-3">
               <label className="block text-sm text-gray-600 mb-2">Select fine</label>
               <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
-                <option>Choose...</option>
-                <option>Overdue – Audio Recorder ($5.00)</option>
-                <option>Damage – Tripod ($12.00)</option>
+                <option value="">Choose...</option>
+                {studentPaymentOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 

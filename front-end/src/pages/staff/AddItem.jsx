@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const AddItem = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
     itemName: '',
-    category: 'Camera',
+    category: '',
     quantity: '1',
     location: '',
     condition: 'Good',
@@ -13,6 +14,27 @@ const AddItem = ({ onNavigate }) => {
     description: '',
     available: true
   });
+  const { data, error, refetch } = useMockData('items', {
+    initialData: { filters: { categories: [], facilities: [] } }
+  });
+
+  const categories = (data?.filters?.categories ?? [])
+    .filter((category) => category !== 'All');
+  const facilities = (data?.filters?.facilities ?? [])
+    .filter((facility) => facility !== 'All');
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const next = { ...prev };
+      if (!prev.category && categories.length > 0) {
+        next.category = categories[0];
+      }
+      if (!prev.location && facilities.length > 0) {
+        next.location = facilities[0];
+      }
+      return next;
+    });
+  }, [categories, facilities]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -57,6 +79,15 @@ const AddItem = ({ onNavigate }) => {
           <h1 className="text-3xl font-bold text-gray-900">Add New Item</h1>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            Unable to load form options.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Form */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Item details</h2>
@@ -87,12 +118,12 @@ const AddItem = ({ onNavigate }) => {
                 onChange={(e) => handleInputChange('category', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
-                <option value="Camera">Camera</option>
-                <option value="Audio">Audio</option>
-                <option value="Lighting">Lighting</option>
-                <option value="Computer">Computer</option>
-                <option value="Accessory">Accessory</option>
-                <option value="Other">Other</option>
+                {categories.length === 0 && <option value="">Loading…</option>}
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -120,11 +151,12 @@ const AddItem = ({ onNavigate }) => {
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
               >
-                <option value="">Select location</option>
-                <option value="IM Lab">IM Lab</option>
-                <option value="Media Center">Media Center</option>
-                <option value="Library">Library</option>
-                <option value="Arts Centre">Arts Centre</option>
+                {facilities.length === 0 && <option value="">Loading…</option>}
+                {facilities.map((facility) => (
+                  <option key={facility} value={facility}>
+                    {facility}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

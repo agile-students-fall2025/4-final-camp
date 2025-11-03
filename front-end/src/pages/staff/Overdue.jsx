@@ -1,43 +1,19 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
 
 const Overdue = ({ onNavigate }) => {
-  const overdueItems = [
-    {
-      id: 1,
-      item: 'Audio Recorder',
-      days: 1,
-      student: 'J. Patel',
-      dueDate: 'Oct 26, 2025'
-    },
-    {
-      id: 2,
-      item: 'Tripod',
-      days: 3,
-      student: 'R. Chen',
-      dueDate: 'Oct 24, 2025'
-    },
-    {
-      id: 3,
-      item: 'DSLR Camera',
-      days: 5,
-      student: 'A. Martinez',
-      dueDate: 'Oct 22, 2025'
-    },
-    {
-      id: 4,
-      item: 'Lighting Kit',
-      days: 2,
-      student: 'S. Johnson',
-      dueDate: 'Oct 25, 2025'
-    }
-  ];
+  const { data, loading, error, refetch } = useMockData('staffOverdue', {
+    initialData: { items: [] }
+  });
+
+  const overdueItems = data?.items ?? [];
 
   const handleSendReminder = (id) => {
     alert(`Reminder sent for item ${id}`);
   };
 
-  const handleApplyFine = (id) => {
+  const handleApplyFine = () => {
     onNavigate('fines');
   };
 
@@ -57,49 +33,61 @@ const Overdue = ({ onNavigate }) => {
 
         {/* Overdue Items List */}
         <div className="space-y-4">
-          {overdueItems.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm p-5">
-              <div className="mb-4">
-                <h3 className="font-semibold text-gray-900 text-lg mb-1">
-                  {item.item} – {item.days} day{item.days > 1 ? 's' : ''}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Student: {item.student}
-                </p>
-                <p className="text-sm text-red-600 font-medium mt-1">
-                  Due date: {item.dueDate}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleSendReminder(item.id)}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                >
-                  Send Reminder
-                </button>
-                <button
-                  onClick={() => handleApplyFine(item.id)}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+              Unable to load overdue items.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
+          {loading && overdueItems.length === 0 ? (
+            <p className="text-center text-gray-600">Loading overdue list…</p>
+          ) : overdueItems.length > 0 ? (
+            overdueItems.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg shadow-sm p-5">
+                <div className="mb-4">
+                  <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                    {item.item} – {item.days} day{item.days > 1 ? 's' : ''}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Student: {item.student}
+                  </p>
+                  <p className="text-sm text-red-600 font-medium mt-1">
+                    Due date: {item.dueDate}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleSendReminder(item.id)}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    Send Reminder
+                  </button>
+                  <button
+                  onClick={handleApplyFine}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                 >
                   Apply Fine
                 </button>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+              <div className="text-6xl mb-4">✅</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No Overdue Items
+              </h3>
+              <p className="text-gray-600">
+                All items are returned on time!
+              </p>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Empty State (if no overdue items) */}
-        {overdueItems.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <div className="text-6xl mb-4">✅</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Overdue Items
-            </h3>
-            <p className="text-gray-600">
-              All items are returned on time!
-            </p>
-          </div>
-        )}
+        {/* handled above */}
 
         {/* Back Button */}
         <button

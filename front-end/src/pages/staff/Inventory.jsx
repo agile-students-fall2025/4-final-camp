@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
+import { useMockData } from '../../hooks/useMockData.js';
+
+const STATUS_ORDER = ['available', 'reserved', 'checked-out', 'maintenance'];
+const STATUS_LABELS = {
+  available: 'Available',
+  reserved: 'Reserved',
+  'checked-out': 'Checked-Out',
+  maintenance: 'Maintenance'
+};
 
 const Inventory = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
-  const filters = ['Available', 'Reserved', 'Checked-Out', 'Maintenance'];
+  const { data, loading, error, refetch } = useMockData('staffInventory', {
+    initialData: { items: [] }
+  });
 
-  const items = [
-    { id: 1, name: 'DSLR Camera Kit', location: 'IM Lab', assetId: 'ID CAM-201', status: 'available', category: 'Camera', quantity: 3, condition: 'Good', reservationWindow: 24, description: 'Body + 18-55mm lens, 2 batteries, charger' },
-    { id: 2, name: 'Audio Recorder', location: 'Media Center', assetId: 'ID AUD-105', status: 'checked-out', category: 'Audio', quantity: 2, condition: 'Good', reservationWindow: 48, description: 'Zoom H4n Pro with accessories' },
-    { id: 3, name: 'Tripod', location: 'Library', assetId: 'ID TRI-042', status: 'available', category: 'Accessory', quantity: 5, condition: 'Good', reservationWindow: 24, description: 'Manfrotto 190 aluminum tripod' },
-    { id: 4, name: 'Microphone Stand', location: 'Media Center', assetId: 'ID MIC-089', status: 'reserved', category: 'Audio', quantity: 4, condition: 'Good', reservationWindow: 24, description: 'Adjustable boom stand' },
-    { id: 5, name: 'Lighting Kit', location: 'IM Lab', assetId: 'ID LIT-034', status: 'reserved', category: 'Lighting', quantity: 2, condition: 'Excellent', reservationWindow: 48, description: '3-point LED lighting kit with stands' },
-    { id: 6, name: 'Video Camera', location: 'Arts Centre', assetId: 'ID VID-112', status: 'maintenance', category: 'Camera', quantity: 1, condition: 'Needs Repair', reservationWindow: 72, description: 'Sony FDR-AX700 4K camcorder' },
-    { id: 7, name: 'Projector', location: 'Library', assetId: 'ID PRJ-056', status: 'available', category: 'Other', quantity: 3, condition: 'Good', reservationWindow: 24, description: 'Epson PowerLite 1080p projector' },
-    { id: 8, name: 'Laptop - MacBook Pro', location: 'IM Lab', assetId: 'ID LAP-203', status: 'checked-out', category: 'Computer', quantity: 1, condition: 'Excellent', reservationWindow: 168, description: '16" M2 Pro, 16GB RAM, 512GB SSD' }
-  ];
+  const items = useMemo(() => data?.items ?? [], [data]);
+
+  const availableFilters = useMemo(() => {
+    const presentStatuses = new Set(items.map((item) => item.status));
+    const filtered = STATUS_ORDER.filter((status) => presentStatuses.has(status));
+    return filtered.length > 0 ? filtered : STATUS_ORDER;
+  }, [items]);
 
   // Filter logic
   const filteredItems = items.filter((item) => {
@@ -25,7 +33,7 @@ const Inventory = ({ onNavigate }) => {
       item.assetId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.location.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesFilter = activeFilter === 'all' || item.status === activeFilter.toLowerCase();
+    const matchesFilter = activeFilter === 'all' || item.status === activeFilter;
 
     return matchesSearch && matchesFilter;
   });
@@ -56,6 +64,15 @@ const Inventory = ({ onNavigate }) => {
           />
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            Unable to load inventory.
+            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button
@@ -68,24 +85,26 @@ const Inventory = ({ onNavigate }) => {
           >
             All
           </button>
-          {filters.map((filter) => (
+          {availableFilters.map((status) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter.toLowerCase())}
+              key={status}
+              onClick={() => setActiveFilter(status)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                activeFilter === filter.toLowerCase()
+                activeFilter === status
                   ? 'bg-violet-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {filter}
+              {STATUS_LABELS[status] ?? status}
             </button>
           ))}
         </div>
 
         {/* Items List */}
         <div className="space-y-4">
-          {filteredItems.length > 0 ? (
+          {loading && items.length === 0 ? (
+            <p className="text-gray-500 text-center">Loading inventory…</p>
+          ) : filteredItems.length > 0 ? (
             filteredItems.map((item) => (
               <div key={item.id} className="bg-white rounded-lg shadow-sm p-4">
                 <div className="flex justify-between items-start mb-3">

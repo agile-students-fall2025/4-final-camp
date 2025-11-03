@@ -1,36 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function FinesPage({ onNavigate, setSelectedFine }) {
-  const [fines, setFines] = useState([
-    {
-      id: 1,
-      type: 'Overdue',
-      item: 'Audio Recorder',
-      amount: 5.00,
-      dueDate: 'Oct 10',
-      status: 'Unpaid',
-      ref: 'F-2084'
-    },
-    {
-      id: 2,
-      type: 'Damage',
-      item: 'Tripod',
-      amount: 12.00,
-      assessed: 'Oct 11',
-      status: 'Unpaid',
-      ref: 'F-3091'
-    },
-    {
-      id: 3,
-      type: 'Late',
-      item: 'Microphone',
-      amount: 0.00,
-      paid: 'Oct 01',
-      receipt: 'R-1012',
-      status: 'Paid'
-    }
-  ]);
+  const { data, loading, error, refetch } = useMockData('fines', {
+    initialData: { fines: [] }
+  });
+
+  const fines = data?.fines ?? [];
 
   const handlePayFine = (fine) => {
     setSelectedFine(fine);
@@ -59,45 +36,62 @@ export default function FinesPage({ onNavigate, setSelectedFine }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Fines</h2>
 
-          <div className="space-y-4">
-            {fines.map((fine) => (
-              <div
-                key={fine.id}
-                className="bg-white border-2 border-gray-200 rounded-xl p-5"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">
-                      {fine.type} - {fine.item}
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-1">
-                      {fine.dueDate && `Due date: ${fine.dueDate}`}
-                      {fine.assessed && `Assessed: ${fine.assessed}`}
-                      {fine.paid && `Paid: ${fine.paid}`}
-                      {' • '}
-                      {fine.status === 'Paid' ? (
-                        <span>Receipt {fine.receipt}</span>
-                      ) : (
-                        <span>Status: {fine.status}</span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    ${fine.amount.toFixed(2)}
-                  </div>
-                </div>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              Unable to load fines.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Try again
+              </button>
+            </div>
+          )}
 
-                {fine.status === 'Unpaid' && (
-                  <button
-                    onClick={() => handlePayFine(fine)}
-                    className="w-full mt-3 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
+          {loading && fines.length === 0 ? (
+            <div className="text-center text-gray-600 py-6">Loading fines…</div>
+          ) : (
+            <div className="space-y-4">
+              {fines.length === 0 ? (
+                <p className="text-center text-gray-600">You have no fines 🎉</p>
+              ) : (
+                fines.map((fine) => (
+                  <div
+                    key={fine.id}
+                    className="bg-white border-2 border-gray-200 rounded-xl p-5"
                   >
-                    Pay this fine
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {fine.type} - {fine.item}
+                        </h3>
+                        <p className="text-gray-600 text-sm mt-1">
+                          {fine.dueDate && `Due date: ${fine.dueDate}`}
+                          {fine.assessed && `Assessed: ${fine.assessed}`}
+                          {fine.paid && `Paid: ${fine.paid}`}
+                          {' • '}
+                          {fine.status === 'Paid' ? (
+                            <span>Receipt {fine.receipt}</span>
+                          ) : (
+                            <span>Status: {fine.status}</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        ${fine.amount.toFixed(2)}
+                      </div>
+                    </div>
+
+                    {fine.status === 'Unpaid' && (
+                      <button
+                        onClick={() => handlePayFine(fine)}
+                        className="w-full mt-3 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
+                      >
+                        Pay this fine
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* View Payment History Button */}

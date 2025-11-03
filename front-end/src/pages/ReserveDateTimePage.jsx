@@ -1,14 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function ReserveDateTimePage({ onNavigate, selectedItem, setReservationData }) {
-  const [selectedDate, setSelectedDate] = useState('Oct 15');
-  const [selectedTime, setSelectedTime] = useState('10:00-12:00');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
 
-  const dates = ['Oct 15', 'Oct 16', 'Oct 17'];
-  const times = ['10:00-12:00', '14:00-16:00', '16:00-18:00'];
+  const { data, loading, error, refetch } = useMockData('reservationSlots', {
+    initialData: { dates: [], timeBlocks: [] }
+  });
+
+  const dates = useMemo(() => data?.dates ?? [], [data]);
+  const times = useMemo(() => data?.timeBlocks ?? [], [data]);
+
+  useEffect(() => {
+    if (!selectedDate && dates.length > 0) {
+      setSelectedDate(dates[0]);
+    }
+  }, [dates, selectedDate]);
+
+  useEffect(() => {
+    if (!selectedTime && times.length > 0) {
+      setSelectedTime(times[0]);
+    }
+  }, [times, selectedTime]);
 
   const handleNext = () => {
+    if (!selectedDate || !selectedTime) {
+      return;
+    }
     const reservationNumber = `R-${Math.floor(Math.random() * 9000) + 1000}`;
     const reservation = {
       number: reservationNumber,
@@ -61,23 +81,35 @@ export default function ReserveDateTimePage({ onNavigate, selectedItem, setReser
         {/* Choose Date */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a date</h3>
+          {error && (
+            <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+              Unable to load available dates.
+              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+                Retry
+              </button>
+            </div>
+          )}
           <div className="space-y-3">
-            {dates.map((date) => (
-              <label
-                key={date}
-                className="flex items-center space-x-3 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="date"
-                  value={date}
-                  checked={selectedDate === date}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-5 h-5 text-blue-500 cursor-pointer"
-                />
-                <span className="text-lg text-gray-900">{date}</span>
-              </label>
-            ))}
+            {loading && dates.length === 0 ? (
+              <p className="text-sm text-gray-500">Loading availability…</p>
+            ) : (
+              dates.map((date) => (
+                <label
+                  key={date}
+                  className="flex items-center space-x-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="date"
+                    value={date}
+                    checked={selectedDate === date}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-5 h-5 text-blue-500 cursor-pointer"
+                  />
+                  <span className="text-lg text-gray-900">{date}</span>
+                </label>
+              ))
+            )}
           </div>
         </div>
 
@@ -85,28 +117,33 @@ export default function ReserveDateTimePage({ onNavigate, selectedItem, setReser
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a time</h3>
           <div className="space-y-3">
-            {times.map((time) => (
-              <label
-                key={time}
-                className="flex items-center space-x-3 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="time"
-                  value={time}
-                  checked={selectedTime === time}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  className="w-5 h-5 text-blue-500 cursor-pointer"
-                />
-                <span className="text-lg text-gray-900">{time}</span>
-              </label>
-            ))}
+            {loading && times.length === 0 ? (
+              <p className="text-sm text-gray-500">Loading time windows…</p>
+            ) : (
+              times.map((time) => (
+                <label
+                  key={time}
+                  className="flex items-center space-x-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="time"
+                    value={time}
+                    checked={selectedTime === time}
+                    onChange={(e) => setSelectedTime(e.target.value)}
+                    className="w-5 h-5 text-blue-500 cursor-pointer"
+                  />
+                  <span className="text-lg text-gray-900">{time}</span>
+                </label>
+              ))
+            )}
           </div>
         </div>
 
         {/* Action Buttons */}
         <button
           onClick={handleNext}
+          disabled={!selectedDate || !selectedTime}
           className="w-full py-4 bg-gray-300 text-gray-700 font-bold text-lg rounded-xl hover:bg-gray-400 transition-colors shadow-sm"
         >
           Next: Review
