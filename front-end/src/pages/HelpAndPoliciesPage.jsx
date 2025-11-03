@@ -212,7 +212,7 @@ export default function HelpAndPolicies({ onNavigate }) {
       title: "FAQs",
       description: "Common questions and answers.",
       color: "from-purple-100 to-violet-100",
-      iconColor: "text-cyan-600",
+      iconColor: "text-purple-600",
       content: (
         <>
           <div className="space-y-3">
