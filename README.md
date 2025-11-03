@@ -68,6 +68,15 @@ Developers
 _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets experience in each role._
 ---
 
+### Sprint 1 Roles:
+- Scrum Master: Talal Naveed
+- Product Owner: Ashmit Mukherjee
+- Dev 1: Shaf Khalid
+- Dev 2: Akshith Karthik
+- Dev 3: Saad Iftikhar
+---
+
+
 ## Project History
 
 **CAMP** was born out of a shared observation: many university facilities rely on separate or outdated systems for asset management. This leads to inefficiency, confusion, and wasted time for both students and staff.  
