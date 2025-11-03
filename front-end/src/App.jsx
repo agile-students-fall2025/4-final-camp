@@ -29,9 +29,13 @@ import AddItem from "./pages/staff/AddItem.jsx";
 import EditItem from "./pages/staff/EditItem.jsx";
 
 import LandingPage from "./pages/landingpage.jsx";
+import StudentLoginPage from "./pages/StudentLoginPage.jsx";
+import StudentRegisterPage from "./pages/StudentRegisterPage.jsx";
+import StaffLoginPage from "./pages/staff/StaffLoginPage.jsx";
 
 export default function App() {
-  const [role, setRole] = useState(null); 
+  const [role, setRole] = useState(null);
+  const [authPage, setAuthPage] = useState(null); // 'studentLogin', 'studentRegister', 'staffLogin', or null
   const [currentPage, setCurrentPage] = useState("home");
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -43,13 +47,77 @@ export default function App() {
 
   const handleLogout = () => {
     setRole(null);
+    setAuthPage(null);
     setCurrentPage("home");
   };
 
-  if (!role) {
-    return <LandingPage onSelectRole={setRole} />;
+  const handleSelectRole = (selectedRole) => {
+    if (selectedRole === "student") {
+      setAuthPage("studentLogin");
+    } else if (selectedRole === "staff") {
+      setAuthPage("staffLogin");
+    }
+  };
+
+  const handleStudentLogin = () => {
+    setRole("student");
+    setAuthPage(null);
+    setCurrentPage("home");
+  };
+
+  const handleStudentRegister = () => {
+    setRole("student");
+    setAuthPage(null);
+    setCurrentPage("home");
+  };
+
+  const handleStaffLogin = () => {
+    setRole("staff");
+    setAuthPage(null);
+    setCurrentPage("dashboard");
+  };
+
+  const handleBackToLanding = () => {
+    setAuthPage(null);
+    setRole(null);
+  };
+
+  // Show landing page if no role selected
+  if (!role && !authPage) {
+    return <LandingPage onSelectRole={handleSelectRole} />;
   }
 
+  // Show authentication pages
+  if (authPage === "studentLogin") {
+    return (
+      <StudentLoginPage
+        onLogin={handleStudentLogin}
+        onBack={handleBackToLanding}
+        onNavigateToRegister={() => setAuthPage("studentRegister")}
+      />
+    );
+  }
+
+  if (authPage === "studentRegister") {
+    return (
+      <StudentRegisterPage
+        onRegister={handleStudentRegister}
+        onBack={handleBackToLanding}
+        onNavigateToLogin={() => setAuthPage("studentLogin")}
+      />
+    );
+  }
+
+  if (authPage === "staffLogin") {
+    return (
+      <StaffLoginPage
+        onLogin={handleStaffLogin}
+        onBack={handleBackToLanding}
+      />
+    );
+  }
+
+  // Staff portal
   if (role === "staff") {
     const onNavigate = (page, data) => {
       if (data?.item) setSelectedItem(data.item);
@@ -90,12 +158,13 @@ export default function App() {
     );
   }
 
+  // Student portal
   if (role === "student") {
     return (
       <div className="min-h-screen relative">
         <button
           onClick={handleLogout}
-          className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
+          className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors z-50"
         >
           Logout
         </button>
