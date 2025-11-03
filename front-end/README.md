@@ -1,3 +1,45 @@
+### Front-end Structure:
+
+front-end/
+│
+├── public/
+│ └── mock-data/ # Contains mock JSON data for testing
+│
+├── src/
+│ ├── assets/ 
+│ ├── hooks/ #Mock Data
+│ ├── pages/ # All React page components
+│ │ ├── staff/ # Staff-side pages
+│ │ │ ├── BrowserCataloguePage.jsx
+│ │ │ ├── FacilityItemsPage.jsx
+│ │ │ ├── FilterAndSearchPage.jsx
+│ │ │ ├── FinesPage.jsx
+│ │ │ ├── HelpAndPoliciesPage.jsx
+│ │ │ ├── HomePage.jsx
+│ │ │ ├── ItemDetailPage.jsx
+│ │ │ ├── MyBorrowalsPage.jsx
+│ │ │ ├── NotificationsPage.jsx
+│ │ │ ├── PayFinePage.jsx
+│ │ │ ├── PaymentHistoryPage.jsx
+│ │ │ ├── PaymentSuccessPage.jsx
+│ │ │ ├── ProfileAndSettingsPage.jsx
+│ │ │ ├── ReservationConfirmedPage.jsx
+│ │ │ ├── ReserveDateTimePage.jsx
+│ │ │ ├── StudentLoginPage.jsx
+│ │ │ ├── StudentRegisterPage.jsx
+│ │ │ ├── WaitlistConfirmedPage.jsx
+│ │ │
+│ │ └── landingpage.jsx # Landing page for all users
+│ │
+│ ├── services/
+│ │ ├── App.css
+│ │ ├── App.jsx # Main app routing and layout
+│ │ ├── index.css # Global styles/Tailwind.CSS
+│ │ └── main.jsx 
+
+
+
+
 This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
 It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
 
