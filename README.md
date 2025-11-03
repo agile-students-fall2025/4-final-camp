@@ -138,10 +138,8 @@ Developing **CAMP** involves tackling real-world software engineering challenges
 
 These challenges make **CAMP** both a technically engaging and impactful project that directly benefits the university community.
 
----
 
-⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
-
+### Sprint1 Breakdown
 
 
 
@@ -182,6 +180,8 @@ Installs all required dependencies listed in `package.json`.
 You only need to run this once before running or building the app.
 
 ---
+
+⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
 
 
 
