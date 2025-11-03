@@ -32,18 +32,6 @@ You only need to run this once before running or building the app.
 
 ---
 
-### Troubleshooting
-
-If you encounter issues like missing modules or unexpected behavior:
-
-1. Delete the `node_modules` folder.
-2. Run `npm install` again.
-3. Restart the dev server using `npm run dev`.
-
-If errors persist, ensure you’re using **Node.js 18+** and **npm 9+**.
-
----
-
 ### Deployment
 
 To deploy your production build:
