@@ -77,7 +77,7 @@ export default function WaitlistConfirmedPage({ onNavigate, waitlistData }) {
           Back to Home
         </button>
 
-        {/* Bottom Spacing */}
+        {/* bottom spacing */}
         <div className="h-8"></div>
       </div>
     </div>
