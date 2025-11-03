@@ -1,41 +1,6 @@
 ### Front-end Structure:
 
-front-end/
-│
-├── public/
-│ └── mock-data/ # Contains mock JSON data for testing
-│
-├── src/
-│ ├── assets/ 
-│ ├── hooks/ #Mock Data
-│ ├── pages/ # All React page components
-│ │ ├── staff/ # Staff-side pages
-│ │ │ ├── BrowserCataloguePage.jsx
-│ │ │ ├── FacilityItemsPage.jsx
-│ │ │ ├── FilterAndSearchPage.jsx
-│ │ │ ├── FinesPage.jsx
-│ │ │ ├── HelpAndPoliciesPage.jsx
-│ │ │ ├── HomePage.jsx
-│ │ │ ├── ItemDetailPage.jsx
-│ │ │ ├── MyBorrowalsPage.jsx
-│ │ │ ├── NotificationsPage.jsx
-│ │ │ ├── PayFinePage.jsx
-│ │ │ ├── PaymentHistoryPage.jsx
-│ │ │ ├── PaymentSuccessPage.jsx
-│ │ │ ├── ProfileAndSettingsPage.jsx
-│ │ │ ├── ReservationConfirmedPage.jsx
-│ │ │ ├── ReserveDateTimePage.jsx
-│ │ │ ├── StudentLoginPage.jsx
-│ │ │ ├── StudentRegisterPage.jsx
-│ │ │ ├── WaitlistConfirmedPage.jsx
-│ │ │
-│ │ └── landingpage.jsx # Landing page for all users
-│ │
-│ ├── services/
-│ │ ├── App.css
-│ │ ├── App.jsx # Main app routing and layout
-│ │ ├── index.css # Global styles/Tailwind.CSS
-│ │ └── main.jsx 
+<img width="985" height="870" alt="image" src="https://github.com/user-attachments/assets/518acdd1-06e0-4d56-b8a5-dba9eefad058" />
 
 
 
