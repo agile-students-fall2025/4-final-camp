@@ -179,9 +179,9 @@ This is useful to test your app before deploying it.
 Installs all required dependencies listed in `package.json`.  
 You only need to run this once before running or building the app.
 
-
 ---
 
 ⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
+
 
 
