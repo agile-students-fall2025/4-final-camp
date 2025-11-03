@@ -212,7 +212,7 @@ export default function HelpAndPolicies({ onNavigate }) {
       title: "FAQs",
       description: "Common questions and answers.",
       color: "from-purple-100 to-violet-100",
-      iconColor: "text-cyan-600",
+      iconColor: "text-purple-600",
       content: (
         <>
           <div className="space-y-3">
@@ -344,7 +344,7 @@ export default function HelpAndPolicies({ onNavigate }) {
               </p>
               <a
                 href="mailto:camp@nyu.edu"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-colors duration-200"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-xl font-medium hover:bg-purple-50 transition-colors duration-200"
               >
                 <Mail className="w-4 h-4" />
                 camp@nyu.edu
@@ -358,24 +358,24 @@ export default function HelpAndPolicies({ onNavigate }) {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Tips</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-xs font-bold">1</span>
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs font-bold">1</span>
               </div>
               <p className="text-gray-600 text-sm">
                 Reserve equipment at least 24 hours in advance for better availability.
               </p>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-xs font-bold">2</span>
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs font-bold">2</span>
               </div>
               <p className="text-gray-600 text-sm">
                 Always inspect equipment before borrowing and report any existing damage.
               </p>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-xs font-bold">3</span>
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs font-bold">3</span>
               </div>
               <p className="text-gray-600 text-sm">
                 Return items on time to avoid late fees and maintain your borrowing privileges.

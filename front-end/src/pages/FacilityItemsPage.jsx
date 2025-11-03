@@ -73,7 +73,7 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
                       {item.name}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">{item.description}</p>
