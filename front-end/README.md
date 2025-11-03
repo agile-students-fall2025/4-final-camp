@@ -1,16 +1,56 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
+It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Available Scripts
 
-## React Compiler
+In the project directory, you can run:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### `npm run dev`
 
-## Expanding the ESLint configuration
+Runs the app in development mode.  
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The page will reload automatically when you make changes to the code.  
+You may also see any lint errors in the console.
+
+### `npm run build`
+
+Builds the app for production to the `dist` folder.  
+It optimizes and bundles your React components for best performance.  
+
+Your app is now ready to be deployed!
+
+### `npm run preview`
+
+Previews the production build locally.  
+This is useful to test your app before deploying it.
+
+### `npm install`
+
+Installs all required dependencies listed in `package.json`.  
+You only need to run this once before running or building the app.
+
+---
+
+### Troubleshooting
+
+If you encounter issues like missing modules or unexpected behavior:
+
+1. Delete the `node_modules` folder.
+2. Run `npm install` again.
+3. Restart the dev server using `npm run dev`.
+
+If errors persist, ensure you’re using **Node.js 18+** and **npm 9+**.
+
+---
+
+### Deployment
+
+To deploy your production build:
+
+1. Run `npm run build`
+2. Upload the contents of the `dist/` folder to your hosting platform (e.g. Vercel, Netlify, or GitHub Pages)
+
+
