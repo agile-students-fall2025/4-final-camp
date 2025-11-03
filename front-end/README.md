@@ -1,9 +1,3 @@
-### Front-end Structure:
-
-<img width="985" height="870" alt="image" src="https://github.com/user-attachments/assets/518acdd1-06e0-4d56-b8a5-dba9eefad058" />
-
-
-
 
 This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
 It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
@@ -39,11 +33,9 @@ You only need to run this once before running or building the app.
 
 ---
 
-### Deployment
+### Front-end Structure:
 
-To deploy your production build:
+<img width="985" height="870" alt="image" src="https://github.com/user-attachments/assets/518acdd1-06e0-4d56-b8a5-dba9eefad058" />
 
-1. Run `npm run build`
-2. Upload the contents of the `dist/` folder to your hosting platform (e.g. Vercel, Netlify, or GitHub Pages)
 
 
