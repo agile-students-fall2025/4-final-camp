@@ -1,5 +1,3 @@
-
-
 This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
 It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
 
