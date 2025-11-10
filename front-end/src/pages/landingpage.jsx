@@ -6,9 +6,17 @@ export default function LandingPage({ onSelectRole }) {
       <header className="px-6 py-6 md:px-12"></header>
 
       <main className="px-6 py-12 md:py-20 max-w-6xl mx-auto text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-purple-800 mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl font-bold text-purple-800 mb-3 leading-tight">
           Campus Asset Management Platform
         </h1>
+
+        {/* Animated C.A.M.P badge */}
+        <div
+          className="inline-block bg-purple-100 text-purple-700 px-5 py-2 rounded-full text-sm font-semibold mb-8 shadow-sm border border-purple-200 
+                     opacity-0 animate-fadeInUp"
+        >
+          C.A.M.P
+        </div>
 
         <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12">
           One platform for all your campus borrowing needs. From cameras to lab kits,
@@ -65,8 +73,25 @@ export default function LandingPage({ onSelectRole }) {
       </main>
 
       <footer className="px-6 py-8 text-center text-gray-500 text-sm">
-        <p>Powered by your NetID • Secure • Real-time availability</p>
+        <p>Powered by your university ID • Secure • Real-time availability</p>
       </footer>
+
+      {/* Custom animation styles */}
+      <style jsx>{`
+        @keyframes fadeInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 0.8s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
