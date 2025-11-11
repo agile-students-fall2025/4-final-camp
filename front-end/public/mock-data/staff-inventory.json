@@ -1,0 +1,100 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "DSLR Camera Kit",
+      "location": "IM Lab",
+      "assetId": "ID CAM-201",
+      "status": "available",
+      "category": "Camera",
+      "quantity": 3,
+      "condition": "Good",
+      "reservationWindow": 24,
+      "description": "Body + 18-55mm lens, 2 batteries, charger"
+    },
+    {
+      "id": 2,
+      "name": "Audio Recorder",
+      "location": "Media Center",
+      "assetId": "ID AUD-105",
+      "status": "checked-out",
+      "category": "Audio",
+      "quantity": 2,
+      "condition": "Good",
+      "reservationWindow": 48,
+      "description": "Zoom H4n Pro with accessories"
+    },
+    {
+      "id": 3,
+      "name": "Tripod",
+      "location": "Library",
+      "assetId": "ID TRI-042",
+      "status": "available",
+      "category": "Accessory",
+      "quantity": 5,
+      "condition": "Good",
+      "reservationWindow": 24,
+      "description": "Manfrotto 190 aluminum tripod"
+    },
+    {
+      "id": 4,
+      "name": "Microphone Stand",
+      "location": "Media Center",
+      "assetId": "ID MIC-089",
+      "status": "reserved",
+      "category": "Audio",
+      "quantity": 4,
+      "condition": "Good",
+      "reservationWindow": 24,
+      "description": "Adjustable boom stand"
+    },
+    {
+      "id": 5,
+      "name": "Lighting Kit",
+      "location": "IM Lab",
+      "assetId": "ID LIT-034",
+      "status": "reserved",
+      "category": "Lighting",
+      "quantity": 2,
+      "condition": "Excellent",
+      "reservationWindow": 48,
+      "description": "3-point LED lighting kit with stands"
+    },
+    {
+      "id": 6,
+      "name": "Video Camera",
+      "location": "Arts Centre",
+      "assetId": "ID VID-112",
+      "status": "maintenance",
+      "category": "Camera",
+      "quantity": 1,
+      "condition": "Needs Repair",
+      "reservationWindow": 72,
+      "description": "Sony FDR-AX700 4K camcorder"
+    },
+    {
+      "id": 7,
+      "name": "Projector",
+      "location": "Library",
+      "assetId": "ID PRJ-056",
+      "status": "available",
+      "category": "Other",
+      "quantity": 3,
+      "condition": "Good",
+      "reservationWindow": 24,
+      "description": "Epson PowerLite 1080p projector"
+    },
+    {
+      "id": 8,
+      "name": "Laptop - MacBook Pro",
+      "location": "IM Lab",
+      "assetId": "ID LAP-203",
+      "status": "checked-out",
+      "category": "Computer",
+      "quantity": 1,
+      "condition": "Excellent",
+      "reservationWindow": 168,
+      "description": "16\" M2 Pro, 16GB RAM, 512GB SSD"
+    }
+  ]
+}

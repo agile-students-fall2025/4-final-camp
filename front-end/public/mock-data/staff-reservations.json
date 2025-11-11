@@ -1,0 +1,44 @@
+{
+  "reservations": [
+    {
+      "id": 1,
+      "item": "DSLR Camera",
+      "time": "2:30 PM",
+      "student": "Akash M.",
+      "location": "IM Lab",
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "item": "Tripod",
+      "time": "3:00 PM",
+      "student": "Leah S.",
+      "location": "Library",
+      "status": "ready"
+    },
+    {
+      "id": 3,
+      "item": "Audio Recorder",
+      "time": "4:15 PM",
+      "student": "Mike T.",
+      "location": "Media Center",
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "item": "Lighting Kit",
+      "time": "5:00 PM",
+      "student": "Emma W.",
+      "location": "IM Lab",
+      "status": "ready"
+    },
+    {
+      "id": 5,
+      "item": "Microphone Stand",
+      "time": "5:30 PM",
+      "student": "David K.",
+      "location": "Media Center",
+      "status": "pending"
+    }
+  ]
+}

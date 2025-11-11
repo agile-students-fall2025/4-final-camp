@@ -1,16 +1,47 @@
-# React + Vite
+### Sprint 1 Roles:
+- Scrum Master: Talal Naveed
+- Product Owner: Ashmit Mukherjee
+- Dev 1: Shaf Khalid
+- Dev 2: Akshith Karthik
+- Dev 3: Saad Iftikhar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Front-end Structure:
 
-Currently, two official plugins are available:
+<img width="985" height="870" alt="image" src="https://github.com/user-attachments/assets/518acdd1-06e0-4d56-b8a5-dba9eefad058" />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
+It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
 
-## React Compiler
+## Available Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+In the project directory, you can run:
 
-## Expanding the ESLint configuration
+### `npm run dev`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Runs the app in development mode.  
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
+
+The page will reload automatically when you make changes to the code.  
+You may also see any lint errors in the console.
+
+### `npm run build`
+
+Builds the app for production to the `dist` folder.  
+It optimizes and bundles your React components for best performance.  
+
+Your app is now ready to be deployed!
+
+### `npm run preview`
+
+Previews the production build locally.  
+This is useful to test your app before deploying it.
+
+### `npm install`
+
+Installs all required dependencies listed in `package.json`.  
+You only need to run this once before running or building the app.
+
+---
+
+
+

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, Package, Calendar, AlertCircle, ChevronRight, Clock, MapPin, X } from 'lucide-react';
+import { useMockData } from '../hooks/useMockData.js';
 
 export default function HomePage({ onNavigate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data, loading, error, refetch } = useMockData('dashboard', {
+    initialData: { stats: [], dueItems: [] }
+  });
 
-  const stats = [
-    { label: 'Active Borrowals', value: '3', color: 'text-blue-600' },
-    { label: 'Upcoming Bookings', value: '2', color: 'text-green-600' },
-    { label: 'Overdue Items', value: '0', color: 'text-red-600' },
-  ];
+  const stats = data?.stats ?? [];
 
   const quickLinks = [
     { label: 'My Borrowals', icon: Package, action: () => onNavigate('borrowals') },
@@ -25,17 +25,24 @@ export default function HomePage({ onNavigate }) {
     { label: 'Help and Policies', icon: AlertCircle, action: () => onNavigate('help') },
   ];
 
-  const dueItems = [
-    { name: 'Canon EOS R5', dueDate: 'Oct 15, 2:00 PM', location: 'Arts Centre' },
-    { name: 'MacBook Pro 16"', dueDate: 'Oct 16, 4:00 PM', location: 'IM Lab' },
-  ];
+  const dueItems = data?.dueItems ?? [];
+
+  const statAccent = useMemo(
+    () => ({
+      activeBorrowals: 'text-[#57068C]',
+      overdueItems: 'text-red-600'
+    }),
+    []
+  );
+
+  const resolveStatAccent = (statId) => statAccent[statId] ?? 'text-[#57068C]';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-blue-800">C.A.M.P</h1>
+        <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center items-start sm:justify-between gap-3">
+          <h1 className="text-3xl font-bold text-[#57068C]">C.A.M.P</h1>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -90,13 +97,35 @@ export default function HomePage({ onNavigate }) {
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-              <div className={`text-3xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+          {loading && stats.length === 0 ? (
+            <div className="col-span-3 text-center text-gray-500 text-sm py-6">
+              Loading dashboard metrics…
             </div>
-          ))}
+          ) : (
+            stats.map((stat) => (
+              <div
+                key={stat.id ?? stat.label}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center"
+              >
+                <div className={`text-3xl font-bold ${resolveStatAccent(stat.id)} mb-2`}>
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-600">{stat.label}</div>
+              </div>
+            ))
+          )}
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
+            <p className="font-medium">We couldn&apos;t load your dashboard data.</p>
+            <button
+              onClick={refetch}
+              className="mt-2 underline hover:text-red-800"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         {/* Quick Links */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -119,26 +148,32 @@ export default function HomePage({ onNavigate }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Due Soon</h2>
           <div className="space-y-3">
-            {dueItems.map((item, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                  <div className="flex items-center space-x-4 mt-1">
-                    <span className="text-sm text-gray-600 flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {item.dueDate}
-                    </span>
-                    <span className="text-sm text-gray-600 flex items-center">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {item.location}
-                    </span>
+            {loading && dueItems.length === 0 ? (
+              <div className="text-center text-gray-500 text-sm py-4">
+                Loading items…
+              </div>
+            ) : (
+              dueItems.map((item) => (
+                <div
+                  key={item.id ?? item.name}
+                  className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {item.dueDisplay ?? item.dueDate}
+                      </span>
+                      <span className="text-sm text-gray-600 flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {item.location}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
-                  Extend
-                </button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
