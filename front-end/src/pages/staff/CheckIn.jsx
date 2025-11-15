@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const CheckIn = ({ onNavigate }) => {
   const [itemId, setItemId] = useState('');
@@ -8,7 +8,7 @@ const CheckIn = ({ onNavigate }) => {
   const [condition, setCondition] = useState('good');
   const [lookupError, setLookupError] = useState(null);
 
-  const { data, loading, error, refetch } = useMockData('staffInventory', {
+  const { data, loading, error, refetch } = useApiData('staffInventory', {
     initialData: { items: [] }
   });
 
