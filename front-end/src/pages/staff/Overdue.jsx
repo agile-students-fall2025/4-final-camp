@@ -1,9 +1,9 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const Overdue = ({ onNavigate }) => {
-  const { data, loading, error, refetch } = useMockData('staffOverdue', {
+  const { data, loading, error, refetch } = useApiData('staffOverdue', {
     initialData: { items: [] }
   });
 
