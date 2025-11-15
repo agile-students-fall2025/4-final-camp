@@ -1,9 +1,9 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
 
 export default function BrowserCataloguePage({ onNavigate, setSelectedFacility }) {
-  const { data, loading, error, refetch } = useMockData('items', {
+  const { data, loading, error, refetch } = useApiData('items', {
     initialData: { facilities: [] }
   });
 

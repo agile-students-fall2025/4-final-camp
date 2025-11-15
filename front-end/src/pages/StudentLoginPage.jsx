@@ -1,23 +1,48 @@
 import React, { useState } from "react";
+import { api } from "../services/api.js";
+import { authUtils } from "../utils/auth.js";
 
 export default function StudentLoginPage({ onLogin, onBack, onNavigateToRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     // Basic validation
     if (!email || !password) {
       setError("Please enter both email and password");
+      setLoading(false);
       return;
     }
 
-    // TODO: Replace with actual authentication
-    // For now, accepting any non-empty credentials
-    onLogin();
+    try {
+      // Call the backend login API
+      const response = await api.login(email, password);
+      
+      // Store user info in localStorage
+      if (response.user) {
+        authUtils.setUser(response.user);
+        if (response.user.id) {
+          authUtils.setUserId(response.user.id);
+        }
+      } else if (response.userId) {
+        authUtils.setUserId(response.userId);
+      } else {
+        // Fallback: use email as userId or default
+        authUtils.setUserId(`usr_${email.split('@')[0]}`);
+      }
+      
+      onLogin();
+    } catch (err) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,9 +113,10 @@ export default function StudentLoginPage({ onLogin, onBack, onNavigateToRegister
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition shadow-md hover:shadow-lg"
+            disabled={loading}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
