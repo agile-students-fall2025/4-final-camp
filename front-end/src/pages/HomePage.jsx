@@ -1,11 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Package, Calendar, AlertCircle, ChevronRight, Clock, MapPin, X } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function HomePage({ onNavigate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { data, loading, error, refetch } = useMockData('dashboard', {
-    initialData: { stats: [], dueItems: [] }
+  const userId = authUtils.getUserId();
+  const { data, loading, error, refetch } = useApiData('dashboard', {
+    initialData: { stats: [], dueItems: [] },
+    params: { userId }
   });
 
   const stats = data?.stats ?? [];
