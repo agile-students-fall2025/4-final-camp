@@ -1,8 +1,8 @@
 import { ArrowRight } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const StaffDashboard = ({ onNavigate }) => {
-  const { data, loading, error, refetch } = useMockData('staffDashboard', {
+  const { data, loading, error, refetch } = useApiData('staffDashboard', {
     initialData: { inventoryStats: null }
   });
 
