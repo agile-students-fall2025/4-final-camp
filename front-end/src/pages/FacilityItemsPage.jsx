@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, Package } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
 
 export default function FacilityItemsPage({ onNavigate, selectedFacility, setSelectedItem }) {
-  const { data, loading, error, refetch } = useMockData('items', {
+  const { data, loading, error, refetch } = useApiData('items', {
     initialData: { items: [] }
   });
 
