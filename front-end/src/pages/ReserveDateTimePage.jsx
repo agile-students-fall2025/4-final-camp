@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
 
 export default function ReserveDateTimePage({ onNavigate, selectedItem, setReservationData }) {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
 
-  const { data, loading, error, refetch } = useMockData('reservationSlots', {
+  const { data, loading, error, refetch } = useApiData('reservationSlots', {
     initialData: { dates: [], timeBlocks: [] }
   });
 
