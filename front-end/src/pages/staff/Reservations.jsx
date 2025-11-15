@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const Reservations = ({ onNavigate }) => {
   const [viewFilter, setViewFilter] = useState('today');
-  const { data, loading, error, refetch } = useMockData('staffReservations', {
+  const { data, loading, error, refetch } = useApiData('staffReservations', {
     initialData: { reservations: [] }
   });
 

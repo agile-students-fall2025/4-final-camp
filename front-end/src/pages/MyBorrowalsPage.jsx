@@ -1,12 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Clock, MapPin } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function MyBorrowalsPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('current');
+  const userId = authUtils.getUserId();
 
-  const { data, loading, error, refetch } = useMockData('borrowals', {
-    initialData: { current: [], history: [] }
+  const { data, loading, error, refetch } = useApiData('borrowals', {
+    initialData: { current: [], history: [] },
+    params: { userId }
   });
 
   const currentBorrowals = data?.current ?? [];

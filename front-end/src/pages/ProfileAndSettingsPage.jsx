@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, CreditCard, Bell, Shield } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function ProfileAndSettingsPage({ onNavigate }) {
   const [campusCash, setCampusCash] = useState('0.00');
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [shareData, setShareData] = useState(false);
+  const userId = authUtils.getUserId();
 
-  const { data, loading, error, refetch } = useMockData('profile', {
-    initialData: { student: null }
+  const { data, loading, error, refetch } = useApiData('profile', {
+    initialData: { student: null },
+    params: { userId }
   });
 
   useEffect(() => {
