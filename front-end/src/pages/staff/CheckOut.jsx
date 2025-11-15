@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const CheckOut = ({ onNavigate }) => {
   const [studentId, setStudentId] = useState('');
@@ -15,14 +15,14 @@ const CheckOut = ({ onNavigate }) => {
     loading: studentsLoading,
     error: studentsError,
     refetch: refetchStudents
-  } = useMockData('students', { initialData: { students: [] } });
+  } = useApiData('students', { initialData: { students: [] } });
 
   const {
     data: inventoryPayload,
     loading: inventoryLoading,
     error: inventoryError,
     refetch: refetchInventory
-  } = useMockData('staffInventory', { initialData: { items: [] } });
+  } = useApiData('staffInventory', { initialData: { items: [] } });
 
   const students = studentsPayload?.students ?? [];
   const inventoryItems = inventoryPayload?.items ?? [];
