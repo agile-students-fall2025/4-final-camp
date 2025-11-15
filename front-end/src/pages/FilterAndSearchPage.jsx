@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, Search } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
 
 export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,7 +8,7 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
   const [selectedFacility, setSelectedFacility] = useState('All');
   const [selectedAvailability, setSelectedAvailability] = useState('All');
 
-  const { data, loading, error, refetch } = useMockData('items', {
+  const { data, loading, error, refetch } = useApiData('items', {
     initialData: {
       items: [],
       filters: { categories: ['All'], facilities: ['All'], availabilities: ['All'] }
