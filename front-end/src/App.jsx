@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { authUtils } from "./utils/auth.js";
 
 import HomePage from "./pages/HomePage";
 import FilterAndSearchPage from "./pages/FilterAndSearchPage";
@@ -46,6 +47,8 @@ export default function App() {
   const [paymentResult, setPaymentResult] = useState(null);
 
   const handleLogout = () => {
+    // Clear auth data from localStorage
+    authUtils.clearAuth();
     setRole(null);
     setAuthPage(null);
     setCurrentPage("home");
