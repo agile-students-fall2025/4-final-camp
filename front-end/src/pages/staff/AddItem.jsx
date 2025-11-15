@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const AddItem = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const AddItem = ({ onNavigate }) => {
     description: '',
     available: true
   });
-  const { data, error, refetch } = useMockData('items', {
+  const { data, error, refetch } = useApiData('items', {
     initialData: { filters: { categories: [], facilities: [] } }
   });
 
