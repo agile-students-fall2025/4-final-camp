@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const STATUS_ORDER = ['available', 'reserved', 'checked-out', 'maintenance'];
 const STATUS_LABELS = {
@@ -14,7 +14,7 @@ const Inventory = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
-  const { data, loading, error, refetch } = useMockData('staffInventory', {
+  const { data, loading, error, refetch } = useApiData('staffInventory', {
     initialData: { items: [] }
   });
 
