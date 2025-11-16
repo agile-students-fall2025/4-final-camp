@@ -99,7 +99,7 @@ export default function HomePage({ onNavigate }) {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {loading && stats.length === 0 ? (
             <div className="col-span-3 text-center text-gray-500 text-sm py-6">
               Loading dashboard metrics…
