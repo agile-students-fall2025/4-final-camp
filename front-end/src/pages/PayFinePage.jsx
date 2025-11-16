@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult }) {
   const [paymentMethod, setPaymentMethod] = useState('campus');
-  const { data, loading, error, refetch } = useMockData('profile', {
-    initialData: { student: { name: '', email: '' } }
+  const userId = authUtils.getUserId();
+  const { data, loading, error, refetch } = useApiData('profile', {
+    initialData: { student: { name: '', email: '' } },
+    params: { userId }
   });
 
   const billingDetails = data?.student ?? { name: '', email: '' };
