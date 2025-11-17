@@ -1,10 +1,13 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function FinesPage({ onNavigate, setSelectedFine }) {
-  const { data, loading, error, refetch } = useMockData('fines', {
-    initialData: { fines: [] }
+  const userId = authUtils.getUserId();
+  const { data, loading, error, refetch } = useApiData('fines', {
+    initialData: { fines: [] },
+    params: { userId }
   });
 
   const fines = data?.fines ?? [];

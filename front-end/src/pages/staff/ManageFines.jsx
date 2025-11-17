@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
-import { useMockData } from '../../hooks/useMockData.js';
+import { useApiData } from '../../hooks/useApiData.js';
 
 const ManageFines = ({ onNavigate }) => {
   const [studentSearch, setStudentSearch] = useState('');
@@ -10,7 +10,7 @@ const ManageFines = ({ onNavigate }) => {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [lookupError, setLookupError] = useState(null);
 
-  const { data, loading, error, refetch } = useMockData('students', {
+  const { data, loading, error, refetch } = useApiData('students', {
     initialData: { students: [] }
   });
 

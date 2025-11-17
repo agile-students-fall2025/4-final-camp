@@ -1,10 +1,13 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { useMockData } from '../hooks/useMockData.js';
+import { useApiData } from '../hooks/useApiData.js';
+import { authUtils } from '../utils/auth.js';
 
 export default function PaymentHistoryPage({ onNavigate }) {
-  const { data, loading, error, refetch } = useMockData('paymentHistory', {
-    initialData: { payments: [] }
+  const userId = authUtils.getUserId();
+  const { data, loading, error, refetch } = useApiData('paymentHistory', {
+    initialData: { payments: [] },
+    params: { userId }
   });
 
   const paymentHistory = data?.payments ?? [];
