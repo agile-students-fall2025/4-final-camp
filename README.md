@@ -77,11 +77,11 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 ---
 
 ### Sprint 2 Roles:
-- Scrum Master: Ashmit Mukherjee
+- Scrum Master: Saad Iftikhar
 - Product Owner: Akshith Karthik
 - Dev 1: Talal Naveed
 - Dev 2: Shaf Khalid
-- Dev 3: Saad Iftikhar
+- Dev 3: Ashmit Mukherjee
 ---  
 
 ## Project History
