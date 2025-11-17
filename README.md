@@ -187,11 +187,11 @@ You only need to run this once before running or building the app.
 
 ### Sprint 2 Roles:
 ### Sprint 2 Roles:
-- Scrum Master: Ashmit Mukherjee
+- Scrum Master: Saad Iftikhar
 - Product Owner: Akshith Karthik
 - Dev 1: Talal Naveed
-- Dev 2: Shaf Khalid
-- Dev 3: Saad Iftikhar
+- Dev 2: Ashmit Mukherjee
+- Dev 3: Shaf Khalid
 
 ### Sprint 2 Breakdown
 
