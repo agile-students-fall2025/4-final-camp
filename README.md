@@ -232,6 +232,39 @@ Complete Express.js backend with RESTful API endpoints for all core features:
 
 
 ---
+## Available Scripts
+
+In the project directory, you can run:
+
+### `npm run dev`
+
+Runs the app in development mode.  
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
+
+The page will reload automatically when you make changes to the code.  
+You may also see any lint errors in the console.
+
+### `npm run build`
+
+Builds the app for production to the `dist` folder.  
+It optimizes and bundles your React components for best performance.  
+
+Your app is now ready to be deployed!
+
+### `npm run preview`
+
+Previews the production build locally.  
+This is useful to test your app before deploying it.
+
+### `npm install`
+
+Installs all required dependencies listed in `package.json`.  
+You only need to run this once before running or building the app.
+
+---
+
+
+---
 
 ⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
 
