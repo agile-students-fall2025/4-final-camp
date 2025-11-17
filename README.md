@@ -186,11 +186,12 @@ You only need to run this once before running or building the app.
 
 
 ### Sprint 2 Roles:
-- Scrum Master: 
-- Product Owner: 
-- Dev 1: 
-- Dev 2: 
-- Dev 3: 
+### Sprint 2 Roles:
+- Scrum Master: Ashmit Mukherjee
+- Product Owner: Akshith Karthik
+- Dev 1: Talal Naveed
+- Dev 2: Shaf Khalid
+- Dev 3: Saad Iftikhar
 
 ### Sprint 2 Breakdown
 
