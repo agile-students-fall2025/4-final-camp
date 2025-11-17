@@ -76,6 +76,13 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 3: Saad Iftikhar
 ---
 
+### Sprint 2 Roles:
+- Scrum Master: Ashmit Mukherjee
+- Product Owner: Akshith Karthik
+- Dev 1: Talal Naveed
+- Dev 2: Shaf Khalid
+- Dev 3: Saad Iftikhar
+---  
 
 ## Project History
 
@@ -184,14 +191,6 @@ You only need to run this once before running or building the app.
 ⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
 
 
-
-### Sprint 2 Roles:
-### Sprint 2 Roles:
-- Scrum Master: Ashmit Mukherjee
-- Product Owner: Akshith Karthik
-- Dev 1: Talal Naveed
-- Dev 2: Shaf Khalid
-- Dev 3: Saad Iftikhar
 
 ### Sprint 2 Breakdown
 
