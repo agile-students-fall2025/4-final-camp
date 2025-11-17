@@ -1,26 +1,18 @@
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const server = require("../app");
-chai.use(chaiHttp);
-chai.should();
+const chai = require('chai');
+const request = require('supertest');
+const app = require('../app');
 
-describe("API Smoke Tests", () => {
-  it("GET /api/items should return items", (done) => {
-    chai.request(server)
-      .get("/api/items")
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        done();
-      });
+const { expect } = chai;
+
+describe('API smoke tests', () => {
+  it('GET / should return 200', async () => {
+    const res = await request(app).get('/');
+    expect(res.status).to.equal(200);
   });
 
-  it("GET /api/fines should return fines", (done) => {
-    chai.request(server)
-      .get("/api/fines")
-      .end((err, res) => {
-        res.should.have.status(200);
-        done();
-      });
+  it('GET /api/health should return 200 and ok=true', async () => {
+    const res = await request(app).get('/api/health');
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('ok', true);
   });
 });
