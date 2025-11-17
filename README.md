@@ -76,13 +76,6 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 3: Saad Iftikhar
 ---
 
-### Sprint 2 Roles:
-- Scrum Master: Saad Iftikhar
-- Product Owner: Akshith Karthik
-- Dev 1: Talal Naveed
-- Dev 2: Shaf Khalid
-- Dev 3: Ashmit Mukherjee
----  
 
 ## Project History
 
@@ -154,117 +147,135 @@ These challenges make **CAMP** both a technically engaging and impactful project
 
 <img width="985" height="870" alt="image" src="https://github.com/user-attachments/assets/518acdd1-06e0-4d56-b8a5-dba9eefad058" />
 
-This project was bootstrapped with [Vite](https://vitejs.dev/), a fast build tool for modern web applications.  
-It uses **React**, **Tailwind CSS**, and **JavaScript (ES6)** for the front-end.
+## How to Build and Run the Project
 
+This project consists of a **React** front-end with **Tailwind CSS** and an **Express.js** back-end API.
 
-### Sprint 2 Breakdown
+### Prerequisites
 
-#### Backend API Implementation
-Complete Express.js backend with RESTful API endpoints for all core features:
+- Node.js (v18 or higher)
+- npm (v9 or higher)
 
-**Routes Implemented** (15 total):
-- `alerts.js` - Notification alerts management
-- `auth.js` - Student/staff authentication
-- `borrowals.js` - Current and historical borrowing records
-- `dashboard.js` - Dashboard stats and due items
-- `facilities.js` - Facility information and management
-- `fines.js` - Fine tracking and payment
-- `help.js` - Help resources
-- `items.js` - Item catalog with filters
-- `notifications.js` - Push notification system
-- `payments.js` - Payment history and processing
-- `policies.js` - Borrowing policies
-- `reservations.js` - Reservation slots and booking
-- `staff.js` - Staff-specific operations
-- `users.js` - User profile management
-- `waitlist.js` - Waitlist management
+### Setup Instructions
 
-**Testing Infrastructure** (11 test suites):
-- `api.test.js` - API smoke tests
-- `app.test.js` - Express app configuration tests
-- `auth_waitlist_borrowals.test.js` - Auth & borrowals flow
-- `fines.test.js` - Fine calculation and payment tests
-- `items.test.js` - Item catalog tests
-- `notifications.test.js` - Notification delivery tests
-- `payments_dashboard.test.js` - Payments & dashboard tests
-- `policies_facilities_alerts_help.test.js` - Supporting features tests
-- `reservations.test.js` - Reservation system tests
-- `staff.test.js` - Staff operations tests
-- `users.test.js` - User profile tests
+#### 1. Clone the Repository
 
-#### Frontend-Backend Integration
-- Created authentication utilities (`/front-end/src/utils/auth.js`) for userId management in localStorage
-- Updated `StudentLoginPage.jsx` to call backend login API
-- Modified `useMockData.js` hook to support both mock and live API modes via `VITE_USE_MOCK` environment variable
-- Configured Vite dev proxy to route `/api` requests to `http://localhost:3000`
-- Updated all pages to pass userId via params for authenticated API calls
+```bash
+git clone <repository-url>
+cd 4-final-camp
+```
 
-**Pages Integrated with Backend**:
-- `HomePage.jsx` - Dashboard data
-- `MyBorrowalsPage.jsx` - Borrowals data
-- `FinesPage.jsx` - Fines data
-- `PaymentHistoryPage.jsx` - Payment history
-- `ProfileAndSettingsPage.jsx` - User profile
-- `PayFinePage.jsx` - User billing info
+#### 2. Install Dependencies
 
-**New API Endpoints**:
-- `/api/dashboard` - Dashboard stats (requires userId)
-- `/api/reservations/slots` - Available reservation times
-- `/api/borrowals` - Returns `{ current: [], history: [] }`
-- `/api/fines` - Returns `{ fines: [] }`
-- `/api/payments/history` - Returns `{ payments: [] }`
-- `/api/users/:userId` - Returns `{ student: {...} }`
-- `/api/items` - Returns `{ items: [], filters: {...} }`
+**Backend:**
+```bash
+cd back-end
+npm install
+```
 
-#### Development & Testing Setup
-- Backend server runs on `http://localhost:3000`
-- Frontend dev server on `http://localhost:5173`
-- Test command: `npm test` (11 test suites with full route coverage)
-- Environment-based mock/live API switching for seamless development
-- Backward compatible with mock data for offline development
+**Frontend:**
+```bash
+cd ../front-end
+npm install --legacy-peer-deps
+```
 
-**Next Steps**:
-- Connect backend routes to production database (currently using mock data)
-- Implement secure session management (replace localStorage auth)
-- Add CI/CD pipeline for automated testing
-- Deploy backend to production environment
+#### 3. Environment Configuration
 
+**Backend:**
+Create a `.env` file in the `back-end` directory (copy from `.env.example` if available):
+```bash
+cd back-end
+touch .env
+```
 
----
-## Available Scripts
+Add necessary environment variables (database credentials, API keys, etc.).
 
-In the project directory, you can run:
+**Frontend:**
+Create a `.env` file in the `front-end` directory:
+```bash
+cd ../front-end
+cp .env.example .env
+```
 
-### `npm run dev`
+Edit `.env` to configure:
+```env
+REACT_APP_USE_MOCK=false
+REACT_APP_API_BASE=/api
+```
 
-Runs the app in development mode.  
-Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
+Set `REACT_APP_USE_MOCK=true` if you want to use mock data instead of the real API.
 
-The page will reload automatically when you make changes to the code.  
-You may also see any lint errors in the console.
+#### 4. Run the Application
 
-### `npm run build`
+**Start the Backend Server (Terminal 1):**
+```bash
+cd back-end
+npm start
+```
+The backend will run on [http://localhost:3000](http://localhost:3000)
 
-Builds the app for production to the `dist` folder.  
-It optimizes and bundles your React components for best performance.  
+**Start the Frontend Development Server (Terminal 2):**
+```bash
+cd front-end
+npm run dev
+```
+The frontend will run on [http://localhost:3001](http://localhost:3001)
 
-Your app is now ready to be deployed!
+Open [http://localhost:3001](http://localhost:3001) in your browser to view the application.
 
-### `npm run preview`
+#### 5. Running Tests
 
-Previews the production build locally.  
-This is useful to test your app before deploying it.
+**Backend Tests:**
+```bash
+cd back-end
+npm test
+```
 
-### `npm install`
+### Available Scripts
 
-Installs all required dependencies listed in `package.json`.  
-You only need to run this once before running or building the app.
+**Frontend:**
+- `npm run dev` - Runs the app in development mode with hot reload
+- `npm run build` - Builds the app for production to the `dist` folder
+- `npm run lint` - Runs ESLint to check code quality
 
----
+**Backend:**
+- `npm start` - Starts the Express server
+- `npm test` - Runs the test suite with Mocha and Chai
+- `npm run test:mocha` - Alternative test command for environments with c8 binary restrictions
 
+### Technology Stack
+
+- **Frontend:** React 19.1.1, Tailwind CSS 4.1.16, Webpack 5
+- **Backend:** Express.js 4.19.0, Node.js
+- **Testing:** Mocha, Chai, Supertest
+- **Build Tools:** Webpack, Babel, PostCSS
+
+### Project Structure
+
+```
+4-final-camp/
+├── front-end/          # React frontend application
+│   ├── src/
+│   │   ├── pages/      # Page components
+│   │   ├── services/   # API and mock data services
+│   │   ├── hooks/      # Custom React hooks
+│   │   └── utils/      # Utility functions
+│   └── public/         # Static assets
+├── back-end/           # Express.js backend API
+│   ├── routes/         # API route handlers
+│   └── tests/          # Unit tests
+└── README.md
+```
+
+### Notes
+
+- All credentials and sensitive information must be stored in `.env` files and never committed to version control
+- The frontend uses webpack dev server with proxy configuration to route `/api` requests to the backend on port 3000
+- Mock data is available for development without a database connection by setting `REACT_APP_USE_MOCK=true`
 
 ---
 
 ⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
+
+
 

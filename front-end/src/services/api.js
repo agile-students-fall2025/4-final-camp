@@ -1,4 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_BASE ?? '' // empty in dev when using Vite proxy
+export const API_BASE = process.env.REACT_APP_API_BASE ?? '' // empty in dev when using webpack proxy
 
 async function req(path, init) {
   const res = await fetch(`${API_BASE}${path}`, {
