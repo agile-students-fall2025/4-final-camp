@@ -5,7 +5,6 @@ const Reservation = require('../models/Reservation');
 const Fine = require('../models/Fine');
 const { authenticate } = require('../middleware/auth');
 
-// GET /api/dashboard - Get user dashboard statistics
 router.get('/', authenticate, async (req, res) => {
   try {
     const userId = req.userId;
@@ -20,7 +19,6 @@ router.get('/', authenticate, async (req, res) => {
       status: 'overdue'
     });
 
-    // Get active reservations count (pending or confirmed)
     const activeReservations = await Reservation.countDocuments({
       user: userId,
       status: { $in: ['pending', 'confirmed'] }

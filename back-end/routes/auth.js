@@ -50,12 +50,10 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
   }
 });
 
-// POST /api/auth/login - Login user
 r.post('/login', authLimiter, validateUserLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ 
@@ -64,7 +62,6 @@ r.post('/login', authLimiter, validateUserLogin, async (req, res) => {
       });
     }
 
-    // Check if user is active
     if (!user.isActive) {
       return res.status(403).json({ 
         error: 'Forbidden', 
