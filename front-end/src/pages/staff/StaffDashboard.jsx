@@ -1,10 +1,16 @@
-import { ArrowRight } from 'lucide-react';
+import { useEffect } from 'react';
+import { ArrowRight, Package, LogOut, LogIn, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
 import { useApiData } from '../../hooks/useApiData.js';
 
 const StaffDashboard = ({ onNavigate }) => {
   const { data, loading, error, refetch } = useApiData('staffDashboard', {
     initialData: { inventoryStats: null }
   });
+
+  // Refetch stats whenever dashboard is shown (e.g., after checkout/checkin)
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const inventoryStats = data?.inventoryStats ?? {
     available: 0,
@@ -16,13 +22,12 @@ const StaffDashboard = ({ onNavigate }) => {
   };
 
   const menuItems = [
-    { id: 'inventory', label: 'Manage Inventory'},
-    { id: 'checkout', label: 'Check-Out'},
-    { id: 'checkin', label: 'Check-In'},
-    { id: 'reservations', label: 'Reservations (Today)'},
-    { id: 'overdue', label: 'Overdue Tracking'},
-    { id: 'fines', label: 'Manage Fines'},
-    { id: 'alerts', label: 'Automated Alerts'}
+    { id: 'inventory', label: 'Inventory', icon: Package, description: 'Manage equipment' },
+    { id: 'checkout', label: 'Check Out', icon: LogOut, description: 'Lend items to students' },
+    { id: 'checkin', label: 'Check In', icon: LogIn, description: 'Process returns' },
+    { id: 'reservations', label: 'Reservations', icon: Calendar, description: 'Today\'s pickups' },
+    { id: 'overdue', label: 'Overdue', icon: AlertTriangle, description: `${inventoryStats.overdue} items overdue` },
+    { id: 'fines', label: 'Student Accounts', icon: DollarSign, description: 'Fines & add funds' },
   ];
 
   return (
@@ -31,48 +36,44 @@ const StaffDashboard = ({ onNavigate }) => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
+          <p className="text-gray-500 mt-1">Manage equipment and student borrowals</p>
         </div>
 
-        {/* Inventory Stats Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          {error && (
-            <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
-              Unable to load staff metrics.
-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+            <p className="text-3xl font-bold text-[#57068C]">{inventoryStats.available}</p>
+            <p className="text-sm text-gray-500">Available</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+            <p className="text-3xl font-bold text-violet-600">{inventoryStats.out}</p>
+            <p className="text-sm text-gray-500">Checked Out</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+            <p className="text-3xl font-bold text-gray-700">{inventoryStats.overdue}</p>
+            <p className="text-sm text-gray-500">Overdue</p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 text-purple-800 text-sm rounded-lg flex items-start gap-3">
+            <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Unable to load stats.
+              <button onClick={refetch} className="ml-2 underline hover:text-purple-900">
                 Retry
               </button>
-            </div>
-          )}
-          {loading && !data?.inventoryStats ? (
-            <p className="text-sm text-gray-600">Loading metrics…</p>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="font-semibold text-gray-900">Inventory</span>
-                <span className="text-sm text-gray-600">
-                  Avail {inventoryStats.available} • Out {inventoryStats.out} • Res {inventoryStats.reserved}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="font-semibold text-gray-900">Today</span>
-                <span className="text-sm text-gray-600">
-                  Checkouts {inventoryStats.checkouts} • Returns {inventoryStats.returns}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-900">Overdue</span>
-                <span className="text-sm text-red-600 font-medium">
-                  {inventoryStats.overdue} items
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+            </span>
+          </div>
+        )}
 
         {/* Navigation Menu */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+          <div className="p-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-900">Quick Actions</h2>
+          </div>
           {menuItems.map((item, index) => (
             <button
               key={item.id}
@@ -81,22 +82,19 @@ const StaffDashboard = ({ onNavigate }) => {
                 index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
               }`}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{item.icon}</span>
-                <span className="font-medium text-gray-900">{item.label}</span>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-[#57068C]" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">{item.label}</p>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
               </div>
               <ArrowRight className="w-5 h-5 text-gray-400" />
             </button>
           ))}
         </div>
-
-        {/* Go to Inventory Button */}
-        <button
-          onClick={() => onNavigate('inventory')}
-          className="w-full mt-6 bg-[#57068C] text-white py-4 rounded-lg font-semibold hover:bg-[#460573] transition-colors"
-        >
-          Go to Inventory
-        </button>
       </div>
     </div>
   );
