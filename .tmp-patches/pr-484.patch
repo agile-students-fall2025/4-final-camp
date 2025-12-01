@@ -1,0 +1,241 @@
+diff --git a/front-end/src/pages/ReserveDateTimePage.jsx b/front-end/src/pages/ReserveDateTimePage.jsx
+index 97a0c0763..de6403d40 100644
+--- a/front-end/src/pages/ReserveDateTimePage.jsx
++++ b/front-end/src/pages/ReserveDateTimePage.jsx
+@@ -1,44 +1,80 @@
+ import React, { useEffect, useMemo, useState } from 'react';
+-import { ChevronLeft } from 'lucide-react';
+-import { useApiData } from '../hooks/useApiData.js';
++import { ChevronLeft, Calendar, Clock } from 'lucide-react';
++import { api } from '../services/api.js';
+ 
+ export default function ReserveDateTimePage({ onNavigate, selectedItem, setReservationData }) {
+-  const [selectedDate, setSelectedDate] = useState('');
+-  const [selectedTime, setSelectedTime] = useState('');
++  // Initialize with tomorrow's date to ensure it's always in the future
++  const tomorrow = useMemo(() => {
++    const d = new Date();
++    d.setDate(d.getDate() + 1);
++    return d.toISOString().slice(0, 10);
++  }, []);
++  
++  const [selectedDate, setSelectedDate] = useState(tomorrow);
++  const [selectedTime, setSelectedTime] = useState('10:00');
+ 
+-  const { data, loading, error, refetch } = useApiData('reservationSlots', {
+-    initialData: { dates: [], timeBlocks: [] }
+-  });
++  const facilityName = selectedItem?.facility && typeof selectedItem.facility === 'object'
++    ? selectedItem.facility.name
++    : selectedItem?.facility;
+ 
+-  const dates = useMemo(() => data?.dates ?? [], [data]);
+-  const times = useMemo(() => data?.timeBlocks ?? [], [data]);
++  // Minimum date is today
++  const minDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
++  // Maximum date is 30 days from now
++  const maxDate = useMemo(() => {
++    const d = new Date();
++    d.setDate(d.getDate() + 30);
++    return d.toISOString().slice(0, 10);
++  }, []);
+ 
+-  useEffect(() => {
+-    if (!selectedDate && dates.length > 0) {
+-      setSelectedDate(dates[0]);
+-    }
+-  }, [dates, selectedDate]);
++  // Available time slots
++  const timeSlots = [
++    { value: '09:00', label: '9:00 AM' },
++    { value: '10:00', label: '10:00 AM' },
++    { value: '11:00', label: '11:00 AM' },
++    { value: '12:00', label: '12:00 PM' },
++    { value: '13:00', label: '1:00 PM' },
++    { value: '14:00', label: '2:00 PM' },
++    { value: '15:00', label: '3:00 PM' },
++    { value: '16:00', label: '4:00 PM' },
++    { value: '17:00', label: '5:00 PM' },
++  ];
+ 
+-  useEffect(() => {
+-    if (!selectedTime && times.length > 0) {
+-      setSelectedTime(times[0]);
+-    }
+-  }, [times, selectedTime]);
++  const handleNext = async () => {
++    if (!selectedDate || !selectedTime) return;
++
++    try {
++      // Build proper ISO pickupDate from selected date and time
++      const [hours, minutes] = selectedTime.split(':').map(Number);
++      const pickupDate = new Date(selectedDate + 'T00:00:00');
++      pickupDate.setHours(hours, minutes, 0, 0);
++
++      // Ensure the date is in the future
++      if (pickupDate <= new Date()) {
++        alert('Please select a future date and time');
++        return;
++      }
++
++      const itemId = selectedItem?._id || selectedItem?.id;
++      const payload = {
++        itemId,
++        pickupDate: pickupDate.toISOString()
++      };
+ 
+-  const handleNext = () => {
+-    if (!selectedDate || !selectedTime) {
+-      return;
++      const res = await api.reserve(payload);
++      const r = res?.reservation;
++      const reservation = {
++        id: r?._id,
++        number: r?._id || `R-${Math.floor(Math.random() * 9000) + 1000}`,
++        item: r?.item?.name || selectedItem.name,
++        facility: r?.item?.facility?.name || facilityName,
++        date: r?.pickupDate ? new Date(r.pickupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : selectedDate,
++        time: r?.pickupDate ? new Date(r.pickupDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : selectedTime
++      };
++      setReservationData(reservation);
++      onNavigate('reservationConfirmed');
++    } catch (e) {
++      alert(e.message || 'Failed to create reservation');
+     }
+-    const reservationNumber = `R-${Math.floor(Math.random() * 9000) + 1000}`;
+-    const reservation = {
+-      number: reservationNumber,
+-      item: selectedItem.name,
+-      facility: selectedItem.facility,
+-      date: selectedDate,
+-      time: selectedTime
+-    };
+-    setReservationData(reservation);
+-    onNavigate('reservationConfirmed');
+   };
+ 
+   if (!selectedItem) {
+@@ -72,74 +108,68 @@ export default function ReserveDateTimePage({ onNavigate, selectedItem, setReser
+               <p className="text-sm text-gray-500">Item</p>
+             </div>
+             <div className="text-right">
+-              <p className="text-lg font-bold text-gray-900">{selectedItem.facility}</p>
++              <p className="text-lg font-bold text-gray-900">{facilityName}</p>
+               <p className="text-lg font-bold text-gray-900">{selectedItem.name}</p>
+             </div>
+           </div>
+         </div>
+ 
+-        {/* Choose Date */}
++        {/* Choose Date - Calendar Picker */}
+         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a date</h3>
+-          {error && (
+-            <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+-              Unable to load available dates.
+-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+-                Retry
+-              </button>
+-            </div>
+-          )}
+-          <div className="space-y-3">
+-            {loading && dates.length === 0 ? (
+-              <p className="text-sm text-gray-500">Loading availability…</p>
+-            ) : (
+-              dates.map((date) => (
+-                <label
+-                  key={date}
+-                  className="flex items-center space-x-3 cursor-pointer"
+-                >
+-                  <input
+-                    type="radio"
+-                    name="date"
+-                    value={date}
+-                    checked={selectedDate === date}
+-                    onChange={(e) => setSelectedDate(e.target.value)}
+-                    className="w-5 h-5 text-blue-500 cursor-pointer"
+-                  />
+-                  <span className="text-lg text-gray-900">{date}</span>
+-                </label>
+-              ))
+-            )}
++          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
++            <Calendar className="w-5 h-5 text-[#57068C]" />
++            Select Pickup Date
++          </h3>
++          <div className="relative">
++            <input
++              type="date"
++              value={selectedDate}
++              onChange={(e) => setSelectedDate(e.target.value)}
++              min={minDate}
++              max={maxDate}
++              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#57068C] focus:border-transparent text-lg cursor-pointer"
++            />
+           </div>
++          <p className="mt-2 text-sm text-gray-500">
++            Select a date within the next 30 days
++          </p>
+         </div>
+ 
+-        {/* Choose Time */}
++        {/* Choose Time - Time Picker */}
+         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose a time</h3>
+-          <div className="space-y-3">
+-            {loading && times.length === 0 ? (
+-              <p className="text-sm text-gray-500">Loading time windows…</p>
+-            ) : (
+-              times.map((time) => (
+-                <label
+-                  key={time}
+-                  className="flex items-center space-x-3 cursor-pointer"
+-                >
+-                  <input
+-                    type="radio"
+-                    name="time"
+-                    value={time}
+-                    checked={selectedTime === time}
+-                    onChange={(e) => setSelectedTime(e.target.value)}
+-                    className="w-5 h-5 text-blue-500 cursor-pointer"
+-                  />
+-                  <span className="text-lg text-gray-900">{time}</span>
+-                </label>
+-              ))
+-            )}
++          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
++            <Clock className="w-5 h-5 text-[#57068C]" />
++            Select Pickup Time
++          </h3>
++          <div className="grid grid-cols-3 gap-3">
++            {timeSlots.map((slot) => (
++              <button
++                key={slot.value}
++                type="button"
++                onClick={() => setSelectedTime(slot.value)}
++                className={`px-4 py-3 rounded-lg font-medium transition-colors ${
++                  selectedTime === slot.value
++                    ? 'bg-[#57068C] text-white'
++                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
++                }`}
++              >
++                {slot.label}
++              </button>
++            ))}
+           </div>
+         </div>
+ 
++        {/* Selected Summary */}
++        {selectedDate && selectedTime && (
++          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
++            <p className="text-sm text-purple-800">
++              <span className="font-semibold">Pickup:</span>{' '}
++              {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}{' '}
++              at {timeSlots.find(s => s.value === selectedTime)?.label}
++            </p>
++          </div>
++        )}
++
+         {/* Action Buttons */}
+         <button
+           onClick={handleNext}
