@@ -39,6 +39,8 @@ export function useApiData(resourceKey, options = {}) {
           result = await api.items();
         } else if (resourceKey === 'reservationSlots') {
           result = await api.reservationSlots(params);
+        } else if (resourceKey === 'reservations') {
+          result = await api.reservations();
         } else if (resourceKey === 'staffDashboard') {
           result = await api.staffDashboard();
         } else if (resourceKey === 'staffInventory') {
@@ -94,6 +96,8 @@ export function useApiData(resourceKey, options = {}) {
         result = await api.items();
       } else if (resourceKey === 'reservationSlots') {
         result = await api.reservationSlots(params);
+      } else if (resourceKey === 'reservations') {
+        result = await api.reservations();
       } else if (resourceKey === 'staffDashboard') {
         result = await api.staffDashboard();
       } else if (resourceKey === 'staffInventory') {
