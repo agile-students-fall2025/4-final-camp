@@ -1,17 +1,77 @@
-
 const express = require('express');
 const router = express.Router();
+const Notification = require('../models/Notification');
+const User = require('../models/User');
+const { authenticate } = require('../middleware/auth');
+const { validatePagination } = require('../middleware/validation');
 
+// GET /api/notifications - Get user's notifications
+router.get('/', authenticate, validatePagination, async (req, res) => {
+  try {
+    const { unreadOnly, page = 1, limit = 20 } = req.query;
+    
+    const query = { user: req.userId };
+    if (unreadOnly === 'true') query.read = false;
 
-const prefsStore = new Map([
-  ['usr_001', {
-    email: true,
-    sms: false,
-    inApp: true,
-    reminder: { startDaysBefore: 5, frequency: 'daily' },
-  }]
-]);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const notifications = await Notification.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
+    const total = await Notification.countDocuments(query);
+    const unreadCount = await Notification.countDocuments({ user: req.userId, read: false });
+
+    res.json({
+      notifications,
+      unreadCount,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch notifications' });
+  }
+});
+
+// PUT /api/notifications/:id/read - Mark notification as read
+router.put('/:id/read', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notification = await Notification.findOne({ _id: id, user: req.userId });
+    if (!notification) {
+      return res.status(404).json({ error: 'Not Found', message: 'Notification not found' });
+    }
+
+    notification.read = true;
+    await notification.save();
+
+    res.json({ message: 'Notification marked as read', notification });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to update notification' });
+  }
+});
+
+// PUT /api/notifications/read-all - Mark all notifications as read
+router.put('/read-all', authenticate, async (req, res) => {
+  try {
+    const result = await Notification.updateMany(
+      { user: req.userId, read: false },
+      { $set: { read: true } }
+    );
+
+    res.json({ message: 'All notifications marked as read', modifiedCount: result.modifiedCount });
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to update notifications' });
+  }
+});
 
 function getDefaults() {
   return {
@@ -43,37 +103,50 @@ function coercePrefs(input = {}) {
   return out;
 }
 
+// GET /api/notifications/preferences - Get notification preferences
+router.get('/preferences', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('notificationPreferences');
+    if (!user) {
+      return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+    }
 
-router.get('/preferences', (req, res) => {
-  const { userId } = req.query;
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing userId' });
+    const prefs = user.notificationPreferences || getDefaults();
+    return res.status(200).json({ userId: req.userId, ...prefs });
+  } catch (error) {
+    console.error('Error fetching preferences:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch preferences' });
   }
-  const prefs = prefsStore.get(userId) || getDefaults();
-  return res.status(200).json({ userId, ...prefs });
 });
 
+// PUT /api/notifications/preferences - Update notification preferences
+router.put('/preferences', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+    }
 
-router.put('/preferences', (req, res) => {
-  const { userId } = req.body || {};
-  if (!userId) {
-    return res.status(400).json({ error: 'Missing userId' });
+    const current = user.notificationPreferences || getDefaults();
+    const updates = coercePrefs(req.body);
+    const merged = {
+      email: updates.email ?? current.email,
+      sms: updates.sms ?? current.sms,
+      inApp: updates.inApp ?? current.inApp,
+      reminder: {
+        startDaysBefore: (updates.reminder?.startDaysBefore ?? current.reminder?.startDaysBefore ?? 5),
+        frequency: (updates.reminder?.frequency ?? current.reminder?.frequency ?? 'daily'),
+      },
+    };
+
+    user.notificationPreferences = merged;
+    await user.save();
+
+    return res.status(200).json({ ok: true, userId: req.userId, ...merged });
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to update preferences' });
   }
-
-  const current = prefsStore.get(userId) || getDefaults();
-  const updates = coercePrefs(req.body);
-  const merged = {
-    email: updates.email ?? current.email,
-    sms: updates.sms ?? current.sms,
-    inApp: updates.inApp ?? current.inApp,
-    reminder: {
-      startDaysBefore: (updates.reminder?.startDaysBefore ?? current.reminder.startDaysBefore),
-      frequency: (updates.reminder?.frequency ?? current.reminder.frequency),
-    },
-  };
-
-  prefsStore.set(userId, merged);
-  return res.status(200).json({ ok: true, userId, ...merged });
 });
 
 module.exports = router;
