@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLogin }) {
   const [formData, setFormData] = useState({
@@ -10,6 +12,8 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login: authLogin } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -18,7 +22,7 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
     });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -43,8 +47,35 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
       return;
     }
 
-    // TODO: Replace with actual registration API call
-    onRegister();
+    setIsLoading(true);
+    try {
+      const response = await api.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        netId: formData.studentId,
+        password: formData.password,
+        role: 'student'
+      });
+      
+      // Auto-login after successful registration
+      if (response.token && response.user) {
+        authLogin(response.user, response.token);
+      }
+      onRegister();
+    } catch (err) {
+      // Parse error message
+      const errMsg = err.message || '';
+      if (errMsg.includes('409') || errMsg.toLowerCase().includes('already exists')) {
+        setError("An account with this email or Student ID already exists");
+      } else if (errMsg.includes('400')) {
+        setError("Please check your information and try again");
+      } else {
+        setError("Unable to create account. Please try again later.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -158,8 +189,11 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
+            <div className="bg-purple-50 border border-purple-200 text-purple-800 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
+              <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
@@ -184,9 +218,20 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition shadow-md hover:shadow-lg"
+            disabled={isLoading}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Create Account
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Creating Account...
+              </>
+            ) : (
+              'Create Account'
+            )}
           </button>
         </form>
 

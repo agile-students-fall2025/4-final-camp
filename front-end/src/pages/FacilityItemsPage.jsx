@@ -7,12 +7,23 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
     initialData: { items: [] }
   });
 
+  // Normalize selected facility data
+  const facilityId = typeof selectedFacility === 'string'
+    ? null // when just a name string we can't match by id, items won't filter
+    : selectedFacility?._id;
+  const facilityName = typeof selectedFacility === 'string'
+    ? selectedFacility
+    : selectedFacility?.name || 'Facility';
+
   const allItems = useMemo(() => data?.items ?? [], [data]);
 
-  const facilityItems = useMemo(
-    () => allItems.filter(item => item.facility === selectedFacility),
-    [allItems, selectedFacility]
-  );
+  const facilityItems = useMemo(() => {
+    if (!facilityId) return [];
+    return allItems.filter(item => {
+      const itemFacilityId = item.facility?._id || item.facility; // populated or raw id
+      return itemFacilityId === facilityId;
+    });
+  }, [allItems, facilityId]);
 
   if (!selectedFacility) {
     onNavigate('catalogue');
@@ -37,7 +48,7 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{selectedFacility}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{facilityName}</h1>
               <p className="text-gray-600 mt-1">{facilityItems.length} items available</p>
             </div>
           </div>
@@ -46,11 +57,16 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
-            Unable to load items right now.
-            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
-              Retry
-            </button>
+          <div className="bg-purple-50 border border-purple-200 text-purple-800 text-sm rounded-xl p-4 flex items-start gap-3">
+            <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Unable to load items right now.
+              <button onClick={refetch} className="ml-2 underline hover:text-purple-900">
+                Retry
+              </button>
+            </span>
           </div>
         )}
 
@@ -58,7 +74,7 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-600">
             Loading items…
           </div>
-        ) : facilityItems.length === 0 ? (
+        ) : !loading && facilityItems.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
             <Package className="w-12 h-12 mx-auto text-gray-400 mb-2" />
             <p className="text-gray-600 font-medium">No items found at this facility</p>
@@ -67,7 +83,7 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
           <div className="space-y-3">
             {facilityItems.map(item => (
               <div
-                key={item.id}
+                key={item._id || item.id}
                 onClick={() => handleItemClick(item)}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all cursor-pointer group"
               >
@@ -85,12 +101,12 @@ export default function FacilityItemsPage({ onNavigate, selectedFacility, setSel
                   </div>
                   <div
                     className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                      item.availability === 'Available'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-orange-100 text-orange-700'
+                      item.status === 'available'
+                        ? 'bg-violet-100 text-violet-700'
+                        : 'bg-gray-200 text-gray-600'
                     }`}
                   >
-                    {item.availability}
+                    {item.status}
                   </div>
                 </div>
               </div>

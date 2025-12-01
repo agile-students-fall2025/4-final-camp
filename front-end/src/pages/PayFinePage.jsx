@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useApiData } from '../hooks/useApiData.js';
 import { authUtils } from '../utils/auth.js';
+import { api } from '../services/api.js';
 
 export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult }) {
   const [paymentMethod, setPaymentMethod] = useState('campus');
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState(null);
   const userId = authUtils.getUserId();
   const { data, loading, error, refetch } = useApiData('profile', {
     initialData: { student: { name: '', email: '' } },
@@ -13,16 +16,29 @@ export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult
 
   const billingDetails = data?.student ?? { name: '', email: '' };
 
-  const handlePayment = () => {
-    const result = {
-      amount: selectedFine.amount,
-      method: paymentMethod === 'campus' ? 'Campus Cash' : 'Card on file',
-      receipt: `R-${Math.floor(Math.random() * 90000) + 10000}`,
-      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-      email: billingDetails.email
-    };
-    setPaymentResult(result);
-    onNavigate('paymentSuccess');
+  const handlePayment = async () => {
+    setPaying(true);
+    setPayError(null);
+    try {
+      await api.payFine(selectedFine.id, {
+        paymentMethod: paymentMethod === 'campus' ? 'campus-cash' : 'card',
+        transactionId: `R-${Math.floor(Math.random() * 90000) + 10000}`
+      });
+      
+      const result = {
+        amount: selectedFine.amount,
+        method: paymentMethod === 'campus' ? 'Campus Cash' : 'Card on file',
+        receipt: `R-${Math.floor(Math.random() * 90000) + 10000}`,
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+        email: billingDetails.email
+      };
+      setPaymentResult(result);
+      onNavigate('paymentSuccess');
+    } catch (e) {
+      setPayError(e.message || 'Payment failed. Please try again.');
+    } finally {
+      setPaying(false);
+    }
   };
 
   if (!selectedFine) {
@@ -104,9 +120,9 @@ export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult
           <h3 className="text-xl font-bold text-gray-900 mb-4">Billing details</h3>
 
           {error && (
-            <div className="mb-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            <div className="mb-3 p-3 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
               Unable to load your billing profile.
-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              <button onClick={refetch} className="ml-2 underline hover:text-gray-800">
                 Retry
               </button>
             </div>
@@ -129,11 +145,22 @@ export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult
         </div>
 
         {/* Action Buttons */}
+        {payError && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {payError}
+          </div>
+        )}
+
         <button
           onClick={handlePayment}
-          className="w-full py-4 bg-gray-300 text-gray-700 font-bold text-lg rounded-xl hover:bg-gray-400 transition-colors shadow-sm"
+          disabled={paying}
+          className={`w-full py-4 font-bold text-lg rounded-xl transition-colors shadow-sm ${
+            paying 
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+          }`}
         >
-          Pay ${selectedFine.amount.toFixed(2)}
+          {paying ? 'Processing...' : `Pay $${selectedFine.amount.toFixed(2)}`}
         </button>
 
         <button

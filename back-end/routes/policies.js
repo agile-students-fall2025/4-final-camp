@@ -1,12 +1,32 @@
-const r = require('express').Router();
+const express = require('express');
+const r = express.Router();
+const { optionalAuth } = require('../middleware/auth');
+
+// These would typically come from a Config model or environment variables
+const POLICIES = {
+  borrowingPeriodDays: 7,
+  lateFeePerDay: 5,
+  maxConcurrentLoans: 3,
+  renewalLimit: 2,
+  reservationHoldHours: 24,
+  categories: {
+    'Camera': { period: 7, renewals: 2, lateFee: 5 },
+    'Computer': { period: 14, renewals: 1, lateFee: 10 },
+    'Audio': { period: 7, renewals: 2, lateFee: 3 },
+    'Lighting': { period: 7, renewals: 2, lateFee: 3 },
+    'Accessory': { period: 7, renewals: 3, lateFee: 2 },
+    'Other': { period: 7, renewals: 2, lateFee: 5 }
+  },
+  fineReasons: [
+    { type: 'overdue', description: 'Late return fee', calculation: 'perDay' },
+    { type: 'damage', description: 'Equipment damage', calculation: 'assessed' },
+    { type: 'lost', description: 'Lost equipment replacement', calculation: 'assessed' }
+  ]
+};
 
 // GET /api/policies
-r.get('/', (_req, res) => {
-  res.status(200).json({
-    borrowingPeriodDays: 7,
-    lateFeePerDay: 5,
-    maxConcurrentLoans: 2,
-  });
+r.get('/', optionalAuth, (_req, res) => {
+  res.status(200).json(POLICIES);
 });
 
 module.exports = r;

@@ -29,6 +29,15 @@ const MAX_TASKS_PER_RUN = 20;
 const RATE_LIMIT_MS = 5000; // 5 seconds between API calls
 const VALID_MEMBERS = ['Ansester', 'TalalNaveed', 'Shaf5', 'Ak1016-stack', 'saadiftikhar04'];
 
+// Member GitHub info for commit authorship
+const MEMBER_INFO = {
+  'Ansester': { name: 'Ansester', email: 'ashmit1308@gmail.com' },
+  'TalalNaveed': { name: 'TalalNaveed', email: 'talalnaveed@nyu.edu' },
+  'Shaf5': { name: 'Shaf5', email: 'shaf5@nyu.edu' },
+  'Ak1016-stack': { name: 'Ak1016-stack', email: 'ak1016@nyu.edu' },
+  'saadiftikhar04': { name: 'saadiftikhar04', email: 'saadiftikhar04@nyu.edu' }
+};
+
 // Map issue titles to file paths
 const ISSUE_TO_FILE_MAP = {
   // Frontend Core
@@ -422,8 +431,10 @@ async function main() {
       // Commit
       log('cyan', 'Committing...');
       const commitMsg = `feat: ${task.title}\n\nCloses #${task.issueNumber}`;
+      const memberInfo = MEMBER_INFO[SPECIFIC_MEMBER];
+      const authorFlag = memberInfo ? `--author="${memberInfo.name} <${memberInfo.email}>"` : '';
       try {
-        execSilent(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
+        execSilent(`git commit ${authorFlag} -m "${commitMsg.replace(/"/g, '\\"')}"`);
         log('green', '   ✓ Committed');
       } catch {
         log('yellow', '   ⚠️  Nothing to commit (already committed?)');

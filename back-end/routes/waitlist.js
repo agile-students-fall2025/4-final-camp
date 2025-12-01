@@ -1,10 +1,107 @@
-const r = require('express').Router();
+const express = require('express');
+const r = express.Router();
+const Waitlist = require('../models/Waitlist');
+const Item = require('../models/Item');
+const { authenticate } = require('../middleware/auth');
+const { validateMongoId } = require('../middleware/validation');
+
+// GET /api/waitlist - Get user's waitlist entries
+r.get('/', authenticate, async (req, res) => {
+  try {
+    const entries = await Waitlist.find({ user: req.userId, status: 'waiting' })
+      .populate('item', 'name category facility imageUrl')
+      .populate('facility', 'name location')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      waitlist: entries.map(e => ({
+        id: e._id,
+        item: e.item.name,
+        position: e.position,
+        addedAt: e.createdAt,
+        facility: e.facility.name,
+        estimatedAvailability: e.estimatedAvailability
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching waitlist:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch waitlist' });
+  }
+});
 
 // POST /api/waitlist
-r.post('/', (req, res) => {
-  const { userId, itemId } = req.body || {};
-  if (!userId || !itemId) return res.status(400).json({ error: 'Missing userId or itemId' });
-  return res.status(201).json({ ok: true, waitlistId: 'w_001', userId, itemId });
+r.post('/', authenticate, async (req, res) => {
+  try {
+    const { itemId } = req.body || {};
+    if (!itemId) return res.status(400).json({ error: 'Missing itemId' });
+
+    const item = await Item.findById(itemId);
+    if (!item) {
+      return res.status(404).json({ error: 'Not Found', message: 'Item not found' });
+    }
+
+    // Check if user already on waitlist for this item
+    const existing = await Waitlist.findOne({
+      user: req.userId,
+      item: itemId,
+      status: 'waiting'
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Bad Request', message: 'Already on waitlist for this item' });
+    }
+
+    // Get next position
+    const maxPosition = await Waitlist.findOne({ item: itemId, status: 'waiting' })
+      .sort({ position: -1 })
+      .select('position');
+    const position = (maxPosition?.position || 0) + 1;
+
+    const waitlistEntry = new Waitlist({
+      user: req.userId,
+      item: itemId,
+      facility: item.facility,
+      position
+    });
+
+    await waitlistEntry.save();
+
+    return res.status(201).json({ 
+      ok: true, 
+      waitlistId: waitlistEntry._id, 
+      userId: req.userId, 
+      itemId,
+      position 
+    });
+  } catch (error) {
+    console.error('Error adding to waitlist:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to add to waitlist' });
+  }
+});
+
+// DELETE /api/waitlist/:id - Remove from waitlist
+r.delete('/:id', authenticate, validateMongoId, async (req, res) => {
+  try {
+    const entry = await Waitlist.findOne({ _id: req.params.id, user: req.userId });
+    
+    if (!entry) {
+      return res.status(404).json({ error: 'Not Found', message: 'Waitlist entry not found' });
+    }
+
+    entry.status = 'cancelled';
+    await entry.save();
+
+    // Update positions for remaining entries
+    await Waitlist.updateMany(
+      { item: entry.item, position: { $gt: entry.position }, status: 'waiting' },
+      { $inc: { position: -1 } }
+    );
+
+    res.json({ message: 'Removed from waitlist', ok: true });
+  } catch (error) {
+    console.error('Error removing from waitlist:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to remove from waitlist' });
+  }
 });
 
 module.exports = r;

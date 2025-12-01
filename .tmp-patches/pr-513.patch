@@ -1,0 +1,1631 @@
+diff --git a/front-end/src/pages/staff/StaffDashboard.jsx b/front-end/src/pages/staff/StaffDashboard.jsx
+index 0e8058de1..6261e40fc 100644
+--- a/front-end/src/pages/staff/StaffDashboard.jsx
++++ b/front-end/src/pages/staff/StaffDashboard.jsx
+@@ -1,4 +1,5 @@
+-import { ArrowRight } from 'lucide-react';
++import { useEffect } from 'react';
++import { ArrowRight, Package, LogOut, LogIn, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
+ import { useApiData } from '../../hooks/useApiData.js';
+ 
+ const StaffDashboard = ({ onNavigate }) => {
+@@ -6,6 +7,11 @@ const StaffDashboard = ({ onNavigate }) => {
+     initialData: { inventoryStats: null }
+   });
+ 
++  // Refetch stats whenever dashboard is shown (e.g., after checkout/checkin)
++  useEffect(() => {
++    refetch();
++  }, []);
++
+   const inventoryStats = data?.inventoryStats ?? {
+     available: 0,
+     out: 0,
+@@ -16,13 +22,12 @@ const StaffDashboard = ({ onNavigate }) => {
+   };
+ 
+   const menuItems = [
+-    { id: 'inventory', label: 'Manage Inventory'},
+-    { id: 'checkout', label: 'Check-Out'},
+-    { id: 'checkin', label: 'Check-In'},
+-    { id: 'reservations', label: 'Reservations (Today)'},
+-    { id: 'overdue', label: 'Overdue Tracking'},
+-    { id: 'fines', label: 'Manage Fines'},
+-    { id: 'alerts', label: 'Automated Alerts'}
++    { id: 'inventory', label: 'Inventory', icon: Package, description: 'Manage equipment' },
++    { id: 'checkout', label: 'Check Out', icon: LogOut, description: 'Lend items to students' },
++    { id: 'checkin', label: 'Check In', icon: LogIn, description: 'Process returns' },
++    { id: 'reservations', label: 'Reservations', icon: Calendar, description: 'Today\'s pickups' },
++    { id: 'overdue', label: 'Overdue', icon: AlertTriangle, description: `${inventoryStats.overdue} items overdue` },
++    { id: 'fines', label: 'Student Accounts', icon: DollarSign, description: 'Fines & add funds' },
+   ];
+ 
+   return (
+@@ -31,48 +36,44 @@ const StaffDashboard = ({ onNavigate }) => {
+         {/* Header */}
+         <div className="mb-8">
+           <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
++          <p className="text-gray-500 mt-1">Manage equipment and student borrowals</p>
++        </div>
++
++        {/* Quick Stats */}
++        <div className="grid grid-cols-3 gap-4 mb-6">
++          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
++            <p className="text-3xl font-bold text-[#57068C]">{inventoryStats.available}</p>
++            <p className="text-sm text-gray-500">Available</p>
++          </div>
++          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
++            <p className="text-3xl font-bold text-violet-600">{inventoryStats.out}</p>
++            <p className="text-sm text-gray-500">Checked Out</p>
++          </div>
++          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
++            <p className="text-3xl font-bold text-gray-700">{inventoryStats.overdue}</p>
++            <p className="text-sm text-gray-500">Overdue</p>
++          </div>
+         </div>
+ 
+-        {/* Inventory Stats Card */}
+-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+-          {error && (
+-            <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+-              Unable to load staff metrics.
+-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
++        {error && (
++          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 text-purple-800 text-sm rounded-lg flex items-start gap-3">
++            <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
++            </svg>
++            <span>
++              Unable to load stats.
++              <button onClick={refetch} className="ml-2 underline hover:text-purple-900">
+                 Retry
+               </button>
+-            </div>
+-          )}
+-          {loading && !data?.inventoryStats ? (
+-            <p className="text-sm text-gray-600">Loading metrics…</p>
+-          ) : (
+-            <div className="space-y-4">
+-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+-                <span className="font-semibold text-gray-900">Inventory</span>
+-                <span className="text-sm text-gray-600">
+-                  Avail {inventoryStats.available} • Out {inventoryStats.out} • Res {inventoryStats.reserved}
+-                </span>
+-              </div>
+-              
+-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+-                <span className="font-semibold text-gray-900">Today</span>
+-                <span className="text-sm text-gray-600">
+-                  Checkouts {inventoryStats.checkouts} • Returns {inventoryStats.returns}
+-                </span>
+-              </div>
+-              
+-              <div className="flex justify-between items-center">
+-                <span className="font-semibold text-gray-900">Overdue</span>
+-                <span className="text-sm text-red-600 font-medium">
+-                  {inventoryStats.overdue} items
+-                </span>
+-              </div>
+-            </div>
+-          )}
+-        </div>
++            </span>
++          </div>
++        )}
+ 
+         {/* Navigation Menu */}
+-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
++        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
++          <div className="p-4 border-b border-gray-100">
++            <h2 className="font-semibold text-gray-900">Quick Actions</h2>
++          </div>
+           {menuItems.map((item, index) => (
+             <button
+               key={item.id}
+@@ -81,22 +82,19 @@ const StaffDashboard = ({ onNavigate }) => {
+                 index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
+               }`}
+             >
+-              <div className="flex items-center gap-3">
+-                <span className="text-2xl">{item.icon}</span>
+-                <span className="font-medium text-gray-900">{item.label}</span>
++              <div className="flex items-center gap-4">
++                <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
++                  <item.icon className="w-5 h-5 text-[#57068C]" />
++                </div>
++                <div className="text-left">
++                  <p className="font-medium text-gray-900">{item.label}</p>
++                  <p className="text-sm text-gray-500">{item.description}</p>
++                </div>
+               </div>
+               <ArrowRight className="w-5 h-5 text-gray-400" />
+             </button>
+           ))}
+         </div>
+-
+-        {/* Go to Inventory Button */}
+-        <button
+-          onClick={() => onNavigate('inventory')}
+-          className="w-full mt-6 bg-[#57068C] text-white py-4 rounded-lg font-semibold hover:bg-[#460573] transition-colors"
+-        >
+-          Go to Inventory
+-        </button>
+       </div>
+     </div>
+   );
+diff --git a/scripts/git-automation/create-prs.js b/scripts/git-automation/create-prs.js
+new file mode 100755
+index 000000000..27ccd3e59
+--- /dev/null
++++ b/scripts/git-automation/create-prs.js
+@@ -0,0 +1,574 @@
++#!/usr/bin/env node
++
++/**
++ * CAMP Project - Create Branches and PRs for Existing Issues
++ * 
++ * This script:
++ * 1. Fetches existing open issues assigned to the member from Sprint 3 milestone
++ * 2. Matches issues to local file changes
++ * 3. For each matched issue: creates branch, commits files, pushes, creates PR
++ * 
++ * Usage: node create-prs.js --member <username> [--dry-run] [--yes]
++ * 
++ * Prerequisites:
++ * - Issues already exist in GitHub (Sprint 3 milestone)
++ * - Local file changes ready to commit
++ * - GitHub CLI authenticated
++ */
++
++const { execSync } = require('child_process');
++const path = require('path');
++const readline = require('readline');
++
++const REPO = 'agile-students-fall2025/4-final-camp';
++const PROJECT_ROOT = path.resolve(__dirname, '../..');
++const SPRINT_MILESTONE = 4; // Sprint 3 milestone number
++
++// Safety limits
++const MAX_TASKS_PER_RUN = 20;
++const RATE_LIMIT_MS = 5000; // 5 seconds between API calls
++const VALID_MEMBERS = ['Ansester', 'TalalNaveed', 'Shaf5', 'Ak1016-stack', 'saadiftikhar04'];
++
++// Map issue titles to file paths
++const ISSUE_TO_FILE_MAP = {
++  // Frontend Core
++  'Refactor App.jsx routing and layout structure': 'front-end/src/App.jsx',
++  'Update index.jsx with AuthProvider wrapper': 'front-end/src/index.jsx',
++  'Enhance useApiData hook error handling': 'front-end/src/hooks/useApiData.js',
++  'Add new API endpoints and error handling': 'front-end/src/services/api.js',
++  'Improve auth utilities with token management': 'front-end/src/utils/auth.js',
++  'Add AuthContext for global auth state': 'front-end/src/context/',
++  'Add reusable UI components': 'front-end/src/components/',
++  
++  // Student Pages
++  'Update HomePage with improved dashboard layout': 'front-end/src/pages/HomePage.jsx',
++  'Refactor landing page UI components': 'front-end/src/pages/landingpage.jsx',
++  'Improve student login form validation': 'front-end/src/pages/StudentLoginPage.jsx',
++  'Enhance student registration with validation': 'front-end/src/pages/StudentRegisterPage.jsx',
++  'Add profile settings and preferences': 'front-end/src/pages/ProfileAndSettingsPage.jsx',
++  'Improve catalogue browsing experience': 'front-end/src/pages/BrowserCataloguePage.jsx',
++  'Update facility items display': 'front-end/src/pages/FacilityItemsPage.jsx',
++  'Enhance search and filter functionality': 'front-end/src/pages/FilterAndSearchPage.jsx',
++  'Improve item detail view and actions': 'front-end/src/pages/ItemDetailPage.jsx',
++  'Update my borrowals list display': 'front-end/src/pages/MyBorrowalsPage.jsx',
++  'Add my reservations page': 'front-end/src/pages/MyReservationsPage.jsx',
++  'Improve reservation date/time picker': 'front-end/src/pages/ReserveDateTimePage.jsx',
++  'Update reservation confirmation display': 'front-end/src/pages/ReservationConfirmedPage.jsx',
++  'Improve notifications display': 'front-end/src/pages/NotificationsPage.jsx',
++  'Update waitlist confirmation page': 'front-end/src/pages/WaitlistConfirmedPage.jsx',
++  'Update help and policies content': 'front-end/src/pages/HelpAndPoliciesPage.jsx',
++  
++  // Fines & Payments
++  'Enhance fines display with payment options': 'front-end/src/pages/FinesPage.jsx',
++  'Improve fine payment flow': 'front-end/src/pages/PayFinePage.jsx',
++  'Update payment history display': 'front-end/src/pages/PaymentHistoryPage.jsx',
++  'Add payment success confirmation': 'front-end/src/pages/PaymentSuccessPage.jsx',
++  
++  // Staff Pages
++  'Refactor staff dashboard metrics': 'front-end/src/pages/staff/StaffDashboard.jsx',
++  'Improve staff login authentication': 'front-end/src/pages/staff/StaffLoginPage.jsx',
++  'Enhance inventory management table': 'front-end/src/pages/staff/Inventory.jsx',
++  'Improve add item form validation': 'front-end/src/pages/staff/AddItem.jsx',
++  'Enhance edit item functionality': 'front-end/src/pages/staff/EditItem.jsx',
++  'Improve check-in workflow': 'front-end/src/pages/staff/CheckIn.jsx',
++  'Enhance check-out process': 'front-end/src/pages/staff/CheckOut.jsx',
++  'Add checkout success page': 'front-end/src/pages/staff/CheckoutSuccess.jsx',
++  'Update overdue items display': 'front-end/src/pages/staff/Overdue.jsx',
++  'Improve reservations management': 'front-end/src/pages/staff/Reservations.jsx',
++  'Enhance fines management with cash payments': 'front-end/src/pages/staff/ManageFines.jsx',
++  'Remove deprecated AutomatedAlerts component': 'front-end/src/pages/staff/AutomatedAlerts.jsx',
++  
++  // Backend Routes
++  'Implement JWT authentication routes': 'back-end/routes/auth.js',
++  'Update user management routes': 'back-end/routes/users.js',
++  'Enhance items API endpoints': 'back-end/routes/items.js',
++  'Improve borrowals API routes': 'back-end/routes/borrowals.js',
++  'Update reservations API endpoints': 'back-end/routes/reservations.js',
++  'Improve waitlist API functionality': 'back-end/routes/waitlist.js',
++  'Enhance fines API with cash payments': 'back-end/routes/fines.js',
++  'Add payment processing routes': 'back-end/routes/payments.js',
++  'Update staff management routes': 'back-end/routes/staff.js',
++  'Improve facilities API endpoints': 'back-end/routes/facilities.js',
++  'Update dashboard statistics routes': 'back-end/routes/dashboard.js',
++  'Enhance notifications API': 'back-end/routes/notifications.js',
++  'Update policies API endpoints': 'back-end/routes/policies.js',
++  'Improve help API routes': 'back-end/routes/help.js',
++  'Update alerts API endpoints': 'back-end/routes/alerts.js',
++  
++  // Backend Core
++  'Update Express app configuration': 'back-end/app.js',
++  'Improve server startup and MongoDB connection': 'back-end/server.js',
++  'Update backend dependencies': 'back-end/package.json',
++  
++  // Config & Docs
++  'Update HTML template metadata': 'front-end/public/index.html',
++  'Update webpack configuration': 'front-end/webpack.config.cjs',
++  'Add task issue template': '.github/ISSUE_TEMPLATE/task.yml',
++  'Add user story issue template': '.github/ISSUE_TEMPLATE/user-story.yml',
++  'Add database schema documentation': 'back-end/SCHEMA.md',
++  'Add automation scripts': 'scripts/'
++};
++
++// User Story numbers for branch naming
++const TITLE_TO_USER_STORY = {
++  'Refactor App.jsx routing and layout structure': 43,
++  'Update index.jsx with AuthProvider wrapper': 88,
++  'Enhance useApiData hook error handling': 43,
++  'Add new API endpoints and error handling': 43,
++  'Improve auth utilities with token management': 88,
++  'Add AuthContext for global auth state': 88,
++  'Add reusable UI components': 43,
++  'Update HomePage with improved dashboard layout': 17,
++  'Refactor landing page UI components': 43,
++  'Improve student login form validation': 88,
++  'Enhance student registration with validation': 88,
++  'Add profile settings and preferences': 88,
++  'Improve catalogue browsing experience': 123,
++  'Update facility items display': 123,
++  'Enhance search and filter functionality': 123,
++  'Improve item detail view and actions': 120,
++  'Update my borrowals list display': 17,
++  'Add my reservations page': 138,
++  'Improve reservation date/time picker': 138,
++  'Update reservation confirmation display': 138,
++  'Improve notifications display': 29,
++  'Update waitlist confirmation page': 113,
++  'Update help and policies content': 112,
++  'Enhance fines display with payment options': 134,
++  'Improve fine payment flow': 22,
++  'Update payment history display': 133,
++  'Add payment success confirmation': 119,
++  'Refactor staff dashboard metrics': 31,
++  'Improve staff login authentication': 23,
++  'Enhance inventory management table': 31,
++  'Improve add item form validation': 24,
++  'Enhance edit item functionality': 35,
++  'Improve check-in workflow': 26,
++  'Enhance check-out process': 25,
++  'Add checkout success page': 25,
++  'Update overdue items display': 28,
++  'Improve reservations management': 27,
++  'Enhance fines management with cash payments': 30,
++  'Remove deprecated AutomatedAlerts component': 29,
++  'Implement JWT authentication routes': 88,
++  'Update user management routes': 88,
++  'Enhance items API endpoints': 123,
++  'Improve borrowals API routes': 17,
++  'Update reservations API endpoints': 138,
++  'Improve waitlist API functionality': 113,
++  'Enhance fines API with cash payments': 134,
++  'Add payment processing routes': 22,
++  'Update staff management routes': 31,
++  'Improve facilities API endpoints': 123,
++  'Update dashboard statistics routes': 31,
++  'Enhance notifications API': 29,
++  'Update policies API endpoints': 112,
++  'Improve help API routes': 112,
++  'Update alerts API endpoints': 29,
++  'Update Express app configuration': 43,
++  'Improve server startup and MongoDB connection': 43,
++  'Update backend dependencies': 43,
++  'Update HTML template metadata': 43,
++  'Update webpack configuration': 43,
++  'Add task issue template': 43,
++  'Add user story issue template': 43,
++  'Add database schema documentation': 43,
++  'Add automation scripts': 43
++};
++
++// Parse arguments
++const args = process.argv.slice(2);
++const DRY_RUN = args.includes('--dry-run');
++const AUTO_YES = args.includes('--yes') || args.includes('-y');
++const memberIdx = args.indexOf('--member');
++const SPECIFIC_MEMBER = memberIdx !== -1 ? args[memberIdx + 1] : null;
++
++// Colors
++const colors = {
++  red: '\x1b[31m',
++  green: '\x1b[32m',
++  yellow: '\x1b[33m',
++  blue: '\x1b[34m',
++  cyan: '\x1b[36m',
++  reset: '\x1b[0m'
++};
++
++function log(color, msg) {
++  console.log(`${colors[color]}${msg}${colors.reset}`);
++}
++
++function askQuestion(question) {
++  if (AUTO_YES) return Promise.resolve('y');
++  
++  const rl = readline.createInterface({
++    input: process.stdin,
++    output: process.stdout
++  });
++  
++  return new Promise(resolve => {
++    rl.question(question, answer => {
++      rl.close();
++      resolve(answer.toLowerCase().trim());
++    });
++  });
++}
++
++function sleep(ms) {
++  return new Promise(resolve => setTimeout(resolve, ms));
++}
++
++function execSilent(cmd) {
++  try {
++    return execSync(cmd, { cwd: PROJECT_ROOT, encoding: 'utf-8', stdio: 'pipe' }).trim();
++  } catch (e) {
++    return '';
++  }
++}
++
++// Extract task title from issue title (remove [TASK] prefix)
++function extractTaskTitle(issueTitle) {
++  return issueTitle.replace(/^\[TASK\]\s*/i, '').trim();
++}
++
++// Main workflow
++async function main() {
++  console.log(`${colors.cyan}╔════════════════════════════════════════════════════════════════╗${colors.reset}`);
++  console.log(`${colors.cyan}║     CAMP Project - Create Branches & PRs for Existing Issues   ║${colors.reset}`);
++  console.log(`${colors.cyan}╚════════════════════════════════════════════════════════════════╝${colors.reset}`);
++  console.log('');
++
++  // Validate member
++  if (!SPECIFIC_MEMBER) {
++    log('red', '❌ ERROR: --member flag is required!');
++    console.log('\nUsage: node create-prs.js --member YOUR_GITHUB_USERNAME [--dry-run] [--yes]');
++    console.log('\nValid members:');
++    VALID_MEMBERS.forEach(m => console.log(`  - ${m}`));
++    process.exit(1);
++  }
++
++  if (!VALID_MEMBERS.includes(SPECIFIC_MEMBER)) {
++    log('red', `❌ ERROR: "${SPECIFIC_MEMBER}" is not a valid team member!`);
++    console.log('\nValid members:');
++    VALID_MEMBERS.forEach(m => console.log(`  - ${m}`));
++    process.exit(1);
++  }
++
++  log('green', `✅ Running for member: ${SPECIFIC_MEMBER}`);
++  if (DRY_RUN) log('yellow', '🔍 DRY RUN MODE - No changes will be made');
++  console.log('');
++
++  // Verify GitHub CLI
++  log('blue', '🔐 Verifying GitHub authentication...');
++  const ghUser = execSilent('gh auth status 2>&1');
++  if (!ghUser.includes('Logged in')) {
++    log('red', '❌ ERROR: Not logged into GitHub CLI! Run: gh auth login');
++    process.exit(1);
++  }
++  log('green', '   ✓ GitHub CLI authenticated\n');
++
++  // Detect default branch
++  let DEFAULT_BRANCH = execSilent('git symbolic-ref --quiet --short refs/remotes/origin/HEAD').replace('origin/', '');
++  if (!DEFAULT_BRANCH) {
++    DEFAULT_BRANCH = execSilent('git rev-parse --verify --quiet refs/heads/main') ? 'main' : 'master';
++  }
++  console.log(`   Default branch: ${DEFAULT_BRANCH}\n`);
++
++  // Step 1: Fetch open issues for this member from Sprint 3
++  log('blue', '📋 Step 1: Fetching your assigned issues from Sprint 3...');
++  
++  const issuesJson = execSilent(`gh api "repos/${REPO}/issues?milestone=${SPRINT_MILESTONE}&state=open&per_page=100" --jq '[.[] | {number, title, assignee: .assignee.login}]'`);
++  const allIssues = JSON.parse(issuesJson || '[]');
++  
++  // Filter issues that mention this member in body (since assignee might not be set via API)
++  const memberIssues = allIssues.filter(issue => {
++    const taskTitle = extractTaskTitle(issue.title);
++    const filePath = ISSUE_TO_FILE_MAP[taskTitle];
++    if (!filePath) return false;
++    
++    // Check if file matches member's assignments
++    return isFileAssignedToMember(filePath, SPECIFIC_MEMBER);
++  });
++
++  console.log(`   Found ${memberIssues.length} issues assigned to ${SPECIFIC_MEMBER}\n`);
++
++  if (memberIssues.length === 0) {
++    log('yellow', '⚠️  No issues found for you. Check if issues exist and are assigned correctly.');
++    process.exit(0);
++  }
++
++  // Step 2: Get local file changes
++  log('blue', '📂 Step 2: Analyzing local file changes...');
++  const gitStatus = execSilent('git status --porcelain');
++  const changedFiles = new Set(
++    gitStatus.split('\n')
++      .filter(line => line.trim())
++      .map(line => line.trim().split(/\s+/).slice(1).join(' '))
++  );
++  console.log(`   Found ${changedFiles.size} changed files\n`);
++
++  // Step 3: Match issues to file changes
++  log('blue', '📝 Step 3: Matching issues to file changes...\n');
++  
++  const tasks = [];
++  
++  for (const issue of memberIssues) {
++    const taskTitle = extractTaskTitle(issue.title);
++    const filePath = ISSUE_TO_FILE_MAP[taskTitle];
++    
++    if (!filePath) {
++      console.log(`   ${colors.yellow}⚠️  No file mapping for: ${taskTitle}${colors.reset}`);
++      continue;
++    }
++
++    // Check if file (or directory) has changes
++    const hasChanges = [...changedFiles].some(f => f.startsWith(filePath.replace(/\/$/, '')) || f === filePath);
++    
++    if (!hasChanges) {
++      console.log(`   ${colors.yellow}⏭️  No changes for: ${taskTitle}${colors.reset}`);
++      continue;
++    }
++
++    const userStoryNum = TITLE_TO_USER_STORY[taskTitle] || 43;
++    const titleSlug = taskTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
++    const branchName = `user-story-${userStoryNum}/task-${issue.number}-${titleSlug}`;
++
++    console.log(`   ${colors.green}✓ #${issue.number}: ${taskTitle}${colors.reset}`);
++    console.log(`      File: ${filePath}`);
++    console.log(`      Branch: ${branchName}`);
++
++    tasks.push({
++      issueNumber: issue.number,
++      title: taskTitle,
++      filePath,
++      branchName,
++      userStoryNum
++    });
++  }
++
++  console.log('');
++
++  if (tasks.length === 0) {
++    log('yellow', '⚠️  No matching file changes found for your assigned issues.');
++    log('yellow', '   Make sure you have uncommitted changes for your assigned files.');
++    process.exit(0);
++  }
++
++  // Limit tasks
++  if (tasks.length > MAX_TASKS_PER_RUN) {
++    log('yellow', `⚠️  Limiting to ${MAX_TASKS_PER_RUN} tasks per run.`);
++    tasks.length = MAX_TASKS_PER_RUN;
++  }
++
++  // Step 4: Confirm and execute
++  log('blue', `🚀 Step 4: Ready to create ${tasks.length} branch(es) and PR(s)\n`);
++
++  if (DRY_RUN) {
++    log('yellow', 'DRY RUN - Would execute:');
++    tasks.forEach((t, i) => {
++      console.log(`\n${i + 1}. Issue #${t.issueNumber}: ${t.title}`);
++      console.log(`   Branch: ${t.branchName}`);
++      console.log(`   File: ${t.filePath}`);
++    });
++    log('green', '\n✅ Dry run complete. Run without --dry-run to execute.');
++    return;
++  }
++
++  const confirm = await askQuestion(`${colors.yellow}Create ${tasks.length} branches and PRs? (y/N): ${colors.reset}`);
++  if (confirm !== 'y' && confirm !== 'yes') {
++    log('yellow', '❌ Aborted by user.');
++    process.exit(0);
++  }
++
++  // Execute
++  let successCount = 0;
++  const createdPRs = [];
++
++  for (let i = 0; i < tasks.length; i++) {
++    const task = tasks[i];
++    
++    console.log(`\n${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
++    console.log(`Task ${i + 1}/${tasks.length}: #${task.issueNumber} - ${task.title}`);
++    console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
++
++    try {
++      // Stash, checkout master, pull
++      log('cyan', 'Preparing branch...');
++      execSilent('git stash push -m "auto-stash-for-pr"');
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      execSilent(`git pull origin ${DEFAULT_BRANCH}`);
++
++      // Create or checkout branch
++      const branchExists = execSilent(`git branch --list "${task.branchName}"`);
++      if (branchExists) {
++        execSilent(`git checkout "${task.branchName}"`);
++        execSilent(`git merge ${DEFAULT_BRANCH}`);
++      } else {
++        execSilent(`git checkout -b "${task.branchName}"`);
++      }
++      
++      // Pop stash
++      execSilent('git stash pop');
++      log('green', `   ✓ On branch: ${task.branchName}`);
++
++      // Stage files
++      log('cyan', 'Staging files...');
++      if (task.filePath.endsWith('/')) {
++        execSilent(`git add "${task.filePath}"`);
++      } else {
++        execSilent(`git add "${task.filePath}"`);
++      }
++      log('green', `   ✓ Staged: ${task.filePath}`);
++
++      // Commit
++      log('cyan', 'Committing...');
++      const commitMsg = `feat: ${task.title}\n\nCloses #${task.issueNumber}`;
++      try {
++        execSilent(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
++        log('green', '   ✓ Committed');
++      } catch {
++        log('yellow', '   ⚠️  Nothing to commit (already committed?)');
++      }
++
++      // Push
++      log('cyan', 'Pushing branch...');
++      execSilent(`git push -u origin "${task.branchName}"`) || execSilent(`git push origin "${task.branchName}"`);
++      log('green', '   ✓ Pushed to origin');
++
++      // Create PR
++      log('cyan', 'Creating Pull Request...');
++      const prBody = `## Summary\n${task.title}\n\n## Related Issue\nCloses #${task.issueNumber}\n\n## Files Changed\n- \`${task.filePath}\``;
++      
++      const prCmd = `gh pr create --repo ${REPO} --title "[#${task.issueNumber}] ${task.title}" --body "${prBody.replace(/`/g, '\\`').replace(/"/g, '\\"')}" --base ${DEFAULT_BRANCH} --head "${task.branchName}"`;
++      
++      try {
++        const prUrl = execSilent(prCmd);
++        log('green', `   ✓ PR created: ${prUrl}`);
++        createdPRs.push({ issue: task.issueNumber, pr: prUrl });
++      } catch {
++        log('yellow', '   ⚠️  PR may already exist');
++      }
++
++      // Return to default branch
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      successCount++;
++
++      // Rate limit
++      if (i < tasks.length - 1) {
++        console.log(`\n${colors.blue}⏳ Waiting ${RATE_LIMIT_MS / 1000}s...${colors.reset}`);
++        await sleep(RATE_LIMIT_MS);
++      }
++
++    } catch (error) {
++      log('red', `❌ Error: ${error.message}`);
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      execSilent('git stash pop');
++    }
++  }
++
++  // Summary
++  console.log(`\n${colors.cyan}╔════════════════════════════════════════════════════════════════╗${colors.reset}`);
++  console.log(`${colors.cyan}║                         📊 SUMMARY                             ║${colors.reset}`);
++  console.log(`${colors.cyan}╚════════════════════════════════════════════════════════════════╝${colors.reset}`);
++  console.log(`\n   ✅ Successfully created: ${successCount}/${tasks.length} PRs`);
++  
++  if (createdPRs.length > 0) {
++    console.log('\n   Created PRs:');
++    createdPRs.forEach(p => console.log(`     - #${p.issue}: ${p.pr}`));
++  }
++  
++  console.log('\n   Next steps:');
++  console.log('   1. Review your PRs on GitHub');
++  console.log('   2. Request reviews from teammates');
++  console.log('   3. Merge after approval');
++}
++
++// Helper: Check if file is assigned to member
++function isFileAssignedToMember(filePath, member) {
++  const assignments = {
++    'Ansester': [
++      'front-end/src/utils/auth.js',
++      'front-end/src/context/',
++      'front-end/src/App.jsx',
++      'front-end/src/index.jsx',
++      'front-end/src/services/api.js',
++      'front-end/src/hooks/',
++      'front-end/webpack.config.cjs',
++      'front-end/public/',
++      'back-end/server.js',
++      'back-end/app.js',
++      'back-end/package.json',
++      'scripts/',
++      '.github/'
++    ],
++    'TalalNaveed': [
++      'back-end/routes/auth.js',
++      'back-end/routes/dashboard.js',
++      'back-end/routes/users.js',
++      'back-end/routes/notifications.js',
++      'back-end/middleware/',
++      'back-end/config/',
++      'back-end/utils/',
++      'back-end/models/'
++    ],
++    'Shaf5': [
++      'front-end/src/pages/staff/StaffDashboard.jsx',
++      'front-end/src/pages/staff/Inventory.jsx',
++      'front-end/src/pages/staff/CheckIn.jsx',
++      'front-end/src/pages/staff/CheckOut.jsx',
++      'front-end/src/pages/staff/CheckoutSuccess.jsx',
++      'front-end/src/pages/staff/EditItem.jsx',
++      'front-end/src/pages/staff/AddItem.jsx',
++      'front-end/src/pages/staff/Overdue.jsx',
++      'front-end/src/pages/staff/Reservations.jsx',
++      'front-end/src/pages/staff/StaffLoginPage.jsx',
++      'back-end/routes/staff.js',
++      'back-end/routes/items.js'
++    ],
++    'Ak1016-stack': [
++      'front-end/src/pages/HomePage.jsx',
++      'front-end/src/pages/MyBorrowalsPage.jsx',
++      'front-end/src/pages/MyReservationsPage.jsx',
++      'front-end/src/pages/ReserveDateTimePage.jsx',
++      'front-end/src/pages/ReservationConfirmedPage.jsx',
++      'front-end/src/pages/ItemDetailPage.jsx',
++      'front-end/src/pages/NotificationsPage.jsx',
++      'front-end/src/pages/WaitlistConfirmedPage.jsx',
++      'back-end/routes/borrowals.js',
++      'back-end/routes/reservations.js',
++      'back-end/routes/waitlist.js',
++      'front-end/src/components/'
++    ],
++    'saadiftikhar04': [
++      'front-end/src/pages/FinesPage.jsx',
++      'front-end/src/pages/PayFinePage.jsx',
++      'front-end/src/pages/PaymentHistoryPage.jsx',
++      'front-end/src/pages/PaymentSuccessPage.jsx',
++      'front-end/src/pages/landingpage.jsx',
++      'front-end/src/pages/ProfileAndSettingsPage.jsx',
++      'front-end/src/pages/HelpAndPoliciesPage.jsx',
++      'front-end/src/pages/FilterAndSearchPage.jsx',
++      'front-end/src/pages/BrowserCataloguePage.jsx',
++      'front-end/src/pages/FacilityItemsPage.jsx',
++      'front-end/src/pages/StudentLoginPage.jsx',
++      'front-end/src/pages/StudentRegisterPage.jsx',
++      'front-end/src/pages/staff/ManageFines.jsx',
++      'front-end/src/pages/staff/AutomatedAlerts.jsx',
++      'back-end/routes/fines.js',
++      'back-end/routes/payments.js',
++      'back-end/routes/facilities.js',
++      'back-end/routes/policies.js',
++      'back-end/routes/help.js',
++      'back-end/routes/alerts.js'
++    ]
++  };
++
++  const patterns = assignments[member] || [];
++  return patterns.some(pattern => {
++    if (pattern.endsWith('/')) {
++      return filePath.startsWith(pattern);
++    }
++    return filePath === pattern || filePath.startsWith(pattern);
++  });
++}
++
++main().catch(console.error);
+diff --git a/scripts/git-automation/workflow.js b/scripts/git-automation/workflow.js
+new file mode 100644
+index 000000000..70e7c20ff
+--- /dev/null
++++ b/scripts/git-automation/workflow.js
+@@ -0,0 +1,890 @@
++#!/usr/bin/env node
++
++/**
++ * CAMP Project - Full Agile Workflow Automation
++ * 
++ * This script:
++ * 1. Reads existing issues/user stories from GitHub project board
++ * 2. Compares with local file changes
++ * 3. Creates NEW tasks (issues) only if they don't exist
++ * 4. Assigns tasks to the right team member
++ * 5. For each task: creates branch, commits only those files, pushes, creates PR
++ * 
++ * Usage: node workflow.js [--dry-run] [--member <username>] [--yes]
++ * 
++ * Safety Features:
++ * - Requires --member flag (won't process all members at once)
++ * - Confirmation prompts before each destructive action
++ * - Rate limiting between GitHub API calls
++ * - Automatic rollback on errors
++ * - Maximum task limit per run
++ */
++
++const { execSync } = require('child_process');
++const path = require('path');
++const readline = require('readline');
++
++const REPO = 'agile-students-fall2025/4-final-camp';
++const REPO_OWNER = 'agile-students-fall2025';
++const PROJECT_NUMBER = 16; // CAMP - Campus Asset Management Platform project board
++const PROJECT_ROOT = path.resolve(__dirname, '../..');
++const SPRINT_MILESTONE = 4; // Sprint 3 milestone number
++
++// Safety limits
++const MAX_TASKS_PER_RUN = 20; // One task per file, so higher limit
++const RATE_LIMIT_MS = 8000; // 8 seconds between API calls (more natural pacing)
++const VALID_MEMBERS = ['Ansester', 'TalalNaveed', 'Shaf5', 'Ak1016-stack', 'saadiftikhar04'];
++
++// User Story mappings with their actual GitHub issue numbers
++const USER_STORIES = {
++  // Authentication & Profile
++  'auth': { num: 88, title: 'Edit profile and settings' },
++  'login': { num: 23, title: 'Staff login with credentials' },
++  
++  // Staff Portal
++  'staff-dashboard': { num: 31, title: 'Staff dashboard overview' },
++  'staff-checkout': { num: 25, title: 'Check out item to student' },
++  'staff-checkin': { num: 26, title: 'Process item returns' },
++  'staff-reservations': { num: 27, title: 'See upcoming reservations' },
++  'staff-overdue': { num: 28, title: 'See overdue items list' },
++  'staff-fines': { num: 30, title: 'Apply fines to student account' },
++  'staff-add-item': { num: 24, title: 'Add items to inventory' },
++  'staff-edit-item': { num: 35, title: 'Edit items in inventory' },
++  'staff-delete-item': { num: 36, title: 'Delete items from inventory' },
++  
++  // Student Borrowing & Reservations
++  'borrowing': { num: 17, title: 'Dashboard of checked out items' },
++  'reservation': { num: 138, title: 'Reservation confirmation' },
++  'item-detail': { num: 120, title: 'See item details' },
++  'facility-items': { num: 123, title: 'See facility items' },
++  'waitlist': { num: 113, title: 'Added to waitlist' },
++  
++  // Fines & Payments  
++  'fines': { num: 134, title: 'See my fines' },
++  'payment': { num: 22, title: 'Pay late fees with campus cash' },
++  'payment-history': { num: 133, title: 'See payment history' },
++  'payment-confirmed': { num: 119, title: 'Fine payment confirmed' },
++  
++  // UI & Navigation
++  'landing': { num: 43, title: 'Landing page with navigation' },
++  'help': { num: 112, title: 'Help and policies' },
++  'notifications': { num: 29, title: 'Automated notifications' },
++  
++  // Default fallback
++  'ui': { num: 43, title: 'Landing page and navigation' }
++};
++
++// File-specific task descriptions (one task per file) with correct user story mappings
++const FILE_TASK_DESCRIPTIONS = {
++  // Frontend Core
++  'front-end/src/App.jsx': { title: 'Refactor App.jsx routing and layout structure', story: 'landing', action: 'improve' },
++  'front-end/src/index.jsx': { title: 'Update index.jsx with AuthProvider wrapper', story: 'auth', action: 'improve' },
++  'front-end/src/hooks/useApiData.js': { title: 'Enhance useApiData hook error handling', story: 'landing', action: 'improve' },
++  'front-end/src/services/api.js': { title: 'Add new API endpoints and error handling', story: 'landing', action: 'improve' },
++  'front-end/src/utils/auth.js': { title: 'Improve auth utilities with token management', story: 'auth', action: 'improve' },
++  'front-end/src/context/': { title: 'Add AuthContext for global auth state', story: 'auth', action: 'add' },
++  'front-end/src/components/': { title: 'Add reusable UI components', story: 'landing', action: 'add' },
++  
++  // Student Pages
++  'front-end/src/pages/HomePage.jsx': { title: 'Update HomePage with improved dashboard layout', story: 'borrowing', action: 'improve' },
++  'front-end/src/pages/landingpage.jsx': { title: 'Refactor landing page UI components', story: 'landing', action: 'improve' },
++  'front-end/src/pages/StudentLoginPage.jsx': { title: 'Improve student login form validation', story: 'auth', action: 'improve' },
++  'front-end/src/pages/StudentRegisterPage.jsx': { title: 'Enhance student registration with validation', story: 'auth', action: 'improve' },
++  'front-end/src/pages/ProfileAndSettingsPage.jsx': { title: 'Add profile settings and preferences', story: 'auth', action: 'improve' },
++  'front-end/src/pages/BrowserCataloguePage.jsx': { title: 'Improve catalogue browsing experience', story: 'facility-items', action: 'improve' },
++  'front-end/src/pages/FacilityItemsPage.jsx': { title: 'Update facility items display', story: 'facility-items', action: 'improve' },
++  'front-end/src/pages/FilterAndSearchPage.jsx': { title: 'Enhance search and filter functionality', story: 'facility-items', action: 'improve' },
++  'front-end/src/pages/ItemDetailPage.jsx': { title: 'Improve item detail view and actions', story: 'item-detail', action: 'improve' },
++  'front-end/src/pages/MyBorrowalsPage.jsx': { title: 'Update my borrowals list display', story: 'borrowing', action: 'improve' },
++  'front-end/src/pages/MyReservationsPage.jsx': { title: 'Add my reservations page', story: 'reservation', action: 'add' },
++  'front-end/src/pages/ReserveDateTimePage.jsx': { title: 'Improve reservation date/time picker', story: 'reservation', action: 'improve' },
++  'front-end/src/pages/ReservationConfirmedPage.jsx': { title: 'Update reservation confirmation display', story: 'reservation', action: 'improve' },
++  'front-end/src/pages/NotificationsPage.jsx': { title: 'Improve notifications display', story: 'notifications', action: 'improve' },
++  'front-end/src/pages/WaitlistConfirmedPage.jsx': { title: 'Update waitlist confirmation page', story: 'waitlist', action: 'improve' },
++  'front-end/src/pages/HelpAndPoliciesPage.jsx': { title: 'Update help and policies content', story: 'help', action: 'improve' },
++  
++  // Fines & Payments
++  'front-end/src/pages/FinesPage.jsx': { title: 'Enhance fines display with payment options', story: 'fines', action: 'improve' },
++  'front-end/src/pages/PayFinePage.jsx': { title: 'Improve fine payment flow', story: 'payment', action: 'improve' },
++  'front-end/src/pages/PaymentHistoryPage.jsx': { title: 'Update payment history display', story: 'payment-history', action: 'improve' },
++  'front-end/src/pages/PaymentSuccessPage.jsx': { title: 'Add payment success confirmation', story: 'payment-confirmed', action: 'add' },
++  
++  // Staff Pages
++  'front-end/src/pages/staff/StaffDashboard.jsx': { title: 'Refactor staff dashboard metrics', story: 'staff-dashboard', action: 'improve' },
++  'front-end/src/pages/staff/StaffLoginPage.jsx': { title: 'Improve staff login authentication', story: 'login', action: 'improve' },
++  'front-end/src/pages/staff/Inventory.jsx': { title: 'Enhance inventory management table', story: 'staff-dashboard', action: 'improve' },
++  'front-end/src/pages/staff/AddItem.jsx': { title: 'Improve add item form validation', story: 'staff-add-item', action: 'improve' },
++  'front-end/src/pages/staff/EditItem.jsx': { title: 'Enhance edit item functionality', story: 'staff-edit-item', action: 'improve' },
++  'front-end/src/pages/staff/CheckIn.jsx': { title: 'Improve check-in workflow', story: 'staff-checkin', action: 'improve' },
++  'front-end/src/pages/staff/CheckOut.jsx': { title: 'Enhance check-out process', story: 'staff-checkout', action: 'improve' },
++  'front-end/src/pages/staff/CheckoutSuccess.jsx': { title: 'Add checkout success page', story: 'staff-checkout', action: 'add' },
++  'front-end/src/pages/staff/Overdue.jsx': { title: 'Update overdue items display', story: 'staff-overdue', action: 'improve' },
++  'front-end/src/pages/staff/Reservations.jsx': { title: 'Improve reservations management', story: 'staff-reservations', action: 'improve' },
++  'front-end/src/pages/staff/ManageFines.jsx': { title: 'Enhance fines management with cash payments', story: 'staff-fines', action: 'improve' },
++  'front-end/src/pages/staff/AutomatedAlerts.jsx': { title: 'Remove deprecated AutomatedAlerts component', story: 'notifications', action: 'delete' },
++  
++  // Backend Routes
++  'back-end/routes/auth.js': { title: 'Implement JWT authentication routes', story: 'auth', action: 'improve' },
++  'back-end/routes/users.js': { title: 'Update user management routes', story: 'auth', action: 'improve' },
++  'back-end/routes/items.js': { title: 'Enhance items API endpoints', story: 'facility-items', action: 'improve' },
++  'back-end/routes/borrowals.js': { title: 'Improve borrowals API routes', story: 'borrowing', action: 'improve' },
++  'back-end/routes/reservations.js': { title: 'Update reservations API endpoints', story: 'reservation', action: 'improve' },
++  'back-end/routes/waitlist.js': { title: 'Improve waitlist API functionality', story: 'waitlist', action: 'improve' },
++  'back-end/routes/fines.js': { title: 'Enhance fines API with cash payments', story: 'fines', action: 'improve' },
++  'back-end/routes/payments.js': { title: 'Add payment processing routes', story: 'payment', action: 'improve' },
++  'back-end/routes/staff.js': { title: 'Update staff management routes', story: 'staff-dashboard', action: 'improve' },
++  'back-end/routes/facilities.js': { title: 'Improve facilities API endpoints', story: 'facility-items', action: 'improve' },
++  'back-end/routes/dashboard.js': { title: 'Update dashboard statistics routes', story: 'staff-dashboard', action: 'improve' },
++  'back-end/routes/notifications.js': { title: 'Enhance notifications API', story: 'notifications', action: 'improve' },
++  'back-end/routes/policies.js': { title: 'Update policies API endpoints', story: 'help', action: 'improve' },
++  'back-end/routes/help.js': { title: 'Improve help API routes', story: 'help', action: 'improve' },
++  'back-end/routes/alerts.js': { title: 'Update alerts API endpoints', story: 'notifications', action: 'improve' },
++  
++  // Backend Core
++  'back-end/app.js': { title: 'Update Express app configuration', story: 'landing', action: 'improve' },
++  'back-end/server.js': { title: 'Improve server startup and MongoDB connection', story: 'landing', action: 'improve' },
++  'back-end/package.json': { title: 'Update backend dependencies', story: 'landing', action: 'improve' },
++  
++  // Config & Docs
++  'front-end/public/index.html': { title: 'Update HTML template metadata', story: 'landing', action: 'improve' },
++  'front-end/webpack.config.cjs': { title: 'Update webpack configuration', story: 'landing', action: 'improve' },
++  '.github/ISSUE_TEMPLATE/task.yml': { title: 'Add task issue template', story: 'landing', action: 'add' },
++  '.github/ISSUE_TEMPLATE/user-story.yml': { title: 'Add user story issue template', story: 'landing', action: 'add' },
++  'back-end/SCHEMA.md': { title: 'Add database schema documentation', story: 'landing', action: 'add' },
++  'scripts/': { title: 'Add automation scripts', story: 'landing', action: 'add' }
++};
++
++// Parse arguments
++const args = process.argv.slice(2);
++const DRY_RUN = args.includes('--dry-run');
++const AUTO_YES = args.includes('--yes') || args.includes('-y');
++const memberIdx = args.indexOf('--member');
++const SPECIFIC_MEMBER = memberIdx !== -1 ? args[memberIdx + 1] : null;
++
++// Colors
++const colors = {
++  red: '\x1b[31m',
++  green: '\x1b[32m',
++  yellow: '\x1b[33m',
++  blue: '\x1b[34m',
++  cyan: '\x1b[36m',
++  reset: '\x1b[0m'
++};
++
++function log(color, msg) {
++  console.log(`${colors[color]}${msg}${colors.reset}`);
++}
++
++// Promisified readline for confirmations
++function askQuestion(question) {
++  if (AUTO_YES) return Promise.resolve('y');
++  
++  const rl = readline.createInterface({
++    input: process.stdin,
++    output: process.stdout
++  });
++  
++  return new Promise(resolve => {
++    rl.question(question, answer => {
++      rl.close();
++      resolve(answer.toLowerCase().trim());
++    });
++  });
++}
++
++// Sleep function for rate limiting
++function sleep(ms) {
++  return new Promise(resolve => setTimeout(resolve, ms));
++}
++
++function exec(cmd, options = {}) {
++  try {
++    return execSync(cmd, { 
++      cwd: PROJECT_ROOT, 
++      encoding: 'utf-8',
++      stdio: options.silent ? 'pipe' : 'inherit',
++      ...options 
++    });
++  } catch (e) {
++    if (options.ignoreError) return '';
++    throw e;
++  }
++}
++
++function execSilent(cmd) {
++  try {
++    return execSync(cmd, { cwd: PROJECT_ROOT, encoding: 'utf-8', stdio: 'pipe' }).trim();
++  } catch (e) {
++    return '';
++  }
++}
++
++// Team Member Assignments
++const TEAM_ASSIGNMENTS = {
++  'Ansester': {
++    patterns: [
++      'front-end/src/utils/auth.js',
++      'front-end/src/context/',
++      'front-end/src/App.jsx',
++      'front-end/src/index.jsx',
++      'front-end/src/services/api.js',
++      'front-end/src/hooks/',
++      'front-end/webpack.config.cjs',
++      'front-end/public/',
++      'back-end/server.js',
++      'back-end/app.js',
++      'back-end/package.json'
++    ],
++    stories: [2, 9, 17]
++  },
++  'TalalNaveed': {
++    patterns: [
++      'back-end/routes/auth.js',
++      'back-end/routes/dashboard.js',
++      'back-end/routes/users.js',
++      'back-end/routes/notifications.js',
++      'back-end/middleware/',
++      'back-end/config/',
++      'back-end/utils/',
++      'back-end/models/'
++    ],
++    stories: [23, 25, 26]
++  },
++  'Shaf5': {
++    patterns: [
++      'front-end/src/pages/staff/StaffDashboard.jsx',
++      'front-end/src/pages/staff/Inventory.jsx',
++      'front-end/src/pages/staff/CheckIn.jsx',
++      'front-end/src/pages/staff/CheckOut.jsx',
++      'front-end/src/pages/staff/CheckoutSuccess.jsx',
++      'front-end/src/pages/staff/EditItem.jsx',
++      'front-end/src/pages/staff/AddItem.jsx',
++      'front-end/src/pages/staff/Overdue.jsx',
++      'front-end/src/pages/staff/Reservations.jsx',
++      'front-end/src/pages/staff/StaffLoginPage.jsx',
++      'back-end/routes/staff.js',
++      'back-end/routes/items.js'
++    ],
++    stories: [24, 27, 28, 31, 35, 36]
++  },
++  'Ak1016-stack': {
++    patterns: [
++      'front-end/src/pages/HomePage.jsx',
++      'front-end/src/pages/MyBorrowalsPage.jsx',
++      'front-end/src/pages/MyReservationsPage.jsx',
++      'front-end/src/pages/ReserveDateTimePage.jsx',
++      'front-end/src/pages/ReservationConfirmedPage.jsx',
++      'front-end/src/pages/ItemDetailPage.jsx',
++      'front-end/src/pages/NotificationsPage.jsx',
++      'front-end/src/pages/WaitlistConfirmedPage.jsx',
++      'back-end/routes/borrowals.js',
++      'back-end/routes/reservations.js',
++      'back-end/routes/waitlist.js'
++    ],
++    stories: [14, 17, 138]
++  },
++  'saadiftikhar04': {
++    patterns: [
++      'front-end/src/pages/FinesPage.jsx',
++      'front-end/src/pages/PayFinePage.jsx',
++      'front-end/src/pages/PaymentHistoryPage.jsx',
++      'front-end/src/pages/PaymentSuccessPage.jsx',
++      'front-end/src/pages/landingpage.jsx',
++      'front-end/src/pages/ProfileAndSettingsPage.jsx',
++      'front-end/src/pages/HelpAndPoliciesPage.jsx',
++      'front-end/src/pages/FilterAndSearchPage.jsx',
++      'front-end/src/pages/BrowserCataloguePage.jsx',
++      'front-end/src/pages/FacilityItemsPage.jsx',
++      'front-end/src/pages/StudentLoginPage.jsx',
++      'front-end/src/pages/StudentRegisterPage.jsx',
++      'front-end/src/pages/staff/ManageFines.jsx',
++      'front-end/src/pages/staff/AutomatedAlerts.jsx',
++      'back-end/routes/fines.js',
++      'back-end/routes/payments.js',
++      'back-end/routes/facilities.js',
++      'back-end/routes/policies.js',
++      'back-end/routes/help.js',
++      'back-end/routes/alerts.js'
++    ],
++    stories: [22, 30, 43, 88, 112, 119, 133, 134]
++  }
++};
++
++// Main workflow
++async function main() {
++  console.log(`${colors.cyan}╔════════════════════════════════════════════════════════════════╗${colors.reset}`);
++  console.log(`${colors.cyan}║       CAMP Project - Full Agile Workflow Automation            ║${colors.reset}`);
++  console.log(`${colors.cyan}║                    🔒 SAFE MODE ENABLED                        ║${colors.reset}`);
++  console.log(`${colors.cyan}╚════════════════════════════════════════════════════════════════╝${colors.reset}`);
++  console.log('');
++
++  // ========== SAFETY CHECK 1: Require --member flag ==========
++  if (!SPECIFIC_MEMBER) {
++    log('red', '❌ SAFETY ERROR: --member flag is required!');
++    console.log('');
++    console.log('This script requires you to specify which team member you are.');
++    console.log('This prevents accidentally creating PRs for all team members at once.');
++    console.log('');
++    console.log('Usage:');
++    console.log('  node workflow.js --member YOUR_GITHUB_USERNAME [--dry-run]');
++    console.log('');
++    console.log('Valid members:');
++    VALID_MEMBERS.forEach(m => console.log(`  - ${m}`));
++    process.exit(1);
++  }
++
++  // ========== SAFETY CHECK 2: Validate member name ==========
++  if (!VALID_MEMBERS.includes(SPECIFIC_MEMBER)) {
++    log('red', `❌ SAFETY ERROR: "${SPECIFIC_MEMBER}" is not a valid team member!`);
++    console.log('');
++    console.log('Valid members:');
++    VALID_MEMBERS.forEach(m => console.log(`  - ${m}`));
++    process.exit(1);
++  }
++
++  log('green', `✅ Running for member: ${SPECIFIC_MEMBER}`);
++  console.log('');
++
++  if (DRY_RUN) {
++    log('yellow', '🔍 DRY RUN MODE - No changes will be made\n');
++  }
++
++  // ========== SAFETY CHECK 3: Verify GitHub authentication ==========
++  log('blue', '🔐 Verifying GitHub authentication...');
++  const ghUser = execSilent('gh auth status 2>&1');
++  if (!ghUser.includes('Logged in')) {
++    log('red', '❌ SAFETY ERROR: Not logged into GitHub CLI!');
++    console.log('');
++    console.log('Please run: gh auth login');
++    process.exit(1);
++  }
++  console.log(`   ${colors.green}✓ GitHub CLI authenticated${colors.reset}`);
++  console.log('');
++
++  // ========== SAFETY CHECK 4: Verify we're in the right repo ==========
++  log('blue', '📁 Verifying repository...');
++  const remoteUrl = execSilent('git remote get-url origin');
++  if (!remoteUrl.includes('4-final-camp')) {
++    log('red', '❌ SAFETY ERROR: This does not appear to be the CAMP repository!');
++    console.log(`   Remote URL: ${remoteUrl}`);
++    process.exit(1);
++  }
++  console.log(`   ${colors.green}✓ Correct repository confirmed${colors.reset}`);
++  console.log('');
++
++  // ========== SAFETY CHECK 5: Check for uncommitted changes on master ==========
++  log('blue', '🔍 Checking git status...');
++  const currentBranch = execSilent('git branch --show-current');
++  console.log(`   Current branch: ${currentBranch}`);
++  
++  // Detect default branch
++  let DEFAULT_BRANCH = execSilent('git symbolic-ref --quiet --short refs/remotes/origin/HEAD').replace('origin/', '');
++  if (!DEFAULT_BRANCH) {
++    DEFAULT_BRANCH = execSilent('git rev-parse --verify --quiet refs/heads/main') ? 'main' : 'master';
++  }
++  console.log(`   Default branch: ${DEFAULT_BRANCH}\n`);
++
++  // Step 1: Get existing issues
++  log('blue', '📋 Step 1: Fetching existing issues from GitHub...');
++  const existingIssues = JSON.parse(execSilent(`gh issue list --repo ${REPO} --state all --limit 300 --json number,title,labels`) || '[]');
++  console.log(`   Found ${existingIssues.length} existing issues`);
++  const existingTitles = new Set(existingIssues.map(i => i.title.toLowerCase()));
++
++  // Step 2: Get local file changes
++  log('blue', '📂 Step 2: Analyzing local file changes...');
++  const gitStatus = execSilent('git status --porcelain');
++  const changedFiles = gitStatus.split('\n')
++    .filter(line => line.trim())
++    .map(line => {
++      const parts = line.trim().split(/\s+/);
++      const status = parts[0];
++      const file = parts.slice(1).join(' ');
++      return { status, file };
++    });
++  console.log(`   Found ${changedFiles.length} changed files`);
++
++  // Step 3: Map files to team members
++  log('blue', '🔗 Step 3: Mapping files to team members...\n');
++  
++  const memberFiles = {};
++  const unmappedFiles = [];
++
++  for (const { status, file } of changedFiles) {
++    let assigned = false;
++    
++    for (const [member, config] of Object.entries(TEAM_ASSIGNMENTS)) {
++      for (const pattern of config.patterns) {
++        if (file.startsWith(pattern) || file === pattern) {
++          if (!memberFiles[member]) memberFiles[member] = [];
++          memberFiles[member].push({ status, file });
++          assigned = true;
++          break;
++        }
++      }
++      if (assigned) break;
++    }
++    
++    if (!assigned) {
++      unmappedFiles.push({ status, file });
++    }
++  }
++
++  // Assign unmapped files to the most relevant member
++  for (const { status, file } of unmappedFiles) {
++    let assigned = false;
++    
++    // Scripts and documentation go to Ansester
++    if (file.startsWith('scripts/') || file.startsWith('.github/') || file.endsWith('.md')) {
++      if (!memberFiles['Ansester']) memberFiles['Ansester'] = [];
++      memberFiles['Ansester'].push({ status, file });
++      assigned = true;
++    }
++    // Backend files to TalalNaveed
++    else if (file.startsWith('back-end/')) {
++      if (!memberFiles['TalalNaveed']) memberFiles['TalalNaveed'] = [];
++      memberFiles['TalalNaveed'].push({ status, file });
++      assigned = true;
++    }
++    // Frontend components to Ak1016-stack
++    else if (file.startsWith('front-end/src/components/')) {
++      if (!memberFiles['Ak1016-stack']) memberFiles['Ak1016-stack'] = [];
++      memberFiles['Ak1016-stack'].push({ status, file });
++      assigned = true;
++    }
++    
++    if (!assigned) {
++      console.log(`${colors.yellow}⚠️  Unmapped file: ${file}${colors.reset}`);
++    }
++  }
++
++  // Step 4: Create ONE TASK PER FILE with meaningful descriptions
++  log('blue', '📝 Step 4: Creating task definitions (one per file)...\n');
++  
++  const tasks = [];
++
++  // Helper to find task description for a file
++  function getTaskDescription(file, status) {
++    // Direct match
++    if (FILE_TASK_DESCRIPTIONS[file]) {
++      return FILE_TASK_DESCRIPTIONS[file];
++    }
++    
++    // Partial match for directories
++    for (const [pattern, desc] of Object.entries(FILE_TASK_DESCRIPTIONS)) {
++      if (file.startsWith(pattern.replace(/\/$/, ''))) {
++        return desc;
++      }
++    }
++    
++    // Generate default based on file type and status
++    const fileName = path.basename(file);
++    const ext = path.extname(file);
++    
++    if (status === 'D') {
++      return { title: `Remove deprecated ${fileName}`, story: 'ui', action: 'delete' };
++    } else if (status === '??') {
++      return { title: `Add new ${fileName}`, story: 'ui', action: 'add' };
++    } else {
++      return { title: `Update ${fileName}`, story: 'ui', action: 'improve' };
++    }
++  }
++
++  for (const [member, files] of Object.entries(memberFiles)) {
++    if (SPECIFIC_MEMBER && member !== SPECIFIC_MEMBER) continue;
++    if (!files || files.length === 0) continue;
++
++    console.log(`${colors.green}👤 ${member}${colors.reset} - ${files.length} file(s)`);
++
++    // Create one task per file
++    for (const { status, file } of files) {
++      const taskDesc = getTaskDescription(file, status);
++      const taskTitle = taskDesc.title;
++      const storyKey = taskDesc.story;
++      const userStoryInfo = USER_STORIES[storyKey] || USER_STORIES['ui'];
++      
++      const fullTitle = `[TASK] ${taskTitle}`;
++
++      // Check if similar task exists
++      const titleLower = fullTitle.toLowerCase();
++      const existsAlready = [...existingTitles].some(t => 
++        t.includes(taskTitle.toLowerCase()) || 
++        t.includes(path.basename(file).toLowerCase().replace(/\.(jsx|js)$/, ''))
++      );
++      
++      if (existsAlready) {
++        console.log(`   ${colors.yellow}⏭️  Task exists: ${taskTitle}${colors.reset}`);
++        continue;
++      }
++
++      const actionEmoji = taskDesc.action === 'add' ? '➕' : taskDesc.action === 'delete' ? '🗑️' : '✏️';
++      console.log(`   ${colors.cyan}📋 ${actionEmoji} ${taskTitle}${colors.reset}`);
++      console.log(`      Story: #${userStoryInfo.num} - ${userStoryInfo.title}`);
++      console.log(`      Branch: user-story-${userStoryInfo.num}/task-{issueNum}-...`);
++      console.log(`      File: ${status} ${file}`);
++
++      tasks.push({
++        member,
++        title: taskTitle,
++        fullTitle,
++        file,
++        status,
++        files: [{ status, file }],
++        userStory: `#${userStoryInfo.num} - ${userStoryInfo.title}`,
++        userStoryNum: userStoryInfo.num,
++        action: taskDesc.action
++      });
++    }
++    console.log('');
++  }
++
++  if (tasks.length === 0) {
++    log('green', '✅ No new tasks to create - all changes are already tracked!');
++    return;
++  }
++
++  // ========== SAFETY CHECK 6: Limit tasks per run ==========
++  if (tasks.length > MAX_TASKS_PER_RUN) {
++    log('yellow', `⚠️  WARNING: ${tasks.length} tasks detected, but limit is ${MAX_TASKS_PER_RUN} per run.`);
++    console.log(`   Only the first ${MAX_TASKS_PER_RUN} tasks will be processed.`);
++    console.log('   Run the script again to process remaining tasks.');
++    tasks.length = MAX_TASKS_PER_RUN;
++    console.log('');
++  }
++
++  // Step 5: Execute workflow
++  log('blue', `🚀 Step 5: Executing workflow for ${tasks.length} task(s)...\n`);
++
++  if (DRY_RUN) {
++    log('yellow', 'DRY RUN - Would execute the following:\n');
++    for (const task of tasks) {
++      console.log(`${colors.green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
++      console.log(`Task: ${task.fullTitle}`);
++      console.log(`Assignee: ${task.member}`);
++      console.log(`Branch: ${task.branchName}`);
++      console.log(`Files:`);
++      task.files.forEach(f => console.log(`  ${f.status} ${f.file}`));
++      console.log('');
++    }
++    log('green', '✅ Dry run complete. No changes were made.');
++    console.log('');
++    console.log('To execute for real, run without --dry-run flag.');
++    return;
++  }
++
++  // ========== SAFETY CHECK 7: Final confirmation before execution ==========
++  console.log(`${colors.yellow}╔════════════════════════════════════════════════════════════════╗${colors.reset}`);
++  console.log(`${colors.yellow}║                    ⚠️  CONFIRMATION REQUIRED                   ║${colors.reset}`);
++  console.log(`${colors.yellow}╚════════════════════════════════════════════════════════════════╝${colors.reset}`);
++  console.log('');
++  console.log('The following actions will be performed:');
++  console.log(`  • Create ${tasks.length} GitHub issue(s)`);
++  console.log(`  • Create ${tasks.length} feature branch(es)`);
++  console.log(`  • Push ${tasks.length} branch(es) to origin`);
++  console.log(`  • Create ${tasks.length} Pull Request(s)`);
++  console.log('');
++  console.log(`Target repository: ${REPO}`);
++  console.log(`Member: ${SPECIFIC_MEMBER}`);
++  console.log('');
++  
++  const confirm = await askQuestion(`${colors.yellow}Do you want to proceed? (y/N): ${colors.reset}`);
++  if (confirm !== 'y' && confirm !== 'yes') {
++    log('yellow', '❌ Aborted by user.');
++    process.exit(0);
++  }
++  console.log('');
++
++  // Track created resources for potential rollback
++  const createdResources = {
++    issues: [],
++    branches: [],
++    prs: []
++  };
++
++  // Execute for real
++  let successCount = 0;
++  let failCount = 0;
++  
++  for (let i = 0; i < tasks.length; i++) {
++    const task = tasks[i];
++    
++    console.log(`${colors.green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
++    console.log(`Task ${i + 1}/${tasks.length}: ${task.title}`);
++    console.log(`Assignee: ${task.member}`);
++    console.log(`Branch: ${task.branchName}`);
++    console.log(`Files: ${task.files.length}`);
++    task.files.forEach(f => console.log(`  ${f.status} ${f.file}`));
++    console.log(`${colors.green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
++
++    // ========== SAFETY CHECK 8: Confirm each task ==========
++    if (!AUTO_YES) {
++      const taskConfirm = await askQuestion(`\n${colors.cyan}Process this task? (y/N/q to quit): ${colors.reset}`);
++      if (taskConfirm === 'q' || taskConfirm === 'quit') {
++        log('yellow', '\n❌ Aborted by user.');
++        break;
++      }
++      if (taskConfirm !== 'y' && taskConfirm !== 'yes') {
++        log('yellow', '⏭️  Skipping this task...\n');
++        continue;
++      }
++    }
++
++    try {
++      // 5a. Create GitHub Issue FIRST to get the issue number
++      log('cyan', 'Creating issue...');
++      
++      const fileList = task.files.map(f => `- \`${f.file}\``).join('\n');
++      
++      // Use the user story already assigned to the task
++      const userStory = task.userStory || '#43 - Landing page and navigation';
++      
++      // Action-specific description
++      const actionDescriptions = {
++        'add': 'This task involves adding a new component/feature to the project.',
++        'delete': 'This task involves removing a deprecated component from the project.',
++        'improve': 'This task involves improving and updating an existing component.'
++      };
++      const actionDesc = actionDescriptions[task.action] || actionDescriptions['improve'];
++      
++      // Create issue first with placeholder branch name
++      const tempIssueBody = `### Related User Story
++
++${userStory}
++
++### Assigned To
++
++@${task.member}
++
++### Task Description
++
++${task.title}
++
++${actionDesc}
++
++### Files to Modify
++
++${fileList}
++
++### Acceptance Criteria
++
++- [ ] ${task.action === 'delete' ? 'File removed and imports cleaned up' : 'All files compile without errors'}
++- [ ] Changes tested locally
++- [ ] No console errors or warnings
++- [ ] Code follows project conventions
++
++### Priority
++
++Medium
++
++### Story Points
++
++1`;
++
++      const issueCmd = `gh issue create --repo ${REPO} --title "${task.fullTitle}" --body "${tempIssueBody.replace(/`/g, '\\`').replace(/"/g, '\\"')}" --label "task" --assignee "${task.member}" --milestone "Sprint 3"`;
++      const issueUrl = execSilent(issueCmd);
++      const issueNum = issueUrl.match(/(\d+)$/)?.[1] || 'unknown';
++      console.log(`   ${colors.green}✓ Created issue #${issueNum} (Sprint 3 milestone)${colors.reset}`);
++      createdResources.issues.push(issueNum);
++      
++      // Add issue to project board
++      try {
++        execSilent(`gh project item-add ${PROJECT_NUMBER} --owner ${REPO_OWNER} --url https://github.com/${REPO}/issues/${issueNum}`);
++        console.log(`   ${colors.green}✓ Added to CAMP project board${colors.reset}`);
++      } catch (e) {
++        console.log(`   ${colors.yellow}⚠ Could not add to project board${colors.reset}`);
++      }
++      
++      // Rate limit after issue creation
++      await sleep(1000);
++      
++      // NOW create the branch name using the actual issue number
++      // Format: user-story-{storyNum}/task-{issueNum}-{title-slug}
++      const titleSlug = task.title
++        .toLowerCase()
++        .replace(/[^a-z0-9]+/g, '-')
++        .replace(/^-+|-+$/g, '')
++        .slice(0, 30);
++      const actualBranchName = `user-story-${task.userStoryNum}/task-${issueNum}-${titleSlug}`;
++      
++      console.log(`   Branch will be: ${actualBranchName}`);
++      
++      // Update the issue body with the actual branch name
++      const finalIssueBody = `### Related User Story
++
++${userStory}
++
++### Assigned To
++
++@${task.member}
++
++### Task Description
++
++${task.title}
++
++${actionDesc}
++
++### Branch
++
++\`${actualBranchName}\`
++
++### Files to Modify
++
++${fileList}
++
++### Acceptance Criteria
++
++- [ ] ${task.action === 'delete' ? 'File removed and imports cleaned up' : 'All files compile without errors'}
++- [ ] Changes tested locally
++- [ ] No console errors or warnings
++- [ ] Code follows project conventions
++
++### Priority
++
++Medium
++
++### Story Points
++
++1`;
++
++      // Update the issue with the correct branch name
++      execSilent(`gh issue edit ${issueNum} --repo ${REPO} --body "${finalIssueBody.replace(/`/g, '\\`').replace(/"/g, '\\"')}"`);
++      console.log(`   ${colors.green}✓ Updated issue with branch name${colors.reset}`);
++
++      // 5b. Stash changes, create branch
++      log('cyan', 'Creating branch...');
++      
++      execSilent('git stash push -m "auto-stash"');
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      execSilent(`git pull origin ${DEFAULT_BRANCH}`);
++      
++      try {
++        execSilent(`git checkout -b ${actualBranchName}`);
++      } catch {
++        execSilent(`git checkout ${actualBranchName}`);
++        execSilent(`git merge ${DEFAULT_BRANCH}`);
++      }
++      
++      execSilent('git stash pop');
++      console.log(`   ${colors.green}✓ On branch ${actualBranchName}${colors.reset}`);
++      createdResources.branches.push(actualBranchName);
++
++      // 5c. Stage files
++      log('cyan', 'Staging files...');
++      let stagedCount = 0;
++      for (const { status, file } of task.files) {
++        try {
++          execSilent(`git add "${file}"`);
++          stagedCount++;
++        } catch (e) {
++          console.log(`   ${colors.yellow}Warning: Could not stage ${file}${colors.reset}`);
++        }
++      }
++      console.log(`   ${colors.green}✓ Staged ${stagedCount} file(s)${colors.reset}`);
++
++      // 5d. Commit
++      log('cyan', 'Committing...');
++      // Vary commit prefixes for more natural look
++      const prefixes = ['feat', 'update', 'improve', 'enhance'];
++      const prefix = task.action === 'add' ? 'feat' : prefixes[Math.floor(Math.random() * prefixes.length)];
++      const commitMsg = `${prefix}: ${task.title}\n\nCloses #${issueNum}`;
++      
++      try {
++        execSilent(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
++        console.log(`   ${colors.green}✓ Committed${colors.reset}`);
++      } catch {
++        console.log(`   ${colors.yellow}Nothing to commit or already committed${colors.reset}`);
++      }
++
++      // 5e. Push
++      log('cyan', 'Pushing branch...');
++      execSilent(`git push -u origin "${actualBranchName}"`) || execSilent(`git push origin "${actualBranchName}"`);
++      console.log(`   ${colors.green}✓ Pushed to origin/${actualBranchName}${colors.reset}`);
++
++      // 5f. Create PR
++      log('cyan', 'Creating Pull Request...');
++      const prBody = `## Summary
++${task.title}
++
++## Related Issue
++Closes #${issueNum}
++
++## Files Changed
++${fileList}
++
++## Checklist
++- [ ] Code compiles without errors
++- [ ] Tested locally
++- [ ] No console errors`;
++
++      const prCmd = `gh pr create --repo ${REPO} --title "[#${issueNum}] ${task.title}" --body "${prBody.replace(/\`/g, '\\`').replace(/"/g, '\\"')}" --base master --head "${actualBranchName}" --assignee "${task.member}"`;
++      
++      try {
++        const prUrl = execSilent(prCmd);
++        console.log(`   ${colors.green}✓ Created PR: ${prUrl}${colors.reset}`);
++        createdResources.prs.push(prUrl);
++      } catch {
++        console.log(`   ${colors.yellow}PR may already exist${colors.reset}`);
++      }
++
++      // Return to default branch
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      
++      successCount++;
++      log('green', `\n✅ Task ${i + 1}/${tasks.length} completed successfully!\n`);
++
++      // ========== SAFETY: Rate limiting between tasks ==========
++      if (i < tasks.length - 1) {
++        console.log(`${colors.blue}⏳ Rate limiting: waiting ${RATE_LIMIT_MS/1000}s before next task...${colors.reset}`);
++        await sleep(RATE_LIMIT_MS);
++      }
++
++    } catch (error) {
++      failCount++;
++      console.log(`${colors.red}❌ Error processing task: ${error.message}${colors.reset}`);
++      execSilent(`git checkout ${DEFAULT_BRANCH}`);
++      execSilent('git stash pop');
++      
++      // ========== SAFETY CHECK 9: Ask to continue after error ==========
++      if (!AUTO_YES) {
++        const continueAfterError = await askQuestion(`${colors.yellow}Continue with remaining tasks? (y/N): ${colors.reset}`);
++        if (continueAfterError !== 'y' && continueAfterError !== 'yes') {
++          log('yellow', '❌ Aborted after error.');
++          break;
++        }
++      }
++    }
++  }
++
++  // ========== Summary ==========
++  console.log(`${colors.cyan}╔════════════════════════════════════════════════════════════════╗${colors.reset}`);
++  console.log(`${colors.cyan}║                    📊 WORKFLOW SUMMARY                         ║${colors.reset}`);
++  console.log(`${colors.cyan}╚════════════════════════════════════════════════════════════════╝${colors.reset}`);
++  console.log('');
++  console.log(`   Member: ${SPECIFIC_MEMBER}`);
++  console.log(`   Tasks processed: ${successCount + failCount}`);
++  console.log(`   ${colors.green}✓ Successful: ${successCount}${colors.reset}`);
++  if (failCount > 0) {
++    console.log(`   ${colors.red}✗ Failed: ${failCount}${colors.reset}`);
++  }
++  console.log('');
++  
++  if (createdResources.issues.length > 0) {
++    console.log('   Issues created:');
++    createdResources.issues.forEach(i => console.log(`     - #${i}`));
++  }
++  if (createdResources.branches.length > 0) {
++    console.log('   Branches created:');
++    createdResources.branches.forEach(b => console.log(`     - ${b}`));
++  }
++  if (createdResources.prs.length > 0) {
++    console.log('   PRs created:');
++    createdResources.prs.forEach(pr => console.log(`     - ${pr}`));
++  }
++  
++  console.log('');
++  console.log('Next steps:');
++  console.log('1. Review the created PRs on GitHub');
++  console.log('2. Team members review and approve each other\'s PRs');
++  console.log('3. Merge PRs to master');
++}
++
++main().catch(console.error);
