@@ -1,35 +1,78 @@
-const r = require('express').Router();
+const express = require('express');
+const r = express.Router();
+const Fine = require('../models/Fine');
+const { authenticate } = require('../middleware/auth');
+const { validateMongoId } = require('../middleware/validation');
 
 // POST /api/payments/:fineId/pay
-r.post('/:fineId/pay', (req, res) => {
-  const { fineId } = req.params;
-  const { method, last4, name, email } = req.body || {};
-  if (!method || !name) return res.status(400).json({ error: 'Missing payment fields' });
-  return res.status(201).json({ ok: true, fineId, receiptId: 'rcpt_001' });
+r.post('/:fineId/pay', authenticate, validateMongoId('fineId'), async (req, res) => {
+  try {
+    const { fineId } = req.params;
+    const { method, last4, name, email } = req.body || {};
+    
+    if (!method || !name) {
+      return res.status(400).json({ error: 'Missing payment fields' });
+    }
+
+    const fine = await Fine.findById(fineId);
+    
+    if (!fine) {
+      return res.status(404).json({ error: 'Not Found', message: 'Fine not found' });
+    }
+
+    if (fine.user.toString() !== req.userId.toString()) {
+      return res.status(403).json({ error: 'Forbidden', message: 'Access denied' });
+    }
+
+    if (fine.status === 'paid') {
+      return res.status(400).json({ error: 'Bad Request', message: 'Fine already paid' });
+    }
+
+    fine.status = 'paid';
+    fine.paidAt = new Date();
+    fine.paymentMethod = method;
+    fine.receiptNumber = `R-${Date.now()}`;
+
+    await fine.save();
+
+    return res.status(201).json({ 
+      ok: true, 
+      fineId: fine._id, 
+      receiptId: fine.receiptNumber,
+      amount: fine.amount,
+      paidAt: fine.paidAt
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to process payment' });
+  }
 });
 
-// GET /api/payments/history?userId=usr_001
-r.get('/history', (req, res) => {
-  const { userId } = req.query;
-  if (!userId) return res.status(400).json({ error: 'Missing userId' });
-  // Exact data from payment-history.json
-  const payments = [
-    {
-      id: 1,
-      receipt: "R-58231",
-      amount: 5,
-      date: "Oct 13, 2025",
-      method: "Campus Cash"
-    },
-    {
-      id: 2,
-      receipt: "R-1012",
-      amount: 3,
-      date: "Oct 01, 2025",
-      method: "Campus Cash"
-    }
-  ];
-  return res.status(200).json({ payments });
+// GET /api/payments/history - Get payment history for user
+r.get('/history', authenticate, async (req, res) => {
+  try {
+    const fines = await Fine.find({
+      user: req.userId,
+      status: 'paid'
+    })
+      .sort({ paidAt: -1 })
+      .limit(50);
+
+    const payments = fines.map(f => ({
+      id: f._id,
+      receipt: f.receiptNumber || `R-${f._id}`,
+      amount: f.amount || 0,
+      date: f.paidAt ? f.paidAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+      method: f.paymentMethod === 'campus-cash' ? 'Campus Cash' : 
+              f.paymentMethod === 'credit-card' ? 'Credit Card' : 
+              f.paymentMethod || 'Other'
+    }));
+
+    return res.status(200).json({ payments });
+  } catch (error) {
+    console.error('Error fetching payment history:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch payment history' });
+  }
 });
 
 module.exports = r;

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useApiData } from '../../hooks/useApiData.js';
+import { api } from '../../services/api.js';
 
 const AddItem = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
@@ -18,45 +19,88 @@ const AddItem = ({ onNavigate }) => {
     initialData: { filters: { categories: [], facilities: [] } }
   });
 
-  const categories = (data?.filters?.categories ?? [])
-    .filter((category) => category !== 'All');
-  const facilities = (data?.filters?.facilities ?? [])
-    .filter((facility) => facility !== 'All');
+  // Memoize to keep stable references and avoid triggering effects unnecessarily
+  const categories = useMemo(
+    () => (data?.filters?.categories ?? []).filter((category) => category !== 'All'),
+    [data?.filters?.categories]
+  );
+  const facilities = useMemo(
+    () => (data?.filters?.facilities ?? []).filter((facility) => facility !== 'All'),
+    [data?.filters?.facilities]
+  );
 
+  // Set initial defaults only when missing; avoid redundant state updates
   useEffect(() => {
-    setFormData((prev) => {
-      const next = { ...prev };
-      if (!prev.category && categories.length > 0) {
-        next.category = categories[0];
-      }
-      if (!prev.location && facilities.length > 0) {
-        next.location = facilities[0];
-      }
-      return next;
-    });
-  }, [categories, facilities]);
+    if (( !formData.category && categories.length) || (!formData.location && facilities.length)) {
+      setFormData(prev => {
+        const updates = {};
+        if (!prev.category && categories.length) {
+          updates.category = categories[0];
+        }
+        if (!prev.location && facilities.length) {
+          updates.location = facilities[0];
+        }
+        return Object.keys(updates).length ? { ...prev, ...updates } : prev;
+      });
+    }
+  }, [formData.category, formData.location, categories, facilities]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAddItem = () => {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const facilitiesList = data?.facilities || [];
+  const selectedFacility = facilitiesList.find(f => f.name === formData.location);
+
+  const handleAddItem = async () => {
+    if (saving) return;
+    setSaveError(null);
     // Validate required fields
     if (!formData.itemName.trim()) {
-      alert('⚠ Please enter an item name');
+      setSaveError('Please enter an item name');
       return;
     }
     if (!formData.location) {
-      alert('⚠ Please select a location');
+      setSaveError('Please select a location');
+      return;
+    }
+    if (!selectedFacility?._id) {
+      setSaveError('Selected facility not found; reload and try again');
       return;
     }
     if (!formData.serialId.trim()) {
-      alert('⚠ Please enter an asset ID');
+      setSaveError('Please enter an asset ID');
+      return;
+    }
+    if (!formData.category) {
+      setSaveError('Please select a category');
       return;
     }
 
-    alert('✓ Item added successfully!');
-    onNavigate('inventory');
+    // Map formData -> API payload (Item schema)
+    const payload = {
+      name: formData.itemName.trim(),
+      description: formData.description?.trim() || 'No description provided',
+      category: formData.category,
+      facility: selectedFacility._id,
+      condition: (formData.condition || 'Good').toLowerCase(),
+      serialNumber: formData.serialId.trim(),
+      // Optional fields not collected: status (default), purchaseDate, value, tags
+    };
+
+    try {
+      setSaving(true);
+      const result = await api.createItem(payload);
+      setSaving(false);
+      alert('Item created: ' + result.item.name);
+      onNavigate('inventory');
+    } catch (e) {
+      setSaving(false);
+      setSaveError(e.message || 'Failed to create item');
+    }
   };
 
   const handleCancel = () => {
@@ -80,9 +124,9 @@ const AddItem = ({ onNavigate }) => {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+          <div className="mb-4 p-3 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
             Unable to load form options.
-            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+            <button onClick={refetch} className="ml-2 underline hover:text-gray-800">
               Retry
             </button>
           </div>
@@ -259,6 +303,11 @@ const AddItem = ({ onNavigate }) => {
           </p>
         </div>
 
+        {saveError && (
+          <div className="mb-4 p-3 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
+            {saveError}
+          </div>
+        )}
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <button
@@ -269,9 +318,10 @@ const AddItem = ({ onNavigate }) => {
           </button>
           <button
             onClick={handleAddItem}
-            className="bg-violet-500 text-white py-4 rounded-lg font-semibold hover:bg-violet-600 transition-colors"
+            disabled={saving}
+            className={`py-4 rounded-lg font-semibold transition-colors ${saving ? 'bg-violet-300 text-white cursor-not-allowed' : 'bg-violet-500 text-white hover:bg-violet-600'}`}
           >
-            Add Item
+            {saving ? 'Saving…' : 'Add Item'}
           </button>
         </div>
       </div>

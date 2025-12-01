@@ -13,8 +13,16 @@ const Overdue = ({ onNavigate }) => {
     alert(`Reminder sent for item ${id}`);
   };
 
-  const handleApplyFine = () => {
-    onNavigate('fines');
+  const handleApplyFine = (item) => {
+    // Pass user data to pre-fill the fines page
+    onNavigate('fines', { 
+      prefillStudent: {
+        name: item.student,
+        odInfo: item.item,
+        days: item.days,
+        odId: item.id
+      }
+    });
   };
 
   return (
@@ -34,9 +42,9 @@ const Overdue = ({ onNavigate }) => {
         {/* Overdue Items List */}
         <div className="space-y-4">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            <div className="p-4 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
               Unable to load overdue items.
-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              <button onClick={refetch} className="ml-2 underline hover:text-gray-800">
                 Retry
               </button>
             </div>
@@ -53,7 +61,7 @@ const Overdue = ({ onNavigate }) => {
                   <p className="text-sm text-gray-600">
                     Student: {item.student}
                   </p>
-                  <p className="text-sm text-red-600 font-medium mt-1">
+                  <p className="text-sm text-gray-600 font-medium mt-1">
                     Due date: {item.dueDate}
                   </p>
                 </div>
@@ -65,17 +73,21 @@ const Overdue = ({ onNavigate }) => {
                     Send Reminder
                   </button>
                   <button
-                  onClick={handleApplyFine}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                >
-                  Apply Fine
-                </button>
+                    onClick={() => handleApplyFine(item)}
+                    className="flex-1 px-4 py-2 bg-violet-500 text-white rounded-lg font-medium hover:bg-violet-600 transition-colors"
+                  >
+                    Apply Fine
+                  </button>
                 </div>
               </div>
             ))
           ) : (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-              <div className="text-6xl mb-4">✅</div>
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No Overdue Items
               </h3>

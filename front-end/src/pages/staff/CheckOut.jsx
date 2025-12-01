@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { Search, ArrowLeft } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, ArrowLeft, User, Package, X, Check, AlertCircle } from 'lucide-react';
+import CheckoutSuccess from './CheckoutSuccess';
 import { useApiData } from '../../hooks/useApiData.js';
+import { api } from '../../services/api.js';
 
 const CheckOut = ({ onNavigate }) => {
-  const [studentId, setStudentId] = useState('');
+  const [studentSearch, setStudentSearch] = useState('');
   const [itemSearch, setItemSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [studentLookupError, setStudentLookupError] = useState(null);
-  const [itemLookupError, setItemLookupError] = useState(null);
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const [showItemDropdown, setShowItemDropdown] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+  const [successBorrowal, setSuccessBorrowal] = useState(null);
 
   const {
     data: studentsPayload,
@@ -27,71 +32,99 @@ const CheckOut = ({ onNavigate }) => {
   const students = studentsPayload?.students ?? [];
   const inventoryItems = inventoryPayload?.items ?? [];
 
-  const handleStudentScan = () => {
-    if (!studentId.trim()) {
-      setStudentLookupError('Enter a NetID to search.');
-      setSelectedStudent(null);
-      return;
-    }
-    const query = studentId.trim().toLowerCase();
-    const match = students.find(
-      (student) =>
-        student.netId.toLowerCase() === query ||
-        student.name.toLowerCase().includes(query)
-    );
-    if (!match) {
-      setStudentLookupError('No student found.');
-      setSelectedStudent(null);
-      return;
-    }
-    setStudentLookupError(null);
+  // Live filter students as user types
+  const filteredStudents = useMemo(() => {
+    if (!studentSearch.trim()) return students.slice(0, 5);
+    const query = studentSearch.toLowerCase();
+    return students.filter(s => 
+      s.name.toLowerCase().includes(query) ||
+      s.netId.toLowerCase().includes(query) ||
+      s.email?.toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [students, studentSearch]);
+
+  // Live filter items as user types
+  const filteredItems = useMemo(() => {
+    if (!itemSearch.trim()) return inventoryItems.filter(i => i.availableQuantity > 0).slice(0, 5);
+    const query = itemSearch.toLowerCase();
+    return inventoryItems.filter(i => 
+      i.name.toLowerCase().includes(query) ||
+      i.assetId?.toLowerCase().includes(query) ||
+      i.category?.toLowerCase().includes(query) ||
+      i.location?.toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [inventoryItems, itemSearch]);
+
+  const handleSelectStudent = (student) => {
     setSelectedStudent({
-      id: match.id,
-      name: match.name,
-      netId: match.netId
+      id: student.id,
+      name: student.name,
+      netId: student.netId,
+      email: student.email,
+      fines: student.activeFines?.length || 0
     });
+    setStudentSearch('');
+    setShowStudentDropdown(false);
   };
 
-  const handleItemSearch = () => {
-    if (!itemSearch.trim()) {
-      setItemLookupError('Enter an item name or asset ID.');
-      setSelectedItem(null);
-      return;
-    }
-
-    const query = itemSearch.trim().toLowerCase();
-    const match = inventoryItems.find(
-      (item) =>
-        item.assetId.toLowerCase() === query ||
-        item.name.toLowerCase().includes(query)
-    );
-
-    if (!match) {
-      setItemLookupError('No matching inventory item found.');
-      setSelectedItem(null);
-      return;
-    }
-
-    setItemLookupError(null);
-    const availability =
-      match.status === 'available'
-        ? 'In stock'
-        : match.status === 'reserved'
-        ? 'Reserved'
-        : match.status === 'checked-out'
-        ? 'Checked out'
-        : 'Maintenance';
+  const handleSelectItem = (item) => {
     setSelectedItem({
-      name: match.name,
-      id: match.assetId,
-      availability
+      id: item.id,
+      name: item.name,
+      assetId: item.assetId,
+      category: item.category,
+      location: item.location,
+      quantity: item.quantity,
+      availableQuantity: item.availableQuantity,
+      status: item.status
     });
+    setItemSearch('');
+    setShowItemDropdown(false);
   };
 
-  const handleConfirmCheckout = () => {
-    alert('Checkout confirmed!');
-    onNavigate('dashboard');
+  const handleConfirmCheckout = async () => {
+    if (checkoutLoading || !selectedStudent || !selectedItem) return;
+    setCheckoutError(null);
+    setCheckoutLoading(true);
+    
+    const payload = {
+      userId: selectedStudent.id,
+      itemId: selectedItem.id
+    };
+
+    try {
+      const result = await api.staffCheckout(payload);
+      setCheckoutLoading(false);
+      setSuccessBorrowal(result?.borrowal || result);
+    } catch (e) {
+      setCheckoutLoading(false);
+      const errorMsg = e.message || 'Failed to check out item';
+      setCheckoutError(errorMsg.includes('::') ? errorMsg.split('::')[1].trim() : errorMsg);
+    }
   };
+
+  const handleNewCheckout = () => {
+    setSuccessBorrowal(null);
+    setSelectedStudent(null);
+    setSelectedItem(null);
+    setStudentSearch('');
+    setItemSearch('');
+  };
+
+  if (successBorrowal) {
+    return (
+      <CheckoutSuccess
+        borrowal={successBorrowal}
+        onNavigate={(dest) => {
+          if (dest === 'checkout') {
+            handleNewCheckout();
+          } else {
+            onNavigate(dest);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -107,115 +140,262 @@ const CheckOut = ({ onNavigate }) => {
           <h1 className="text-3xl font-bold text-gray-900">Check-Out</h1>
         </div>
 
-        {/* Find Student Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Find student</h2>
-          <div className="flex gap-2 flex-wrap">
-            <input
-              type="text"
-              placeholder="Scan ID / Enter NetID"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className="flex-1 min-w-0 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 ring-[#57068C]"
-            />
-            <button
-              onClick={handleStudentScan}
-              className="flex-shrink-0 px-4 sm:px-6 py-3 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
-            >
-              Search
-            </button>
+        {/* Step 1: Find Student */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedStudent ? 'bg-violet-700' : 'bg-violet-500'} text-white font-bold`}>
+              {selectedStudent ? <Check className="w-5 h-5" /> : '1'}
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900">Find Student</h2>
           </div>
-          {studentsLoading && students.length === 0 && (
-            <p className="mt-3 text-sm text-gray-600">Loading student directory…</p>
-          )}
-          {studentsError && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
-              Unable to load students.
-              <button onClick={refetchStudents} className="ml-2 underline hover:text-red-800">
-                Retry
+
+          {!selectedStudent ? (
+            <div className="relative">
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, NetID, or email..."
+                  value={studentSearch}
+                  onChange={(e) => {
+                    setStudentSearch(e.target.value);
+                    setShowStudentDropdown(true);
+                  }}
+                  onFocus={() => setShowStudentDropdown(true)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+
+              {/* Student Dropdown */}
+              {showStudentDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  {studentsLoading && students.length === 0 ? (
+                    <p className="p-3 text-gray-500 text-sm">Loading students...</p>
+                  ) : studentsError ? (
+                    <div className="p-3 text-gray-600 text-sm">
+                      Error loading students. <button onClick={refetchStudents} className="underline">Retry</button>
+                    </div>
+                  ) : filteredStudents.length === 0 ? (
+                    <p className="p-3 text-gray-500 text-sm">No students found</p>
+                  ) : (
+                    filteredStudents.map((student) => (
+                      <button
+                        key={student.id}
+                        onClick={() => handleSelectStudent(student)}
+                        className="w-full text-left p-3 hover:bg-violet-50 border-b border-gray-100 last:border-0 transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">{student.name}</div>
+                        <div className="text-sm text-gray-600">
+                          {student.netId} • {student.email}
+                          {student.activeFines?.length > 0 && (
+                            <span className="ml-2 text-violet-600">
+                              ⚠️ {student.activeFines.length} fine(s)
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 bg-violet-50 border border-violet-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {selectedStudent.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">{selectedStudent.name}</div>
+                  <div className="text-sm text-gray-600">{selectedStudent.netId} • {selectedStudent.email}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedStudent(null)}
+                className="p-2 hover:bg-violet-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           )}
-          {studentLookupError && (
-            <p className="mt-3 text-sm text-red-600">{studentLookupError}</p>
-          )}
-          {selectedStudent && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm font-medium text-green-900">
-                Student: {selectedStudent.name} ({selectedStudent.netId})
-              </p>
+          
+          {selectedStudent?.fines > 0 && (
+            <div className="mt-3 p-3 bg-violet-50 border border-violet-200 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-violet-600" />
+              <span className="text-sm text-violet-700">
+                This student has {selectedStudent.fines} unpaid fine(s). Checkout is still allowed.
+              </span>
             </div>
           )}
         </div>
 
-        {/* Select Item Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Select item</h2>
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search item / scan barcode"
-              value={itemSearch}
-              onChange={(e) => setItemSearch(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleItemSearch()}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
+        {/* Step 2: Select Item */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedItem ? 'bg-violet-700' : selectedStudent ? 'bg-violet-500' : 'bg-gray-300'} text-white font-bold`}>
+              {selectedItem ? <Check className="w-5 h-5" /> : '2'}
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900">Select Item</h2>
           </div>
-          {inventoryLoading && inventoryItems.length === 0 && (
-            <p className="mt-3 text-sm text-gray-600">Loading inventory…</p>
-          )}
-          {inventoryError && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
-              Unable to load inventory items.
-              <button onClick={refetchInventory} className="ml-2 underline hover:text-red-800">
-                Retry
+
+          {!selectedItem ? (
+            <div className="relative">
+              <div className="relative">
+                <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, asset ID, category, or location..."
+                  value={itemSearch}
+                  onChange={(e) => {
+                    setItemSearch(e.target.value);
+                    setShowItemDropdown(true);
+                  }}
+                  onFocus={() => setShowItemDropdown(true)}
+                  disabled={!selectedStudent}
+                  className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 ${!selectedStudent ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                />
+              </div>
+
+              {/* Item Dropdown */}
+              {showItemDropdown && selectedStudent && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                  {inventoryLoading && inventoryItems.length === 0 ? (
+                    <p className="p-3 text-gray-500 text-sm">Loading inventory...</p>
+                  ) : inventoryError ? (
+                    <div className="p-3 text-gray-600 text-sm">
+                      Error loading inventory. <button onClick={refetchInventory} className="underline">Retry</button>
+                    </div>
+                  ) : filteredItems.length === 0 ? (
+                    <p className="p-3 text-gray-500 text-sm">No available items found</p>
+                  ) : (
+                    filteredItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => item.availableQuantity > 0 && handleSelectItem(item)}
+                        disabled={item.availableQuantity <= 0}
+                        className={`w-full text-left p-3 border-b border-gray-100 last:border-0 transition-colors ${
+                          item.availableQuantity > 0 ? 'hover:bg-violet-50' : 'bg-gray-50 cursor-not-allowed opacity-60'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-medium text-gray-900">{item.name}</div>
+                            <div className="text-sm text-gray-600">
+                              {item.assetId} • {item.category} • {item.location}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            item.availableQuantity > 0 ? 'bg-violet-100 text-violet-700' : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {item.availableQuantity}/{item.quantity} avail
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 bg-violet-50 border border-violet-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-500 rounded-full flex items-center justify-center text-white">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">{selectedItem.name}</div>
+                  <div className="text-sm text-gray-600">
+                    {selectedItem.assetId} • {selectedItem.category} • {selectedItem.location}
+                  </div>
+                  <div className="text-sm text-violet-600 font-medium">
+                    {selectedItem.availableQuantity}/{selectedItem.quantity} available
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="p-2 hover:bg-violet-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           )}
-          {itemLookupError && (
-            <p className="mt-3 text-sm text-red-600">{itemLookupError}</p>
-          )}
-          {selectedItem && (
-            <div className="mt-4">
-              <p className="text-sm text-gray-600 mb-2">
-                Availability: <span className="text-green-600 font-medium">{selectedItem.availability}</span>
-              </p>
-              <div className="p-3 bg-violet-50 border border-violet-200 rounded-lg">
-                <p className="text-sm font-medium text-violet-900">
-                  Selected: {selectedItem.name} ({selectedItem.id})
-                </p>
+        </div>
+
+        {/* Checkout Summary */}
+        {selectedStudent && selectedItem && (
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Checkout Summary</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Student:</span>
+                <span className="font-medium">{selectedStudent.name} ({selectedStudent.netId})</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Item:</span>
+                <span className="font-medium">{selectedItem.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Due Date:</span>
+                <span className="font-medium">
+                  {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+                    weekday: 'short', month: 'short', day: 'numeric'
+                  })}
+                </span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Verify Reservation Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Verify reservation</h2>
-          <p className="text-sm text-gray-600">No conflicting reservations</p>
-        </div>
+        {/* Error Message */}
+        {checkoutError && (
+          <div className="mb-4 p-4 bg-gray-100 border border-gray-300 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-gray-700" />
+            <span className="text-gray-700">{checkoutError}</span>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="space-y-3">
           <button
             onClick={handleConfirmCheckout}
-            disabled={!selectedStudent || !selectedItem}
-            className={`w-full py-4 rounded-lg font-semibold transition-colors ${
-              selectedStudent && selectedItem
+            disabled={!selectedStudent || !selectedItem || checkoutLoading}
+            className={`w-full py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+              selectedStudent && selectedItem && !checkoutLoading
                 ? 'bg-violet-500 text-white hover:bg-violet-600'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Confirm Checkout
+            {checkoutLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Check className="w-5 h-5" />
+                Confirm Checkout
+              </>
+            )}
           </button>
           <button
-            onClick={() => onNavigate('inventory')}
+            onClick={() => onNavigate('dashboard')}
             className="w-full bg-gray-200 text-gray-700 py-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
           >
-            Back to Inventory
+            Cancel
           </button>
         </div>
+
+        {/* Click outside to close dropdowns */}
+        {(showStudentDropdown || showItemDropdown) && (
+          <div 
+            className="fixed inset-0 z-0" 
+            onClick={() => {
+              setShowStudentDropdown(false);
+              setShowItemDropdown(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );
