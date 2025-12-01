@@ -17,10 +17,8 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const user = new User({
       netId,
       email,
@@ -33,10 +31,8 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id, user.role);
 
-    // Return user data (without password)
     const userData = user.toObject();
     delete userData.password;
 
@@ -54,12 +50,10 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
   }
 });
 
-// POST /api/auth/login - Login user
 r.post('/login', authLimiter, validateUserLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ 
@@ -68,7 +62,6 @@ r.post('/login', authLimiter, validateUserLogin, async (req, res) => {
       });
     }
 
-    // Check if user is active
     if (!user.isActive) {
       return res.status(403).json({ 
         error: 'Forbidden', 
