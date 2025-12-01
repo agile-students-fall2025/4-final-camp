@@ -1,88 +1,224 @@
 const express = require("express");
 const router = express.Router();
+const User = require('../models/User');
+const Fine = require('../models/Fine');
+const { authenticate, authorize } = require('../middleware/auth');
+const { validateMongoId, validatePagination } = require('../middleware/validation');
 
-const users = [
-  { id: 1, email: "ak@example.com", role: "student" },
-  { id: 2, email: "staff@example.com", role: "staff" },
-];
-
-// GET /api/users (for staff to list all users/students) - must come before /:userId
-router.get("/", (req, res) => {
-  // Exact data from students.json
-  const students = [
-    {
-      id: "stu-1024",
-      name: "Sarah Johnson",
-      netId: "si2356",
-      email: "si2356@univ.edu",
-      activeFines: [
-        {
-          id: 1,
-          reason: "Overdue – Audio Recorder",
-          amount: 5,
-          status: "unpaid"
-        },
-        {
-          id: 2,
-          reason: "Damage – Tripod",
-          amount: 12,
-          status: "unpaid"
-        }
-      ]
-    },
-    {
-      id: "stu-1048",
-      name: "Leah Sullivan",
-      netId: "ls1842",
-      email: "ls1842@univ.edu",
-      activeFines: [
-        {
-          id: 3,
-          reason: "Overdue – Lighting Kit",
-          amount: 8,
-          status: "unpaid"
-        }
-      ]
-    },
-    {
-      id: "stu-1082",
-      name: "Michael Thompson",
-      netId: "mt2201",
-      email: "mt2201@univ.edu",
-      activeFines: []
+// GET /api/users - Get all users (staff only)
+router.get("/", authenticate, authorize('staff', 'admin'), validatePagination, async (req, res) => {
+  try {
+    const { role, page = 1, limit = 50, search } = req.query;
+    
+    const query = { isActive: true };
+    if (role) query.role = role;
+    if (search) {
+      query.$or = [
+        { firstName: new RegExp(search, 'i') },
+        { lastName: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { netId: new RegExp(search, 'i') }
+      ];
     }
-  ];
-  res.json(students);
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const users = await User.find(query)
+      .select('-password')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    // Get fines for each user
+    const usersWithFines = await Promise.all(users.map(async (user) => {
+      const fines = await Fine.find({ user: user._id, status: 'pending' })
+        .select('amount reason description');
+      
+      return {
+        id: user._id,
+        name: user.fullName,
+        netId: user.netId,
+        email: user.email,
+        role: user.role,
+        campusCashBalance: user.campusCashBalance || 0,
+        activeFines: fines.map(f => ({
+          id: f._id,
+          reason: f.description || f.reason,
+          amount: f.amount,
+          status: 'unpaid'
+        }))
+      };
+    }));
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      students: usersWithFines,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to fetch users' 
+    });
+  }
 });
 
-// GET /api/users/:userId
-router.get("/:userId", (req, res) => {
-  const { userId } = req.params;
-  // Exact data from profile.json
-  const student = {
-    name: "Student Name",
-    email: "netid@univ.edu",
-    campusCashBalance: 125.5,
-    notificationPreferences: {
-      email: true,
-      sms: false,
-      shareData: true
+// GET /api/users/:userId - Get user profile
+router.get("/:userId", authenticate, validateMongoId('userId'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Users can only view their own profile unless they're staff
+    if (req.userId.toString() !== userId && !['staff', 'admin'].includes(req.userRole)) {
+      return res.status(403).json({ 
+        error: 'Forbidden', 
+        message: 'Access denied' 
+      });
     }
-  };
-  res.json({ student });
+
+    const user = await User.findById(userId).select('-password');
+    
+    if (!user || !user.isActive) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'User not found' 
+      });
+    }
+
+    const student = {
+      name: user.fullName,
+      email: user.email,
+      netId: user.netId,
+      phone: user.phone,
+      campusCashBalance: user.campusCashBalance || 0,
+      notificationPreferences: {
+        email: true,
+        sms: false,
+        shareData: true
+      }
+    };
+
+    res.json({ student });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to fetch user' 
+    });
+  }
 });
 
+// PUT /api/users/:userId - Update user profile
+router.put("/:userId", authenticate, validateMongoId('userId'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Users can only update their own profile unless they're staff
+    if (req.userId.toString() !== userId && !['staff', 'admin'].includes(req.userRole)) {
+      return res.status(403).json({ 
+        error: 'Forbidden', 
+        message: 'Access denied' 
+      });
+    }
+
+    const allowedUpdates = ['firstName', 'lastName', 'phone'];
+    const updates = {};
+    
+    allowedUpdates.forEach(field => {
+      if (req.body[field]) updates[field] = req.body[field];
+    });
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      updates,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'User not found' 
+      });
+    }
+
+    res.json({
+      message: 'Profile updated successfully',
+      user
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to update user' 
+    });
+  }
+});
+
+// POST /api/users/add-funds - Add Campus Cash funds (staff only)
+router.post("/add-funds", authenticate, authorize('staff', 'admin'), async (req, res) => {
+  try {
+    const { userId, amount, method } = req.body;
+    
+    if (!userId || !amount) {
+      return res.status(400).json({ 
+        error: 'Bad Request', 
+        message: 'userId and amount are required' 
+      });
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ 
+        error: 'Bad Request', 
+        message: 'Amount must be a positive number' 
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.isActive) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'User not found' 
+      });
+    }
+
+    user.campusCashBalance = (user.campusCashBalance || 0) + parsedAmount;
+    await user.save();
+
+    res.json({
+      message: 'Funds added successfully',
+      newBalance: user.campusCashBalance,
+      addedAmount: parsedAmount,
+      method: method || 'cash'
+    });
+  } catch (error) {
+    console.error('Error adding funds:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to add funds' 
+    });
+  }
+});
+
+// Legacy endpoints for backwards compatibility
 router.post("/login", (req, res) => {
-  const { email } = req.body;
-  const user = users.find((u) => u.email === email);
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
-  res.json({ message: "Login successful", user });
+  res.status(301).json({ 
+    message: 'Please use /api/auth/login endpoint',
+    redirect: '/api/auth/login'
+  });
 });
 
 router.post("/register", (req, res) => {
-  const newUser = { id: users.length + 1, ...req.body };
-  users.push(newUser);
-  res.status(201).json({ message: "Registered successfully", user: newUser });
+  res.status(301).json({ 
+    message: 'Please use /api/auth/register endpoint',
+    redirect: '/api/auth/register'
+  });
 });
 
 module.exports = router;
