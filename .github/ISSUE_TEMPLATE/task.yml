@@ -1,0 +1,82 @@
+name: "📋 Task"
+description: "A development task linked to a user story"
+title: "[TASK] "
+labels: ["task", "sprint-3"]
+body:
+  - type: dropdown
+    id: user-story
+    attributes:
+      label: "Related User Story"
+      description: "Which user story does this task belong to?"
+      options:
+        - "US-01: Student Authentication & Session Management"
+        - "US-02: Staff Portal & Inventory Management"
+        - "US-03: Borrowing & Reservations System"
+        - "US-04: Fines & Payment Integration"
+        - "US-05: UI/UX Improvements & Bug Fixes"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: assignee
+    attributes:
+      label: "Assigned To"
+      description: "Team member responsible for this task"
+      options:
+        - "Team Member 1"
+        - "Team Member 2"
+        - "Team Member 3"
+        - "Team Member 4"
+        - "Team Member 5"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Task Description"
+      description: "Detailed description of what needs to be done"
+      placeholder: "Describe the task..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: "Files to Modify"
+      description: "List the files this task will change"
+      placeholder: |
+        - front-end/src/pages/HomePage.jsx
+        - back-end/routes/auth.js
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance Criteria"
+      description: "How do we know this task is complete?"
+      placeholder: |
+        - [ ] Feature works as expected
+        - [ ] No console errors
+        - [ ] Tests pass
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      options:
+        - "High"
+        - "Medium"
+        - "Low"
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: "Story Points"
+      description: "Estimated effort (1, 2, 3, 5, 8)"
+      placeholder: "3"
