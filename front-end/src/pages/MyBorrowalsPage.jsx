@@ -73,11 +73,16 @@ export default function MyBorrowalsPage({ onNavigate }) {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
-            Unable to load borrowals.
-            <button onClick={refetch} className="ml-2 underline hover:text-red-800">
-              Try again
-            </button>
+          <div className="bg-purple-50 border border-purple-200 text-purple-800 text-sm rounded-xl p-4 flex items-start gap-3">
+            <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Unable to load borrowals.
+              <button onClick={refetch} className="ml-2 underline hover:text-purple-900">
+                Try again
+              </button>
+            </span>
           </div>
         )}
 
@@ -109,7 +114,7 @@ export default function MyBorrowalsPage({ onNavigate }) {
                         </span>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                    <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-lg text-sm font-medium">
                       {item.status}
                     </span>
                   </div>
