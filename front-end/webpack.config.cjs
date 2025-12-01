@@ -50,6 +50,7 @@ module.exports = {
     port: 3001,
     historyApiFallback: true,
     hot: true,
+    allowedHosts: 'all',
     proxy: [
       {
         context: ['/api'],
