@@ -17,10 +17,8 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const user = new User({
       netId,
       email,
@@ -33,10 +31,8 @@ r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id, user.role);
 
-    // Return user data (without password)
     const userData = user.toObject();
     delete userData.password;
 
