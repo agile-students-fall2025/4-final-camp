@@ -5,12 +5,10 @@ const { generateToken } = require('../utils/jwt');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { validateUserRegistration, validateUserLogin } = require('../middleware/validation');
 
-// POST /api/auth/register - Register new user
 r.post('/register', authLimiter, validateUserRegistration, async (req, res) => {
   try {
     const { netId, email, password, firstName, lastName, role, phone } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { netId }] });
     if (existingUser) {
       return res.status(409).json({ 
