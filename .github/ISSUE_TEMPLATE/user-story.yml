@@ -1,0 +1,55 @@
+name: "📖 User Story"
+description: "A user story describing a feature from the user's perspective"
+title: "[USER STORY] "
+labels: ["user-story", "sprint-3"]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: "User Story"
+      description: "As a [type of user], I want [goal] so that [benefit]"
+      placeholder: "As a student, I want to reserve equipment online so that I can pick it up at my convenience."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance Criteria"
+      description: "Conditions that must be met for the story to be complete"
+      placeholder: |
+        - [ ] User can browse available equipment
+        - [ ] User can select date and time
+        - [ ] User receives confirmation
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: "Related Tasks"
+      description: "Break down into smaller tasks (will be created as separate issues)"
+      placeholder: |
+        - [ ] #123 Backend reservation endpoint
+        - [ ] #124 Frontend reservation form
+        - [ ] #125 Confirmation page UI
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      options:
+        - "Must Have"
+        - "Should Have"
+        - "Could Have"
+        - "Won't Have"
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: "Story Points"
+      placeholder: "8"
