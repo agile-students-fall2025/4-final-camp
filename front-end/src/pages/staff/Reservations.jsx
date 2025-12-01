@@ -1,9 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useApiData } from '../../hooks/useApiData.js';
+import { api } from '../../services/api.js';
+import CheckoutSuccess from './CheckoutSuccess';
 
 const Reservations = ({ onNavigate }) => {
   const [viewFilter, setViewFilter] = useState('today');
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
+  const [checkoutError, setCheckoutError] = useState(null);
+  const [successBorrowal, setSuccessBorrowal] = useState(null);
   const { data, loading, error, refetch } = useApiData('staffReservations', {
     initialData: { reservations: [] }
   });
@@ -31,14 +36,46 @@ const Reservations = ({ onNavigate }) => {
     alert(`Reservation ${id} marked as prepared`);
   };
 
-  const handleFastCheckout = (id) => {
-    alert(`Fast checkout for reservation ${id}`);
-    onNavigate('checkout');
+  const handleFastCheckout = async (reservation) => {
+    if (checkoutLoading) return;
+    if (!reservation.userId || !reservation.itemId) {
+      setCheckoutError('Missing user or item data for this reservation');
+      return;
+    }
+    setCheckoutError(null);
+    setCheckoutLoading(reservation.id);
+    try {
+      const result = await api.staffCheckout({
+        userId: reservation.userId,
+        itemId: reservation.itemId
+      });
+      setCheckoutLoading(null);
+      setSuccessBorrowal(result?.borrowal || result);
+    } catch (e) {
+      setCheckoutLoading(null);
+      setCheckoutError(e.message || 'Fast checkout failed');
+    }
   };
 
   const handleNoShow = (id) => {
     alert(`Reservation ${id} marked as no-show`);
   };
+
+  if (successBorrowal) {
+    return (
+      <CheckoutSuccess
+        borrowal={successBorrowal}
+        onNavigate={(dest) => {
+          if (dest === 'checkout' || dest === 'reservations') {
+            setSuccessBorrowal(null);
+            refetch();
+          } else {
+            onNavigate(dest);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -88,12 +125,19 @@ const Reservations = ({ onNavigate }) => {
           </button>
         </div>
 
+        {/* Checkout Error */}
+        {checkoutError && (
+          <div className="mb-4 p-3 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
+            {checkoutError}
+          </div>
+        )}
+
         {/* Reservations List */}
         <div className="space-y-4">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-700 rounded-lg">
+            <div className="p-4 bg-gray-100 border border-gray-300 text-sm text-gray-700 rounded-lg">
               Unable to load reservations.
-              <button onClick={refetch} className="ml-2 underline hover:text-red-800">
+              <button onClick={refetch} className="ml-2 underline hover:text-gray-800">
                 Retry
               </button>
             </div>
@@ -108,13 +152,16 @@ const Reservations = ({ onNavigate }) => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-semibold text-gray-900 text-lg">
-                      {reservation.item} – {reservation.time}
+                      {reservation.item}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
                       {reservation.student}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Pickup at {reservation.location} • Status: {reservation.status === 'pending' ? 'Pending' : 'Ready'}
+                      Pickup: {reservation.date} at {reservation.time}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Location: {reservation.location} - Status: {reservation.status === 'pending' ? 'Pending' : 'Ready'}
                     </p>
                   </div>
                 </div>
@@ -128,10 +175,15 @@ const Reservations = ({ onNavigate }) => {
                     </button>
                   )}
                   <button
-                    onClick={() => handleFastCheckout(reservation.id)}
-                    className="flex-1 px-4 py-2 bg-[#57068C] text-white rounded-lg font-medium hover:bg-[#460573] transition-colors"
+                    onClick={() => handleFastCheckout(reservation)}
+                    disabled={checkoutLoading === reservation.id}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                      checkoutLoading === reservation.id
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : 'bg-[#57068C] text-white hover:bg-[#460573]'
+                    }`}
                   >
-                    Fast Checkout
+                    {checkoutLoading === reservation.id ? 'Processing…' : 'Fast Checkout'}
                   </button>
                   {reservation.status === 'ready' && (
                     <button
