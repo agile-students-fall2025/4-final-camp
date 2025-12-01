@@ -1,0 +1,25 @@
+diff --git a/front-end/src/pages/landingpage.jsx b/front-end/src/pages/landingpage.jsx
+index fc54853db..c0c840b63 100644
+--- a/front-end/src/pages/landingpage.jsx
++++ b/front-end/src/pages/landingpage.jsx
+@@ -1,4 +1,4 @@
+-import { Camera, BookOpen, Dumbbell } from "lucide-react";
++import { Camera, BookOpen } from "lucide-react";
+ 
+ export default function LandingPage({ onSelectRole }) {
+   return (
+@@ -54,11 +54,11 @@ export default function LandingPage({ onSelectRole }) {
+ 
+           <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+             <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mb-4">
+-              <Dumbbell className="w-6 h-6 text-fuchsia-600" />
++              <BookOpen className="w-6 h-6 text-fuchsia-600" />
+             </div>
+-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Sports Centre</h3>
++            <h3 className="text-lg font-semibold text-gray-900 mb-2">Library</h3>
+             <p className="text-gray-600 text-sm">
+-              Athletic equipment, outdoor gear, and accessories
++              Projectors, study tech, and media equipment
+             </p>
+           </div>
+         </div>
