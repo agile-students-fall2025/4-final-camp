@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const { generalLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
@@ -8,6 +9,9 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Apply rate limiting to all API routes
+app.use('/api/', generalLimiter);
 
 /* ---------- health & root ---------- */
 app.get('/api/health', (_req, res) => {
