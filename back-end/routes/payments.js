@@ -33,3 +33,5 @@ r.get('/history', (req, res) => {
 });
 
 module.exports = r;
+
+// [Task #388] Update: Add payment processing routes
