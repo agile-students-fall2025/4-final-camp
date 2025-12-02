@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, ArrowLeft, User, Package, X, Check, AlertCircle } from 'lucide-react';
 import CheckoutSuccess from './CheckoutSuccess';
 import { useApiData } from '../../hooks/useApiData.js';
 import { api } from '../../services/api.js';
 
-const CheckOut = ({ onNavigate }) => {
+const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
   const [studentSearch, setStudentSearch] = useState('');
   const [itemSearch, setItemSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -31,6 +31,29 @@ const CheckOut = ({ onNavigate }) => {
 
   const students = studentsPayload?.students ?? [];
   const inventoryItems = inventoryPayload?.items ?? [];
+
+  // Handle prefill data
+  useEffect(() => {
+    if (prefillData) {
+      // Prefill Student
+      if (!selectedStudent && students.length > 0) {
+        const targetStudentId = String(prefillData.studentId || prefillData.userId || '');
+        if (targetStudentId) {
+          const match = students.find(s => String(s.id) === targetStudentId);
+          if (match) handleSelectStudent(match);
+        }
+      }
+      
+      // Prefill Item
+      if (!selectedItem && inventoryItems.length > 0) {
+        const targetItemId = String(prefillData.itemId || prefillData.id || '');
+        if (targetItemId) {
+          const match = inventoryItems.find(i => String(i.id) === targetItemId);
+          if (match && match.availableQuantity > 0) handleSelectItem(match);
+        }
+      }
+    }
+  }, [prefillData, students, inventoryItems]);
 
   // Live filter students as user types
   const filteredStudents = useMemo(() => {
