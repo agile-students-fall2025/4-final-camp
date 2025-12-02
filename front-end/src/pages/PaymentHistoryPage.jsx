@@ -81,3 +81,5 @@ export default function PaymentHistoryPage({ onNavigate }) {
     </div>
   );
 }
+
+// [Task #404] Update: Update payment history display
