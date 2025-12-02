@@ -304,7 +304,7 @@ const Inventory = ({ onNavigate }) => {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => item.availableQuantity > 0 && onNavigate('checkout')}
+                      onClick={() => item.availableQuantity > 0 && onNavigate('checkout', { itemId: item.id, item })}
                       disabled={item.availableQuantity <= 0}
                       className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
                         item.availableQuantity > 0
@@ -316,7 +316,7 @@ const Inventory = ({ onNavigate }) => {
                     </button>
                     {checkedOutCount > 0 && (
                       <button
-                        onClick={() => onNavigate('checkin')}
+                        onClick={() => onNavigate('checkin', { itemId: item.id, item })}
                         className="flex-1 px-4 py-2 bg-violet-600 text-white rounded-lg font-medium hover:bg-violet-700 transition-colors text-sm"
                       >
                         Check In
@@ -340,3 +340,5 @@ const Inventory = ({ onNavigate }) => {
 };
 
 export default Inventory;
+
+// [Task #501] Update: Refactor staff inventory list
