@@ -259,3 +259,5 @@ router.delete("/:id", authenticate, authorize('staff', 'admin'), validateId, asy
 });
 
 module.exports = router;
+
+// [Task #502] Update: Modify item management routes
