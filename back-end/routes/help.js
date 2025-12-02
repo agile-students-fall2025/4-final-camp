@@ -9,3 +9,5 @@ const help = [
 router.get("/", (req, res) => res.json(help));
 
 module.exports = router;
+
+// [Task #386] Update: Improve help API routes
