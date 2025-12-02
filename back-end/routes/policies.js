@@ -10,3 +10,5 @@ r.get('/', (_req, res) => {
 });
 
 module.exports = r;
+
+// [Task #390] Update: Update policies API endpoints
