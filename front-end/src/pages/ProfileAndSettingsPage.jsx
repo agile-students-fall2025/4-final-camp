@@ -171,3 +171,5 @@ export default function ProfileAndSettingsPage({ onNavigate }) {
     </div>
   );
 }
+
+// [Task #406] Update: Add profile settings and preferences
