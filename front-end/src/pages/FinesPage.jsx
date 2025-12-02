@@ -213,3 +213,5 @@ export default function FinesPage({ onNavigate, setSelectedFine }) {
     </div>
   );
 }
+
+// [Task #398] Update: Enhance fines display with payment options

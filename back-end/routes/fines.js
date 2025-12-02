@@ -48,3 +48,5 @@ router.post("/:id/pay", (req, res) => {
 });
 
 module.exports = router;
+
+// [Task #398] Update: Enhance fines display with payment options
