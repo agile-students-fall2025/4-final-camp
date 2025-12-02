@@ -48,3 +48,5 @@ router.post("/:id/pay", (req, res) => {
 });
 
 module.exports = router;
+
+// [Task #384] Update: Enhance fines API with cash payments
