@@ -176,3 +176,5 @@ export default function PayFinePage({ onNavigate, selectedFine, setPaymentResult
     </div>
   );
 }
+
+// [Task #402] Update: Improve fine payment flow
