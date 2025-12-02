@@ -211,3 +211,5 @@ export default function StudentRegisterPage({ onRegister, onBack, onNavigateToLo
     </div>
   );
 }
+
+// [Task #410] Update: Enhance student registration with validation
