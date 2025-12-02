@@ -48,13 +48,15 @@ r.get('/inventory', validatePagination, async (req, res) => {
         status: { $in: ['active', 'overdue'] }
       });
       
-      // Count active reservations for this item
+      // For staff view: Don't subtract reservations - staff can check out reserved items
+      // They just need to know what's physically available (not checked out)
+      const availableQty = Math.max(0, totalQty - activeBorrowals);
+      
+      // Also provide reservation count for reference
       const activeReservations = await Reservation.countDocuments({
         item: item._id,
         status: { $in: ['active', 'pending', 'confirmed'] }
       });
-      
-      const availableQty = Math.max(0, totalQty - activeBorrowals - activeReservations);
       
       return {
         id: item._id,
@@ -65,6 +67,7 @@ r.get('/inventory', validatePagination, async (req, res) => {
         category: item.category,
         quantity: totalQty,
         availableQuantity: availableQty,
+        reservedQuantity: activeReservations,
         condition: item.condition || 'Good',
         reservationWindow: 24,
         description: item.description
@@ -150,40 +153,32 @@ r.post('/checkout', validateBorrowalCreation, async (req, res) => {
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
     
-    // Check if item has available quantity
-    const availableQty = item.quantityAvailable ?? item.quantity ?? 1;
-    if (availableQty <= 0) {
-      // Allow checkout if item is reserved specifically for this user
-      if (item.status === 'reserved') {
-        const existingReservation = await Reservation.findOne({
-          item: itemId,
-          user: userId,
-          status: { $in: ['confirmed', 'pending'] }
-        }).sort({ pickupDate: 1 });
+    // For staff checkout: only count actual borrowals, not reservations
+    // Staff can check out items even if they're reserved
+    const totalQty = item.quantity || 1;
+    const activeBorrowals = await Borrowal.countDocuments({
+      item: itemId,
+      status: { $in: ['active', 'overdue'] }
+    });
+    
+    // Physical availability = total - currently checked out
+    const physicallyAvailable = Math.max(0, totalQty - activeBorrowals);
 
-        if (!existingReservation) {
-          return res.status(400).json({ error: 'Item is reserved for another student' });
-        }
-        // Mark reservation as picked-up/fulfilled
-        existingReservation.status = 'picked-up';
-        existingReservation.fulfilledAt = new Date();
-        await existingReservation.save();
-      } else {
-        return res.status(400).json({ error: `No available quantity for this item` });
-      }
-    } else {
-      // Check for reservation even if quantity available
-      const existingReservation = await Reservation.findOne({
-        item: itemId,
-        user: userId,
-        status: { $in: ['confirmed', 'pending'] }
-      }).sort({ pickupDate: 1 });
-      
-      if (existingReservation) {
-        existingReservation.status = 'picked-up';
-        existingReservation.fulfilledAt = new Date();
-        await existingReservation.save();
-      }
+    if (physicallyAvailable <= 0) {
+      return res.status(400).json({ error: `No available quantity for this item - all units are checked out` });
+    }
+    
+    // Check if user has a reservation for this item and fulfill it
+    const existingReservation = await Reservation.findOne({
+      item: itemId,
+      user: userId,
+      status: { $in: ['confirmed', 'pending'] }
+    }).sort({ pickupDate: 1 });
+    
+    if (existingReservation) {
+      existingReservation.status = 'picked-up';
+      existingReservation.fulfilledAt = new Date();
+      await existingReservation.save();
     }
 
     const borrowal = new Borrowal({
@@ -349,10 +344,13 @@ r.get('/overdue', validatePagination, async (req, res) => {
 
     const items = borrowals.map(b => ({
       id: b._id,
-      item: b.item.name,
-      days: b.daysOverdue,
-      student: `${b.user.firstName.charAt(0)}. ${b.user.lastName}`,
-      dueDate: b.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      odId: b._id.toString(),
+      userId: b.user?._id?.toString(),
+      itemId: b.item?._id?.toString(),
+      item: b.item?.name || 'Unknown Item',
+      days: b.daysOverdue || 0,
+      student: b.user ? `${b.user.firstName?.charAt(0) || ''}. ${b.user.lastName || 'Unknown'}` : 'Unknown',
+      dueDate: b.dueDate ? b.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'
     }));
 
     const total = await Borrowal.countDocuments({ status: 'overdue' });
