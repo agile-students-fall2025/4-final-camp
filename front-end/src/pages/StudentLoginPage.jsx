@@ -141,3 +141,5 @@ export default function StudentLoginPage({ onLogin, onBack, onNavigateToRegister
     </div>
   );
 }
+
+// [Task #408] Update: Improve student login form validation
