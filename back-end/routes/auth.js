@@ -174,3 +174,5 @@ r.post('/staff/login', authLimiter, validateUserLogin, async (req, res) => {
 });
 
 module.exports = r;
+
+// [Task #418] Update: Implement JWT authentication routes
