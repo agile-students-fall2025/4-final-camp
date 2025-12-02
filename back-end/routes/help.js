@@ -9,3 +9,5 @@ const help = [
 router.get("/", (req, res) => res.json(help));
 
 module.exports = router;
+
+// [Task #400] Update: Update help and policies content

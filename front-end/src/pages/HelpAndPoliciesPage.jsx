@@ -387,3 +387,5 @@ export default function HelpAndPolicies({ onNavigate }) {
     </div>
   );
 }
+
+// [Task #400] Update: Update help and policies content

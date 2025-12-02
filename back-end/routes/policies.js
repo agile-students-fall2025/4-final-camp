@@ -10,3 +10,5 @@ r.get('/', (_req, res) => {
 });
 
 module.exports = r;
+
+// [Task #400] Update: Update help and policies content
