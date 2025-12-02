@@ -70,3 +70,5 @@ export default function LandingPage({ onSelectRole }) {
     </div>
   );
 }
+
+// [Task #412] Update: Refactor landing page UI components
