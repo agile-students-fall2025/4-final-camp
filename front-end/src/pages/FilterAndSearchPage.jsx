@@ -219,3 +219,5 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
     </div>
   );
 }
+
+// [Task #503] Update: Update student search filter interface
