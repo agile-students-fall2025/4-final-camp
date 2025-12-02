@@ -240,3 +240,5 @@ const ManageFines = ({ onNavigate }) => {
 };
 
 export default ManageFines;
+
+// [Task #416] Update: Enhance fines management with cash payments

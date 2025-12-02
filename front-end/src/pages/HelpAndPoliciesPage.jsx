@@ -76,22 +76,22 @@ export default function HelpAndPolicies({ onNavigate }) {
 
           <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
             <li>
-              <strong>IM Lab</strong> — Room 201, North Building. Cameras, audio
+              <strong>IM Lab</strong> - Room 201, North Building. Cameras, audio
               kits, VR headsets.
             </li>
             <li>
-              <strong>Arts Centre</strong> — Ground Floor Equipment Desk.
+              <strong>Arts Centre</strong> - Ground Floor Equipment Desk.
               Instruments, lighting, stage equipment.
             </li>
             <li>
-              <strong>Library</strong> — Media Desk, Level 2. Laptops, projectors,
+              <strong>Library</strong> - Media Desk, Level 2. Laptops, projectors,
               study tech.
             </li>
           </ul>
 
           <p className="mt-2 text-sm text-gray-700">
-            If a proxy will pick up on your behalf, contact support in advance —
-            pickup generally requires the borrower’s ID for verification.
+            If a proxy will pick up on your behalf, contact support in advance -
+            pickup generally requires the borrower's ID for verification.
           </p>
         </>
       ),
@@ -101,8 +101,8 @@ export default function HelpAndPolicies({ onNavigate }) {
       icon: Clock,
       title: "Operating Hours",
       description: "Facility opening and closing times.",
-      color: "from-green-100 to-emerald-100",
-      iconColor: "text-green-600",
+      color: "from-violet-100 to-purple-100",
+      iconColor: "text-[#57068C]",
       content: (
         <>
           <p className="mb-2 text-sm text-gray-700">
@@ -134,8 +134,8 @@ export default function HelpAndPolicies({ onNavigate }) {
       icon: CreditCard,
       title: "Fees and Deposits",
       description: "Security deposits and late fee structure.",
-      color: "from-orange-100 to-amber-100",
-      iconColor: "text-orange-600",
+      color: "from-violet-100 to-purple-100",
+      iconColor: "text-violet-600",
       content: (
         <>
           <p className="mb-2 text-sm text-gray-700">
@@ -170,8 +170,8 @@ export default function HelpAndPolicies({ onNavigate }) {
       icon: AlertCircle,
       title: "Damage Policy",
       description: "What to do if equipment is damaged.",
-      color: "from-red-100 to-rose-100",
-      iconColor: "text-red-600",
+      color: "from-gray-100 to-gray-200",
+      iconColor: "text-gray-600",
       content: (
         <>
           <p className="mb-2 text-sm text-gray-700">
@@ -219,8 +219,8 @@ export default function HelpAndPolicies({ onNavigate }) {
             <div>
               <p className="text-sm font-medium text-gray-800">Can I extend my loan?</p>
               <p className="text-sm text-gray-700">
-                Yes — request an extension in the app before your due time. Extensions
-                are subject to availability and staff approval.
+              Yes - request an extension in the app before your due time. Extensions
+              are subject to availability and staff approval.
               </p>
             </div>
 
@@ -235,8 +235,8 @@ export default function HelpAndPolicies({ onNavigate }) {
             <div>
               <p className="text-sm font-medium text-gray-800">Can someone else pick up my reservation?</p>
               <p className="text-sm text-gray-700">
-                Generally no — pickup requires the borrower’s Campus ID. Contact
-                support ahead of time if you need special arrangements.
+              Generally no - pickup requires the borrower's Campus ID. Contact
+              support ahead of time if you need special arrangements.
               </p>
             </div>
 
