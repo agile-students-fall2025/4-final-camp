@@ -1,3 +1,9 @@
+/**
+ * Main Application Component
+ * Handles routing, authentication state, and navigation
+ * Integrates AuthContext for global authentication management
+ * Related to User Story #43 (Landing/Home Page), Task #698
+ */
 import React, { useEffect, useState } from "react";
 import { useAuth } from "./context/AuthContext.jsx";
 
