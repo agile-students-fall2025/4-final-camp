@@ -7,6 +7,19 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
     return null;
   }
 
+  const facilityName = selectedItem.facility && typeof selectedItem.facility === 'object'
+    ? selectedItem.facility.name
+    : selectedItem.facility;
+
+  // Normalize availability status regardless of backend field naming
+  const rawStatus = selectedItem.status || selectedItem.availability || '';
+  const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : '';
+  
+  // Check quantity-based availability
+  const totalQuantity = selectedItem.quantity ?? 1;
+  const availableQuantity = selectedItem.availableQuantity ?? (normalizedStatus === 'available' ? 1 : 0);
+  const isAvailable = availableQuantity > 0;
+
   const handleReserve = () => {
     onNavigate('reserveDateTime');
   };
@@ -16,7 +29,7 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
     const waitlist = {
       number: waitlistNumber,
       item: selectedItem.name,
-      facility: selectedItem.facility,
+      facility: facilityName,
       expectedBack: selectedItem.expectedBack || 'TBD'
     };
     setWaitlistData(waitlist);
@@ -42,7 +55,7 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
         {/* Item Card - Available */}
-        {selectedItem.availability === 'Available' && (
+        {isAvailable && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
@@ -54,12 +67,14 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Availability</p>
-                    <p className="text-lg font-bold text-gray-900">Available tomorrow</p>
+                    <p className="text-lg font-bold text-gray-900">
+                      {availableQuantity} of {totalQuantity} available
+                    </p>
                   </div>
                 </div>
               </div>
               <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium">
-                {selectedItem.facility}
+                {facilityName}
               </span>
             </div>
 
@@ -73,7 +88,7 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
         )}
 
         {/* Item Card - Unavailable */}
-        {selectedItem.availability !== 'Available' && (
+        {!isAvailable && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
@@ -81,11 +96,14 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
                   {selectedItem.name}
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  Unavailable • Expected back: {selectedItem.expectedBack || 'TBD'}
+                  {totalQuantity > 1 
+                    ? `All ${totalQuantity} units currently unavailable`
+                    : `Status: ${rawStatus || 'Unavailable'}`
+                  } • Expected back: {selectedItem.expectedBack || 'TBD'}
                 </p>
               </div>
               <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium">
-                {selectedItem.facility}
+                {facilityName}
               </span>
             </div>
 
