@@ -17,6 +17,7 @@ const Overdue = ({ onNavigate }) => {
     // Pass user data to pre-fill the fines page
     onNavigate('fines', { 
       prefillStudent: {
+        userId: item.userId,
         name: item.student,
         odInfo: item.item,
         days: item.days,
