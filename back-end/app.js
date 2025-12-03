@@ -2,6 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const { generalLimiter } = require('./middleware/rateLimiter');
+const connectDB = require('./config/database');
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 
