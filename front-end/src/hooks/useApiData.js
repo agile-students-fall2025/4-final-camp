@@ -29,6 +29,8 @@ export function useApiData(resourceKey, options = {}) {
           result = await api.dashboard(params.userId);
         } else if (resourceKey === 'borrowals' && params?.userId) {
           result = await api.borrowals(params.userId);
+        } else if (resourceKey === 'reservations') {
+          result = await api.reservations();
         } else if (resourceKey === 'fines' && params?.userId) {
           result = await api.fines(params.userId);
         } else if (resourceKey === 'paymentHistory' && params?.userId) {
@@ -84,6 +86,8 @@ export function useApiData(resourceKey, options = {}) {
         result = await api.dashboard(params.userId);
       } else if (resourceKey === 'borrowals' && params?.userId) {
         result = await api.borrowals(params.userId);
+      } else if (resourceKey === 'reservations') {
+        result = await api.reservations();
       } else if (resourceKey === 'fines' && params?.userId) {
         result = await api.fines(params.userId);
       } else if (resourceKey === 'paymentHistory' && params?.userId) {
