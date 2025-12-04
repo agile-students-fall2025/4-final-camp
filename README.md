@@ -76,6 +76,21 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 3: Saad Iftikhar
 ---
 
+### Sprint 2 Roles:
+- Scrum Master: Saad Iftikhar
+- Product Owner: Akshith Karthik
+- Dev 1: Shaf Khalid
+- Dev 2: Ashmit Mukherjee
+- Dev 3: Talal Naveed
+---
+
+### Sprint 3 Roles:
+- Scrum Master: Ashmit Mukherjee
+- Product Owner: Talal Naveed
+- Dev 1: Shaf Khalid
+- Dev 2: Akshith Karthik
+- Dev 3: Saad Iftikhar
+---
 
 ## Project History
 
@@ -171,12 +186,14 @@ cd 4-final-camp
 ```bash
 cd back-end
 npm install
+npm start
 ```
 
 **Frontend:**
 ```bash
 cd ../front-end
 npm install --legacy-peer-deps
+npm run dev
 ```
 
 #### 3. Environment Configuration
