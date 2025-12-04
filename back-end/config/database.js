@@ -6,11 +6,11 @@ const connectDB = async () => {
     
     await mongoose.connect(mongoURI);
     
-    console.log('✅ MongoDB connected successfully');
-    console.log(`📍 Database: ${mongoose.connection.name}`);
+    console.log('MongoDB connected successfully');
+    console.log(`Database: ${mongoose.connection.name}`);
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
-    console.error('⚠️  Server will continue but database operations will fail');
+    console.error('MongoDB connection error:', error.message);
+    console.error('Server will continue but database operations will fail');
     // Don't exit - allow server to run for debugging
   }
 };
