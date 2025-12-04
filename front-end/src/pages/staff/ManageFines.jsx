@@ -294,28 +294,41 @@ const ManageFines = ({ onNavigate, prefillData }) => {
                   Active fines - {selectedStudent.name}
                 </h2>
                 <div className="space-y-3">
-                  {selectedStudent.activeFines?.length ? selectedStudent.activeFines.map((fine) => (
-                    <div
-                      key={fine.id}
-                      className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{fine.reason}</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          ${fine.amount.toFixed(2)} {fine.status}
+                  {selectedStudent.activeFines?.length ? (
+                    <>
+                      {selectedStudent.activeFines.map((fine) => (
+                        <div
+                          key={fine.id}
+                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{fine.reason}</p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              ${fine.amount.toFixed(2)} {fine.status}
+                            </p>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              fine.status === 'unpaid'
+                                ? 'bg-violet-100 text-violet-700'
+                                : 'bg-gray-200 text-gray-600'
+                            }`}
+                          >
+                            {fine.status === 'unpaid' ? 'Unpaid' : 'Paid'}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
+                        <p className="text-sm font-semibold text-gray-900">Total unpaid fines:</p>
+                        <p className="text-lg font-bold text-[#57068C]">
+                          ${selectedStudent.activeFines
+                            .filter(f => f.status === 'unpaid')
+                            .reduce((sum, f) => sum + f.amount, 0)
+                            .toFixed(2)}
                         </p>
                       </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          fine.status === 'unpaid'
-                            ? 'bg-violet-100 text-violet-700'
-                            : 'bg-gray-200 text-gray-600'
-                        }`}
-                      >
-                        {fine.status === 'unpaid' ? 'Unpaid' : 'Paid'}
-                      </span>
-                    </div>
-                  )) : (
+                    </>
+                  ) : (
                     <p className="text-sm text-gray-600">No outstanding fines for this student.</p>
                   )}
                 </div>
@@ -382,9 +395,14 @@ const ManageFines = ({ onNavigate, prefillData }) => {
                 
                 {/* Select fine */}
                 <div className="mb-3">
-                  <label className="block text-sm text-gray-600 mb-2">Select fine</label>
-                  <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
-                    <option value="">Choose...</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select fine to pay</label>
+                  <select 
+                    disabled={!selectedStudent || studentPaymentOptions.length === 0}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+                  >
+                    <option value="">
+                      {studentPaymentOptions.length === 0 ? 'No unpaid fines' : 'Choose...'}
+                    </option>
                     {studentPaymentOptions.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.label}

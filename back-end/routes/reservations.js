@@ -91,16 +91,16 @@ router.post("/", authenticate, validateReservationCreation, async (req, res) => 
     const reservationAt = new Date();
     const expiryDate = new Date(pickupAt.getTime() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Count how many reservations overlap with the requested time slot
-    const conflictingReservations = await Reservation.countDocuments({
+    // Get all overlapping reservations sorted by reservation date (earliest first - first-come, first-served)
+    const conflictingReservations = await Reservation.find({
       item: itemId,
       status: { $in: ['pending', 'confirmed'] },
       pickupDate: { $lt: expiryDate },
       expiryDate: { $gt: pickupAt }
-    });
+    }).sort({ reservationDate: 1 });
 
     // If all units are booked for this slot, reject
-    if (conflictingReservations >= totalQty) {
+    if (conflictingReservations.length >= totalQty) {
       return res.status(409).json({ 
         error: 'Conflict', 
         message: 'All units are reserved for this time slot' 
