@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Borrowal = require('../models/Borrowal');
 const Reservation = require('../models/Reservation');
 const Fine = require('../models/Fine');
@@ -24,11 +25,25 @@ router.get('/', authenticate, async (req, res) => {
       status: { $in: ['pending', 'confirmed'] }
     });
 
-    // Get unpaid fines total
+    // Get unpaid fines count and total
+    let userObjectId;
+    try {
+      userObjectId = new mongoose.Types.ObjectId(userId);
+    } catch (e) {
+      userObjectId = userId;
+    }
+    
+    const unpaidFinesCount = await Fine.countDocuments({
+      user: userObjectId,
+      status: 'pending'
+    });
+
     const unpaidFinesTotal = await Fine.aggregate([
-      { $match: { user: userId, status: 'pending' } },
+      { $match: { user: userObjectId, status: 'pending' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
+    
+    const finesAmount = unpaidFinesTotal.length > 0 ? unpaidFinesTotal[0].total : 0;
 
     const stats = [
       {
@@ -49,7 +64,8 @@ router.get('/', authenticate, async (req, res) => {
       {
         id: "unpaidFines",
         label: "Unpaid Fines",
-        value: unpaidFinesTotal[0]?.total || 0
+        value: unpaidFinesCount,
+        amount: finesAmount
       }
     ];
 

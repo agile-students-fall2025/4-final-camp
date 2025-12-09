@@ -11,6 +11,169 @@ const { validateItemCreation, validateBorrowalCreation, validateMongoId, validat
 // All staff routes require staff or admin role
 r.use(authenticate, authorize('staff', 'admin'));
 
+// GET /api/staff/students/search - Search for students and get their borrowals
+r.get('/students/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({ 
+        error: 'Bad Request', 
+        message: 'Search query must be at least 2 characters' 
+      });
+    }
+
+    const searchRegex = new RegExp(q.trim(), 'i');
+    
+    // Search users by name, email, or netId
+    const users = await User.find({
+      role: 'student',
+      $or: [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+        { netId: searchRegex }
+      ]
+    })
+    .select('firstName lastName email netId')
+    .limit(20);
+
+    // For each user, get their active borrowals
+    const results = await Promise.all(users.map(async (user) => {
+      const borrowals = await Borrowal.find({
+        user: user._id,
+        status: { $in: ['active', 'overdue'] }
+      })
+      .populate('item', 'name assetId category')
+      .populate({
+        path: 'item',
+        populate: { path: 'facility', select: 'name' }
+      })
+      .sort({ checkoutDate: -1 });
+
+      return {
+        student: {
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          netId: user.netId
+        },
+        borrowals: borrowals.map(b => ({
+          id: b._id,
+          item: {
+            id: b.item?._id,
+            name: b.item?.name || 'Unknown Item',
+            assetId: b.item?.assetId,
+            category: b.item?.category
+          },
+          facility: b.item?.facility?.name || 'Unknown',
+          checkoutDate: b.checkoutDate ? b.checkoutDate.toISOString() : null,
+          dueDate: b.dueDate ? b.dueDate.toISOString() : null,
+          status: b.status,
+          daysOverdue: b.daysOverdue || 0
+        })),
+        activeBorrowalsCount: borrowals.length
+      };
+    }));
+
+    return res.status(200).json({ 
+      students: results,
+      count: results.length
+    });
+  } catch (error) {
+    console.error('Error searching students:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to search students' 
+    });
+  }
+});
+
+// GET /api/staff/students/:userId/borrowals - Get a specific student's borrowals
+r.get('/students/:userId/borrowals', validateMongoId('userId'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select('firstName lastName email netId role');
+    if (!user) {
+      return res.status(404).json({ error: 'Not Found', message: 'Student not found' });
+    }
+
+    if (user.role !== 'student') {
+      return res.status(400).json({ error: 'Bad Request', message: 'User is not a student' });
+    }
+
+    // Get all borrowals (active, overdue, and history)
+    const activeBorrowals = await Borrowal.find({
+      user: userId,
+      status: { $in: ['active', 'overdue'] }
+    })
+    .populate('item', 'name assetId category')
+    .populate({
+      path: 'item',
+      populate: { path: 'facility', select: 'name' }
+    })
+    .sort({ checkoutDate: -1 });
+
+    const returnedBorrowals = await Borrowal.find({
+      user: userId,
+      status: 'returned'
+    })
+    .populate('item', 'name assetId category')
+    .populate({
+      path: 'item',
+      populate: { path: 'facility', select: 'name' }
+    })
+    .sort({ returnDate: -1 })
+    .limit(10);
+
+    return res.status(200).json({
+      student: {
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        netId: user.netId
+      },
+      active: activeBorrowals.map(b => ({
+        id: b._id,
+        item: {
+          id: b.item?._id,
+          name: b.item?.name || 'Unknown Item',
+          assetId: b.item?.assetId,
+          category: b.item?.category
+        },
+        facility: b.item?.facility?.name || 'Unknown',
+        checkoutDate: b.checkoutDate ? b.checkoutDate.toISOString() : null,
+        dueDate: b.dueDate ? b.dueDate.toISOString() : null,
+        status: b.status,
+        daysOverdue: b.daysOverdue || 0
+      })),
+      history: returnedBorrowals.map(b => ({
+        id: b._id,
+        item: {
+          id: b.item?._id,
+          name: b.item?.name || 'Unknown Item',
+          assetId: b.item?.assetId,
+          category: b.item?.category
+        },
+        facility: b.item?.facility?.name || 'Unknown',
+        checkoutDate: b.checkoutDate ? b.checkoutDate.toISOString() : null,
+        returnDate: b.returnDate ? b.returnDate.toISOString() : null
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching student borrowals:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to fetch student borrowals' 
+    });
+  }
+});
+
 // GET /api/staff/inventory
 r.get('/inventory', validatePagination, async (req, res) => {
   try {
@@ -198,12 +361,27 @@ r.post('/checkout', validateBorrowalCreation, async (req, res) => {
     }
     await item.save();
 
-    const populated = await borrowal.populate({
-      path: 'item',
-      select: 'name assetId facility quantity quantityAvailable',
-      populate: { path: 'facility', select: 'name location' }
+    const populated = await borrowal.populate([
+      {
+        path: 'item',
+        select: 'name assetId facility quantity quantityAvailable',
+        populate: { path: 'facility', select: 'name location' }
+      },
+      {
+        path: 'user',
+        select: 'firstName lastName netId email'
+      }
+    ]);
+    return res.status(201).json({ 
+      ok: true, 
+      borrowal: populated,
+      student: {
+        id: populated.user._id,
+        name: `${populated.user.firstName} ${populated.user.lastName}`,
+        netId: populated.user.netId,
+        email: populated.user.email
+      }
     });
-    return res.status(201).json({ ok: true, borrowal: populated });
   } catch (error) {
     console.error('Error checking out item:', error);
     res.status(500).json({ error: 'Internal Server Error', message: 'Failed to check out item' });
@@ -213,24 +391,35 @@ r.post('/checkout', validateBorrowalCreation, async (req, res) => {
 // POST /api/staff/checkin
 r.post('/checkin', async (req, res) => {
   try {
-    const { itemId, borrowalId, condition, notes } = req.body || {};
+    const { itemId, userId, borrowalId, condition, notes } = req.body || {};
     if (!itemId) return res.status(400).json({ error: 'Missing itemId' });
+    if (!userId && !borrowalId) return res.status(400).json({ error: 'Missing userId or borrowalId' });
 
     const item = await Item.findById(itemId);
     if (!item) return res.status(404).json({ error: 'Item not found' });
 
-    // Find active borrowal for this item
+    // Find active borrowal for this item and user
     const borrowal = borrowalId 
       ? await Borrowal.findById(borrowalId)
-      : await Borrowal.findOne({ item: itemId, status: { $in: ['active', 'overdue'] } });
+      : await Borrowal.findOne({ 
+          item: itemId, 
+          user: userId,
+          status: { $in: ['active', 'overdue'] } 
+        });
 
-    if (borrowal) {
-      borrowal.status = 'returned';
-      borrowal.returnDate = new Date();
-      borrowal.conditionOnReturn = condition || 'good';
-      if (notes) borrowal.notes = notes;
-      await borrowal.save();
+    if (!borrowal) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'No active borrowal found for this item and student' 
+      });
     }
+
+    borrowal.status = 'returned';
+    borrowal.returnDate = new Date();
+    borrowal.checkedInBy = req.userId;
+    borrowal.conditionOnReturn = condition || 'good';
+    if (notes) borrowal.notes = notes;
+    await borrowal.save();
 
     // Restore quantity
     const totalQty = item.quantity || 1;
@@ -326,6 +515,59 @@ r.get('/reservations', validatePagination, async (req, res) => {
   } catch (error) {
     console.error('Error fetching reservations:', error);
     res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch reservations' });
+  }
+});
+
+// GET /api/staff/borrowals/active - Get all active borrowals
+r.get('/borrowals/active', validatePagination, async (req, res) => {
+  try {
+    const { page = 1, limit = 50, itemId } = req.query;
+    
+    const query = { status: { $in: ['active', 'overdue'] } };
+    if (itemId) query.item = itemId;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const borrowals = await Borrowal.find(query)
+      .populate('user', 'firstName lastName netId email')
+      .populate('item', 'name assetId')
+      .sort({ checkoutDate: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const results = borrowals.map(b => ({
+      id: b._id,
+      borrowalId: b._id,
+      student: {
+        id: b.user?._id,
+        name: b.user ? `${b.user.firstName} ${b.user.lastName}` : 'Unknown',
+        netId: b.user?.netId,
+        email: b.user?.email
+      },
+      item: {
+        id: b.item?._id,
+        name: b.item?.name || 'Unknown Item',
+        assetId: b.item?.assetId
+      },
+      checkoutDate: b.checkoutDate ? b.checkoutDate.toISOString() : null,
+      dueDate: b.dueDate ? b.dueDate.toISOString() : null,
+      status: b.status,
+      daysOverdue: b.daysOverdue || 0
+    }));
+
+    const total = await Borrowal.countDocuments(query);
+
+    return res.status(200).json({ 
+      borrowals: results,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching active borrowals:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch active borrowals' });
   }
 });
 
