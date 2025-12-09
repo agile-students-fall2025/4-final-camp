@@ -49,10 +49,6 @@ const Reservations = ({ onNavigate }) => {
     return reservations;
   }, [reservations, viewFilter]);
 
-  const handleMarkPrepared = (id) => {
-    alert(`Reservation ${id} marked as prepared`);
-  };
-
   const handleFastCheckout = async (reservation) => {
     if (checkoutLoading) return;
     if (!reservation.userId || !reservation.itemId) {
@@ -185,14 +181,6 @@ const Reservations = ({ onNavigate }) => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  {reservation.status === 'pending' && (
-                    <button
-                      onClick={() => handleMarkPrepared(reservation.id)}
-                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                    >
-                      Mark Prepared
-                    </button>
-                  )}
                   <button
                     onClick={() => handleFastCheckout(reservation)}
                     disabled={checkoutLoading === reservation.id}
