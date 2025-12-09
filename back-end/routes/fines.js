@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Fine = require('../models/Fine');
 const Borrowal = require('../models/Borrowal');
+const { createNotification } = require('../utils/notificationService');
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateFineCreation, validateMongoId, validatePagination } = require('../middleware/validation');
 
@@ -78,19 +79,41 @@ router.post("/:id/pay", authenticate, validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const { paymentMethod, transactionId } = req.body;
+    const User = require('../models/User');
 
-    const fine = await Fine.findById(id);
+    const fine = await Fine.findById(id)
+      .populate('user', 'email firstName lastName')
+      .populate('item', 'name');
     
     if (!fine) {
       return res.status(404).json({ error: 'Not Found', message: 'Fine not found' });
     }
 
-    if (fine.user.toString() !== req.userId.toString() && !['staff', 'admin'].includes(req.userRole)) {
+    if (fine.user._id.toString() !== req.userId.toString() && !['staff', 'admin'].includes(req.userRole)) {
       return res.status(403).json({ error: 'Forbidden', message: 'Access denied' });
     }
 
     if (fine.status === 'paid') {
       return res.status(400).json({ error: 'Bad Request', message: 'Fine already paid' });
+    }
+
+    // Check if user has sufficient Campus Cash balance
+    if (paymentMethod === 'campus-cash') {
+      const user = await User.findById(fine.user._id);
+      if (!user) {
+        return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+      }
+      
+      if ((user.campusCashBalance || 0) < fine.amount) {
+        return res.status(400).json({ 
+          error: 'Bad Request', 
+          message: 'Insufficient Campus Cash balance' 
+        });
+      }
+      
+      // Deduct from Campus Cash
+      user.campusCashBalance = (user.campusCashBalance || 0) - fine.amount;
+      await user.save();
     }
 
     fine.status = 'paid';
@@ -100,9 +123,12 @@ router.post("/:id/pay", authenticate, validateId, async (req, res) => {
 
     await fine.save();
 
+    const populatedFine = await fine.populate(['item', 'borrowal']);
+
     res.json({ 
       message: 'Fine paid successfully', 
-      fine: await fine.populate(['item', 'borrowal'])
+      fine: populatedFine,
+      receiptId: fine.receiptNumber
     });
   } catch (error) {
     console.error('Error paying fine:', error);
@@ -126,6 +152,20 @@ router.post("/", authenticate, authorize('staff', 'admin'), validateFineCreation
     });
 
     await fine.save();
+
+    try {
+      await createNotification({
+        userId,
+        type: 'fine',
+        title: 'New fine issued',
+        message: `A fine of $${amount.toFixed(2)} was issued for ${reason}.`,
+        relatedItem: itemId,
+        relatedBorrowal: borrowalId,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Fine creation notification failed:', notifyErr);
+    }
 
     res.status(201).json({
       message: 'Fine created successfully',
