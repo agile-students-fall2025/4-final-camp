@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { useAuth } from "./context/AuthContext.jsx";
+import { Home } from "lucide-react";
 
 import HomePage from "./pages/HomePage";
 import FilterAndSearchPage from "./pages/FilterAndSearchPage";
@@ -36,6 +37,7 @@ import StudentLoginPage from "./pages/StudentLoginPage.jsx";
 import StudentRegisterPage from "./pages/StudentRegisterPage.jsx";
 import StaffLoginPage from "./pages/staff/StaffLoginPage.jsx";
 import Protected from "./components/Protected.jsx";
+import NotificationInbox from "./components/NotificationInbox.jsx";
 
 export default function App() {
   const { role, logout, isAuthenticated, initializing } = useAuth();
@@ -140,18 +142,34 @@ export default function App() {
 
     return (
       <Protected allowedRoles={["staff"]}>
-      <div className="min-h-screen bg-gray-50">
-        <div className="p-4 bg-white shadow-sm flex justify-between items-center">
-          <h2 className="font-bold text-lg text-gray-800">C.A.M.P Staff Portal</h2>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-          >
-            Logout
-          </button>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Fixed Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCurrentPage('dashboard')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Dashboard"
+              >
+                <Home className="w-5 h-5 text-[#57068C]" />
+              </button>
+              <h2 className="font-bold text-base sm:text-lg text-gray-800">C.A.M.P Staff</h2>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <NotificationInbox />
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="p-4">
+        {/* Main Content */}
+        <div className="flex-1 p-4">
           {currentPage === "dashboard" && <StaffDashboard {...shared} />}
           {currentPage === "inventory" && <Inventory {...shared} />}
           {currentPage === "checkout" && <CheckOut {...shared} />}
@@ -174,15 +192,32 @@ export default function App() {
   if (role === "student" && isAuthenticated) {
     return (
       <Protected allowedRoles={["student"]}>
-      <div className="min-h-screen relative">
-        <button
-          onClick={handleLogout}
-          className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors z-50"
-        >
-          Logout
-        </button>
+      <div className="min-h-screen flex flex-col">
+        {/* Fixed Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <button
+              onClick={() => setCurrentPage('home')}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Home"
+            >
+              <Home className="w-5 h-5 text-[#57068C]" />
+            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <NotificationInbox />
+              <button
+                onClick={handleLogout}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg shadow-sm transition-colors text-sm sm:text-base"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
 
-        {currentPage === "home" && <HomePage onNavigate={setCurrentPage} />}
+        {/* Main Content */}
+        <div className="flex-1">
+          {currentPage === "home" && <HomePage onNavigate={setCurrentPage} />}
         {currentPage === "filter" && (
           <FilterAndSearchPage onNavigate={setCurrentPage} setSelectedItem={setSelectedItem} />
         )}
@@ -201,7 +236,7 @@ export default function App() {
           />
         )}
         {currentPage === "reservationConfirmed" && (
-          <ReservationConfirmedPage onNavigate={setCurrentPage} reservationData={reservationData} />
+          <ReservationConfirmedPage onNavigate={setCurrentPage} reservationData={reservationData} setSelectedItem={setSelectedItem} />
         )}
         {currentPage === "waitlistConfirmed" && (
           <WaitlistConfirmedPage onNavigate={setCurrentPage} waitlistData={waitlistData} />
@@ -223,6 +258,7 @@ export default function App() {
           <PaymentSuccessPage onNavigate={setCurrentPage} paymentResult={paymentResult} />
         )}
         {currentPage === "help" && <HelpAndPoliciesPage onNavigate={setCurrentPage} />}
+        </div>
       </div>
       </Protected>
     );

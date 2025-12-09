@@ -1,17 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Package, X, Check, AlertCircle, Search } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ArrowLeft, Package, X, Check, AlertCircle, Search, User } from 'lucide-react';
 import { useApiData } from '../../hooks/useApiData.js';
 import { api } from '../../services/api.js';
 
 const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
   const [itemSearch, setItemSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedBorrowal, setSelectedBorrowal] = useState(null);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [condition, setCondition] = useState('good');
   const [notes, setNotes] = useState('');
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinError, setCheckinError] = useState(null);
   const [checkinSuccess, setCheckinSuccess] = useState(false);
+  
+  // Active borrowals for the selected item
+  const [itemBorrowals, setItemBorrowals] = useState([]);
+  const [borrowalsLoading, setBorrowalsLoading] = useState(false);
 
   const { data, loading, error, refetch } = useApiData('staffInventory', {
     initialData: { items: [] }
@@ -56,7 +61,7 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
     ).slice(0, 10);
   }, [inventoryItems, itemSearch]);
 
-  const handleSelectItem = (item) => {
+  const handleSelectItem = async (item) => {
     setSelectedItem({
       id: item.id,
       name: item.name,
@@ -69,15 +74,34 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
     });
     setItemSearch('');
     setShowItemDropdown(false);
+    setSelectedBorrowal(null);
+    
+    // Fetch active borrowals for this item
+    setBorrowalsLoading(true);
+    try {
+      const res = await api.staffActiveBorrowals(item.id);
+      setItemBorrowals(res.borrowals || []);
+      // If only one borrowal, auto-select it
+      if (res.borrowals?.length === 1) {
+        setSelectedBorrowal(res.borrowals[0]);
+      }
+    } catch (err) {
+      console.error('Failed to load item borrowals:', err);
+      setItemBorrowals([]);
+    } finally {
+      setBorrowalsLoading(false);
+    }
   };
 
   const handleCompleteCheckIn = async () => {
-    if (checkinLoading || !selectedItem) return;
+    if (checkinLoading || !selectedItem || !selectedBorrowal) return;
     setCheckinError(null);
     setCheckinLoading(true);
 
     const payload = {
+      borrowalId: selectedBorrowal.id || selectedBorrowal.borrowalId,
       itemId: selectedItem.id,
+      userId: selectedBorrowal.student?.id,
       condition: condition,
       notes: notes
     };
@@ -96,6 +120,8 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
   const handleNewCheckin = () => {
     setCheckinSuccess(false);
     setSelectedItem(null);
+    setSelectedBorrowal(null);
+    setItemBorrowals([]);
     setItemSearch('');
     setCondition('good');
     setNotes('');
@@ -166,7 +192,7 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
         {overdueItems.length > 0 && !selectedItem && (
           <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 mb-4">
             <h3 className="font-semibold text-gray-800 mb-2">
-              ⚠️ Overdue Items ({overdueItems.length})
+              Overdue Items ({overdueItems.length})
             </h3>
             <div className="space-y-2">
               {overdueItems.slice(0, 3).map((item, index) => (
@@ -274,7 +300,11 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
                 </div>
               </div>
               <button
-                onClick={() => setSelectedItem(null)}
+                onClick={() => {
+                  setSelectedItem(null);
+                  setSelectedBorrowal(null);
+                  setItemBorrowals([]);
+                }}
                 className="p-2 hover:bg-violet-100 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-600" />
@@ -283,11 +313,77 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
           )}
         </div>
 
-        {/* Step 2: Condition Assessment */}
+        {/* Step 2: Select Borrower (only if item has multiple borrowals) */}
+        {selectedItem && (
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedBorrowal ? 'bg-violet-700' : 'bg-violet-500'} text-white font-bold`}>
+                {selectedBorrowal ? <Check className="w-5 h-5" /> : '2'}
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Select Borrower</h2>
+            </div>
+
+            {borrowalsLoading ? (
+              <p className="text-sm text-gray-500">Loading borrowers...</p>
+            ) : itemBorrowals.length === 0 ? (
+              <p className="text-sm text-gray-500">No active borrowals found for this item.</p>
+            ) : selectedBorrowal ? (
+              <div className="flex items-center justify-between p-4 bg-violet-50 border border-violet-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-violet-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {selectedBorrowal.student?.name?.charAt(0) || 'U'}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">{selectedBorrowal.student?.name || 'Unknown'}</div>
+                    <div className="text-sm text-gray-600">{selectedBorrowal.student?.netId} • {selectedBorrowal.student?.email}</div>
+                    <div className={`text-sm ${new Date(selectedBorrowal.dueDate) < new Date() ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                      Due: {new Date(selectedBorrowal.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(selectedBorrowal.dueDate) < new Date() && ' (OVERDUE)'}
+                    </div>
+                  </div>
+                </div>
+                {itemBorrowals.length > 1 && (
+                  <button
+                    onClick={() => setSelectedBorrowal(null)}
+                    className="p-2 hover:bg-violet-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600 mb-3">Select the student who is returning this item:</p>
+                {itemBorrowals.map((b) => (
+                  <button
+                    key={b.id || b.borrowalId}
+                    onClick={() => setSelectedBorrowal(b)}
+                    className="w-full text-left p-3 bg-gray-50 hover:bg-violet-50 rounded-lg border border-gray-200 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {b.student?.name?.charAt(0) || 'U'}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{b.student?.name || 'Unknown Student'}</div>
+                        <div className="text-sm text-gray-600">{b.student?.netId}</div>
+                      </div>
+                      <div className={`text-sm ${new Date(b.dueDate) < new Date() ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                        {new Date(b.dueDate) < new Date() ? 'OVERDUE' : `Due: ${new Date(b.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 3: Condition Assessment */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
           <div className="flex items-center gap-2 mb-4">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedItem ? 'bg-violet-500' : 'bg-gray-300'} text-white font-bold`}>
-              2
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedBorrowal ? 'bg-violet-500' : 'bg-gray-300'} text-white font-bold`}>
+              3
             </div>
             <h2 className="text-lg font-semibold text-gray-900">Condition Assessment</h2>
           </div>
@@ -296,19 +392,19 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
             {[
               { value: 'good', label: 'Good', icon: 'OK', color: 'violet' },
               { value: 'fair', label: 'Fair', icon: '○', color: 'violet' },
-              { value: 'damaged', label: 'Damaged', icon: '⚠', color: 'gray' },
-              { value: 'needs-repair', label: 'Needs Repair', icon: '🔧', color: 'gray' }
+              { value: 'damaged', label: 'Damaged', icon: '!', color: 'gray' },
+              { value: 'needs-repair', label: 'Needs Repair', icon: '⛏', color: 'gray' }
             ].map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => selectedItem && setCondition(opt.value)}
-                disabled={!selectedItem}
+                onClick={() => selectedBorrowal && setCondition(opt.value)}
+                disabled={!selectedBorrowal}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   condition === opt.value
                     ? opt.color === 'violet' ? 'border-violet-500 bg-violet-50'
                     : 'border-gray-500 bg-gray-100'
                     : 'border-gray-200 hover:border-gray-300'
-                } ${!selectedItem ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${!selectedBorrowal ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className="text-2xl mb-1">{opt.icon}</div>
                 <div className="font-medium text-gray-900">{opt.label}</div>
@@ -357,9 +453,9 @@ const CheckIn = ({ onNavigate, selectedItem: prefillData }) => {
         <div className="space-y-3">
           <button
             onClick={handleCompleteCheckIn}
-            disabled={!selectedItem || checkinLoading}
+            disabled={!selectedItem || !selectedBorrowal || checkinLoading}
             className={`w-full py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
-              selectedItem && !checkinLoading
+              selectedItem && selectedBorrowal && !checkinLoading
                 ? 'bg-violet-500 text-white hover:bg-violet-600'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}

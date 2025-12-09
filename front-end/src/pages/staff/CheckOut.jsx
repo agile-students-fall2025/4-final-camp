@@ -14,6 +14,8 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
   const [successBorrowal, setSuccessBorrowal] = useState(null);
+  const [studentBorrowals, setStudentBorrowals] = useState({ active: [], history: [] });
+  const [borrowalsLoading, setBorrowalsLoading] = useState(false);
 
   const {
     data: studentsPayload,
@@ -57,37 +59,54 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
 
   // Live filter students as user types
   const filteredStudents = useMemo(() => {
-    if (!studentSearch.trim()) return students.slice(0, 5);
+    if (!studentSearch.trim()) return students.slice(0, 20);
     const query = studentSearch.toLowerCase();
     return students.filter(s => 
       s.name.toLowerCase().includes(query) ||
       s.netId.toLowerCase().includes(query) ||
       s.email?.toLowerCase().includes(query)
-    ).slice(0, 8);
+    ).slice(0, 20);
   }, [students, studentSearch]);
 
   // Live filter items as user types
   const filteredItems = useMemo(() => {
-    if (!itemSearch.trim()) return inventoryItems.filter(i => i.availableQuantity > 0).slice(0, 5);
+    const availableItems = inventoryItems.filter(i => i.availableQuantity > 0);
+    if (!itemSearch.trim()) return availableItems.slice(0, 20);
     const query = itemSearch.toLowerCase();
-    return inventoryItems.filter(i => 
+    return availableItems.filter(i => 
       i.name.toLowerCase().includes(query) ||
       i.assetId?.toLowerCase().includes(query) ||
       i.category?.toLowerCase().includes(query) ||
       i.location?.toLowerCase().includes(query)
-    ).slice(0, 8);
+    ).slice(0, 20);
   }, [inventoryItems, itemSearch]);
 
-  const handleSelectStudent = (student) => {
+  const handleSelectStudent = async (student) => {
     setSelectedStudent({
       id: student.id,
       name: student.name,
       netId: student.netId,
       email: student.email,
-      fines: student.activeFines?.length || 0
+      fines: student.activeFines?.length || 0,
+      finesTotal: student.activeFines?.reduce((sum, f) => sum + (f.amount || 0), 0) || 0
     });
     setStudentSearch('');
     setShowStudentDropdown(false);
+    
+    // Fetch student's borrowals
+    setBorrowalsLoading(true);
+    try {
+      const res = await api.staffStudentBorrowals(student.id);
+      setStudentBorrowals({
+        active: res.active || [],
+        history: res.history || []
+      });
+    } catch (err) {
+      console.error('Failed to load student borrowals:', err);
+      setStudentBorrowals({ active: [], history: [] });
+    } finally {
+      setBorrowalsLoading(false);
+    }
   };
 
   const handleSelectItem = (item) => {
@@ -132,6 +151,7 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
     setSelectedItem(null);
     setStudentSearch('');
     setItemSearch('');
+    setStudentBorrowals({ active: [], history: [] });
   };
 
   if (successBorrowal) {
@@ -211,8 +231,8 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
                         <div className="text-sm text-gray-600">
                           {student.netId} • {student.email}
                           {student.activeFines?.length > 0 && (
-                            <span className="ml-2 text-violet-600">
-                              ⚠️ {student.activeFines.length} fine(s)
+                            <span className="ml-2 text-violet-600 font-medium">
+                              {student.activeFines.length} fine(s) - ${student.activeFines.reduce((sum, f) => sum + (f.amount || 0), 0).toFixed(2)}
                             </span>
                           )}
                         </div>
@@ -234,7 +254,10 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
                 </div>
               </div>
               <button
-                onClick={() => setSelectedStudent(null)}
+                onClick={() => {
+                  setSelectedStudent(null);
+                  setStudentBorrowals({ active: [], history: [] });
+                }}
                 className="p-2 hover:bg-violet-100 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-600" />
@@ -246,8 +269,36 @@ const CheckOut = ({ onNavigate, selectedItem: prefillData }) => {
             <div className="mt-3 p-3 bg-violet-50 border border-violet-200 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-violet-600" />
               <span className="text-sm text-violet-700">
-                This student has {selectedStudent.fines} unpaid fine(s). Checkout is still allowed.
+                This student has {selectedStudent.fines} unpaid fine(s) totaling <strong>${selectedStudent.finesTotal?.toFixed(2) || '0.00'}</strong>. Checkout is still allowed.
               </span>
+            </div>
+          )}
+
+          {/* Student's Current Borrowals */}
+          {selectedStudent && (
+            <div className="mt-4">
+              {borrowalsLoading ? (
+                <p className="text-sm text-gray-500">Loading borrowals...</p>
+              ) : studentBorrowals.active.length > 0 ? (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Current Borrowals ({studentBorrowals.active.length})
+                  </h4>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {studentBorrowals.active.map((b) => (
+                      <div key={b.id} className="flex justify-between items-center text-sm p-2 bg-white rounded border border-gray-100">
+                        <span className="font-medium text-gray-900">{b.item?.name || 'Unknown Item'}</span>
+                        <span className={`text-xs ${new Date(b.dueDate) < new Date() ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                          Due: {new Date(b.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {new Date(b.dueDate) < new Date() && ' (OVERDUE)'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No active borrowals</p>
+              )}
             </div>
           )}
         </div>
