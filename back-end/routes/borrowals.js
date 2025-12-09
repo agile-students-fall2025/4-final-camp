@@ -3,6 +3,7 @@ const r = express.Router();
 const Borrowal = require('../models/Borrowal');
 const Item = require('../models/Item');
 const User = require('../models/User');
+const { createNotification, notifyWaitlistForItem } = require('../utils/notificationService');
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateBorrowalCreation, validateMongoId, validatePagination } = require('../middleware/validation');
 
@@ -133,6 +134,20 @@ r.post('/checkout', authenticate, authorize('staff', 'admin'), validateBorrowalC
     item.status = 'checked-out';
     await item.save();
 
+    try {
+      await createNotification({
+        userId: userId,
+        type: 'borrowal',
+        title: 'Item checked out',
+        message: `You checked out "${item.name}". Due on ${new Date(dueDate).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`,
+        relatedItem: item._id,
+        relatedBorrowal: borrowal._id,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Checkout notification failed:', notifyErr);
+    }
+
     res.status(201).json({
       message: 'Item checked out successfully',
       borrowal: await borrowal.populate({
@@ -174,6 +189,27 @@ r.put('/:id/return', authenticate, authorize('staff', 'admin'), validateId, asyn
     if (item) {
       item.status = 'available';
       await item.save();
+      
+      // Notify waitlist users that item is now available
+      try {
+        await notifyWaitlistForItem(item._id);
+      } catch (waitlistErr) {
+        console.error('Waitlist notification failed:', waitlistErr);
+      }
+    }
+
+    try {
+      await createNotification({
+        userId: borrowal.user,
+        type: 'borrowal',
+        title: 'Return confirmed',
+        message: `Thanks for returning "${item?.name || 'your item'}".`,
+        relatedItem: borrowal.item,
+        relatedBorrowal: borrowal._id,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Return notification failed:', notifyErr);
     }
 
     res.json({
@@ -212,6 +248,21 @@ r.put('/:id/renew', authenticate, validateId, async (req, res) => {
     borrowal.dueDate = new Date(borrowal.dueDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     await borrowal.save();
+
+    try {
+      const renewedItem = await Item.findById(borrowal.item);
+      await createNotification({
+        userId: borrowal.user,
+        type: 'borrowal',
+        title: 'Borrowal renewed',
+        message: `Your borrowal for "${renewedItem?.name || 'your item'}" was renewed. New due date: ${borrowal.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`,
+        relatedBorrowal: borrowal._id,
+        relatedItem: borrowal.item,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Renew notification failed:', notifyErr);
+    }
 
     res.json({
       message: 'Borrowal renewed successfully',
