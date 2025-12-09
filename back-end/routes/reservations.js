@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Reservation = require('../models/Reservation');
 const Item = require('../models/Item');
+const { createNotification } = require('../utils/notificationService');
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateReservationCreation, validateMongoId, validatePagination } = require('../middleware/validation');
 
@@ -161,6 +162,20 @@ router.post("/", authenticate, validateReservationCreation, async (req, res) => 
       populate: { path: 'facility', select: 'name location' }
     });
 
+    try {
+      await createNotification({
+        userId: req.userId,
+        type: 'reservation',
+        title: 'Reservation confirmed',
+        message: `Your reservation for "${item.name}" is confirmed for ${pickupAt.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}.`,
+        relatedItem: item._id,
+        relatedReservation: reservation._id,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Reservation notification failed:', notifyErr);
+    }
+
     res.status(201).json({
       message: 'Reservation created successfully',
       reservation: populated
@@ -224,6 +239,20 @@ router.put("/:id/cancel", authenticate, validateId, async (req, res) => {
     if (item && item.status === 'reserved') {
       item.status = 'available';
       await item.save();
+    }
+
+    try {
+      await createNotification({
+        userId: reservation.user,
+        type: 'reservation',
+        title: 'Reservation cancelled',
+        message: `Your reservation for "${item?.name || 'your item'}" has been cancelled.`,
+        relatedItem: reservation.item,
+        relatedReservation: reservation._id,
+        sendEmailNotification: true,
+      });
+    } catch (notifyErr) {
+      console.error('Reservation cancel notification failed:', notifyErr);
     }
 
     res.json({ message: 'Reservation cancelled successfully', reservation });
