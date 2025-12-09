@@ -8,24 +8,60 @@ const { validateMongoId } = require('../middleware/validation');
 // GET /api/waitlist - Get user's waitlist entries
 r.get('/', authenticate, async (req, res) => {
   try {
-    const entries = await Waitlist.find({ user: req.userId, status: 'waiting' })
-      .populate('item', 'name category facility imageUrl')
-      .populate('facility', 'name location')
+    // Get both 'waiting' and 'notified' entries (notified means item is available)
+    const entries = await Waitlist.find({ 
+      user: req.userId, 
+      status: { $in: ['waiting', 'notified'] }
+    })
+      .populate({
+        path: 'item',
+        select: 'name category facility imageUrl',
+        populate: {
+          path: 'facility',
+          select: 'name location',
+          model: 'Facility'
+        }
+      })
       .sort({ createdAt: -1 });
 
-    res.json({
-      waitlist: entries.map(e => ({
-        id: e._id,
-        item: e.item.name,
-        position: e.position,
-        addedAt: e.createdAt,
-        facility: e.facility.name,
-        estimatedAvailability: e.estimatedAvailability
-      }))
-    });
+    const waitlist = entries
+      .filter(e => e.item && e.item._id) // Filter out entries with deleted items
+      .map(e => {
+        try {
+          // Handle facility - it might be populated object or ObjectId
+          let facilityName = 'Unknown Facility';
+          if (e.item && e.item.facility) {
+            if (typeof e.item.facility === 'object' && e.item.facility !== null && e.item.facility.name) {
+              facilityName = e.item.facility.name;
+            }
+          }
+
+          return {
+            id: e._id.toString(),
+            itemId: e.item._id ? e.item._id.toString() : '',
+            item: e.item.name || 'Unknown Item',
+            position: e.position,
+            addedAt: e.createdAt,
+            facility: facilityName,
+            status: e.status, // Include status so frontend can differentiate
+            notifiedAt: e.notifiedAt
+          };
+        } catch (mapError) {
+          console.error('Error mapping waitlist entry:', mapError, e);
+          return null;
+        }
+      })
+      .filter(e => e !== null); // Remove any null entries from mapping errors
+
+    res.json({ waitlist });
   } catch (error) {
     console.error('Error fetching waitlist:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch waitlist' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to fetch waitlist',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -60,7 +96,6 @@ r.post('/', authenticate, async (req, res) => {
     const waitlistEntry = new Waitlist({
       user: req.userId,
       item: itemId,
-      facility: item.facility,
       position
     });
 
