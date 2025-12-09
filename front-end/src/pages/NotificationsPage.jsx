@@ -15,15 +15,15 @@ export default function NotificationsPage({ onNavigate }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center items-start sm:space-x-4 space-y-2 sm:space-y-0">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => onNavigate('home')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Notifications</h1>
           </div>
         </div>
       </div>
