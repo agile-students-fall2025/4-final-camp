@@ -31,6 +31,7 @@ async function req(path, init) {
 export const api = {
   health: () => req('/api/health'),
   items: (q='') => req(`/api/items${q ? `?${q}` : ''}`),
+  suggestedItems: (itemId) => req(`/api/items/${encodeURIComponent(itemId)}/suggested`),
   createItem: (payload) => req('/api/items', { method: 'POST', body: JSON.stringify(payload) }),
   facilities: () => req('/api/facilities'),
   facilityItems: (slug) => req(`/api/facilities/${slug}/items`),
@@ -60,6 +61,10 @@ export const api = {
   staffReservations: () => req('/api/staff/reservations'),
   staffOverdue: () => req('/api/staff/overdue'),
   students: () => req('/api/users'),
+  // New staff student search and borrowal endpoints
+  staffSearchStudents: (query) => req(`/api/staff/students/search?q=${encodeURIComponent(query)}`),
+  staffStudentBorrowals: (userId) => req(`/api/staff/students/${encodeURIComponent(userId)}/borrowals`),
+  staffActiveBorrowals: (itemId) => req(`/api/staff/borrowals/active${itemId ? `?itemId=${encodeURIComponent(itemId)}` : ''}`),
   staffCheckout: (payload) => req('/api/staff/checkout', { method: 'POST', body: JSON.stringify(payload) }),
   staffCheckin: (payload) => req('/api/staff/checkin', { method: 'POST', body: JSON.stringify(payload) }),
   // Fines and payments
@@ -67,4 +72,15 @@ export const api = {
   payFine: (fineId, payload) => req(`/api/fines/${encodeURIComponent(fineId)}/pay`, { method: 'POST', body: JSON.stringify(payload) }),
   // Campus Cash / Funds
   addFunds: (payload) => req('/api/users/add-funds', { method: 'POST', body: JSON.stringify(payload) }),
+  // Waitlist
+  getWaitlist: () => req('/api/waitlist'),
+  joinWaitlist: (payload) => req('/api/waitlist', { method: 'POST', body: JSON.stringify(payload) }),
+  // Notifications
+  getNotifications: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return req(`/api/notifications${qs}`);
+  },
+  getUnreadNotificationCount: () => req('/api/notifications/unread-count'),
+  markNotificationRead: (id) => req(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'PUT' }),
+  markAllNotificationsRead: () => req('/api/notifications/read-all', { method: 'PUT' }),
 };
