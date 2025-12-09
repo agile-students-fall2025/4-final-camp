@@ -34,15 +34,15 @@ export default function FinesPage({ onNavigate, setSelectedFine }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => onNavigate('home')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Fines & Payments</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Fines & Payments</h1>
           </div>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function FinesPage({ onNavigate, setSelectedFine }) {
             ) : unpaidFines.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
                 <CreditCard className="w-12 h-12 text-[#57068C] mx-auto mb-3" />
-                <p className="text-gray-600 font-medium">No outstanding fines! 🎉</p>
+                <p className="text-gray-600 font-medium">No outstanding fines!</p>
                 <p className="text-sm text-gray-500 mt-1">You're all caught up.</p>
               </div>
             ) : (
