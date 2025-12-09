@@ -5,22 +5,39 @@ const User = require('../models/User');
 const { authenticate } = require('../middleware/auth');
 const { validatePagination } = require('../middleware/validation');
 
+// GET /api/notifications/unread-count - Get unread notification count
+router.get('/unread-count', authenticate, async (req, res) => {
+  try {
+    const unreadCount = await Notification.countDocuments({ 
+      user: req.userId, 
+      isRead: false 
+    });
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Error fetching unread count:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to fetch unread count' });
+  }
+});
+
 // GET /api/notifications - Get user's notifications
 router.get('/', authenticate, validatePagination, async (req, res) => {
   try {
     const { unreadOnly, page = 1, limit = 20 } = req.query;
     
     const query = { user: req.userId };
-    if (unreadOnly === 'true') query.read = false;
+    if (unreadOnly === 'true') query.isRead = false;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const notifications = await Notification.find(query)
+      .populate('relatedItem', 'name')
+      .populate('relatedBorrowal')
+      .populate('relatedReservation')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
     const total = await Notification.countDocuments(query);
-    const unreadCount = await Notification.countDocuments({ user: req.userId, read: false });
+    const unreadCount = await Notification.countDocuments({ user: req.userId, isRead: false });
 
     res.json({
       notifications,
@@ -48,7 +65,8 @@ router.put('/:id/read', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Not Found', message: 'Notification not found' });
     }
 
-    notification.read = true;
+    notification.isRead = true;
+    notification.readAt = new Date();
     await notification.save();
 
     res.json({ message: 'Notification marked as read', notification });
@@ -62,8 +80,8 @@ router.put('/:id/read', authenticate, async (req, res) => {
 router.put('/read-all', authenticate, async (req, res) => {
   try {
     const result = await Notification.updateMany(
-      { user: req.userId, read: false },
-      { $set: { read: true } }
+      { user: req.userId, isRead: false },
+      { $set: { isRead: true, readAt: new Date() } }
     );
 
     res.json({ message: 'All notifications marked as read', modifiedCount: result.modifiedCount });
