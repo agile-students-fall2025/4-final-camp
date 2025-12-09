@@ -1,6 +1,7 @@
 const express = require('express');
 const r = express.Router();
 const Fine = require('../models/Fine');
+const { createNotification } = require('../utils/notificationService');
 const { authenticate } = require('../middleware/auth');
 const { validateMongoId } = require('../middleware/validation');
 
@@ -14,7 +15,9 @@ r.post('/:fineId/pay', authenticate, validateMongoId('fineId'), async (req, res)
       return res.status(400).json({ error: 'Missing payment fields' });
     }
 
-    const fine = await Fine.findById(fineId);
+    const fine = await Fine.findById(fineId)
+      .populate('user', 'email firstName lastName notificationPreferences')
+      .populate('item', 'name');
     
     if (!fine) {
       return res.status(404).json({ error: 'Not Found', message: 'Fine not found' });
@@ -34,6 +37,19 @@ r.post('/:fineId/pay', authenticate, validateMongoId('fineId'), async (req, res)
     fine.receiptNumber = `R-${Date.now()}`;
 
     await fine.save();
+
+    try {
+      await createNotification({
+        userId: fine.user?._id || req.userId,
+        type: 'fine',
+        title: 'Payment received',
+        message: `Payment received for fine ${fine.receiptNumber}. Amount: $${(fine.amount || 0).toFixed(2)}.`,
+        relatedItem: fine.item?._id,
+        relatedBorrowal: fine.borrowal,
+      });
+    } catch (notifyErr) {
+      console.error('Payment notification failed:', notifyErr);
+    }
 
     return res.status(201).json({ 
       ok: true, 
