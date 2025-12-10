@@ -9,6 +9,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy - needed when behind nginx reverse proxy
+app.set('trust proxy', 1);
+
 /* ---------- core middleware ---------- */
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
