@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, CheckCheck, Clock, List, Calendar, DollarSign } from 'lucide-react';
 import { api } from '../services/api.js';
 
@@ -7,7 +7,9 @@ export default function NotificationInbox() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const panelRef = useRef(null);
 
+  // ================= API ===================
   const fetchNotifications = async () => {
     setLoading(true);
     try {
@@ -30,9 +32,9 @@ export default function NotificationInbox() {
     }
   };
 
+  // ================= EFFECTS ===================
   useEffect(() => {
     fetchUnreadCount();
-    // Refresh unread count every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -40,18 +42,29 @@ export default function NotificationInbox() {
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
+      document.body.style.overflow = "hidden"; // scroll lock
+      panelRef.current?.focus(); // focus trap entry
+    } else {
+      document.body.style.overflow = "auto";
     }
+    return () => (document.body.style.overflow = "auto");
   }, [isOpen]);
 
-  const handleMarkAsRead = async (notificationId) => {
+  // Esc key close
+  useEffect(() => {
+    const closeOnEscape = (e) => e.key === "Escape" && setIsOpen(false);
+    if (isOpen) window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isOpen]);
+
+  // ================= HANDLERS ===================
+  const handleMarkAsRead = async (id) => {
     try {
-      await api.markNotificationRead(notificationId);
-      setNotifications(prev => 
-        prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
-      );
+      await api.markNotificationRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error marking notification:', error);
     }
   };
 
@@ -61,39 +74,37 @@ export default function NotificationInbox() {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error('Error marking all notifications:', error);
     }
   };
 
+  // ================= UI HELPERS ===================
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'reminder':
-      case 'overdue':
-        return <Clock className="w-5 h-5 text-gray-600" />;
-      case 'waitlist':
-        return <List className="w-5 h-5 text-gray-600" />;
-      case 'reservation':
-        return <Calendar className="w-5 h-5 text-gray-600" />;
-      case 'fine':
-        return <DollarSign className="w-5 h-5 text-gray-600" />;
-      default:
-        return <Bell className="w-5 h-5 text-gray-600" />;
+      case 'overdue': return <Clock className="w-5 h-5 text-gray-600" />;
+      case 'waitlist': return <List className="w-5 h-5 text-gray-600" />;
+      case 'reservation': return <Calendar className="w-5 h-5 text-gray-600" />;
+      case 'fine': return <DollarSign className="w-5 h-5 text-gray-600" />;
+      default: return <Bell className="w-5 h-5 text-gray-600" />;
     }
   };
 
   const getNotificationColor = (type, priority) => {
     if (type === 'overdue' || priority === 'high') return 'border-red-200 bg-red-50';
-    if (type === 'waitlist' || priority === 'high') return 'border-violet-200 bg-violet-50';
+    if (type === 'waitlist') return 'border-violet-200 bg-violet-50';
     if (type === 'reminder') return 'border-yellow-200 bg-yellow-50';
     return 'border-gray-200 bg-white';
   };
 
+  // ================= UI ===================
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm transition-colors"
+        className="relative p-2 bg-gray-100 hover:bg-gray-200 rounded-lg shadow-sm transition"
         aria-label="Notifications"
+        aria-expanded={isOpen}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -105,16 +116,18 @@ export default function NotificationInbox() {
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsOpen(false)}
-          />
-            <div className="
-              fixed sm:absolute
-              inset-x-2 sm:inset-x-auto
-              sm:right-0
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setIsOpen(false)} />
+
+          {/* Panel */}
+          <div
+            ref={panelRef}
+            tabIndex={-1}
+            className="
+              fixed
+              left-2 right-2 sm:left-auto sm:right-0
               top-14 sm:top-12
-              w-auto sm:w-96
+              w-[calc(100%-1rem)] sm:w-96
               max-w-full
               bg-white
               rounded-lg
@@ -123,74 +136,62 @@ export default function NotificationInbox() {
               z-50
               max-h-[calc(100vh-6rem)]
               flex flex-col
-            ">
+              transition-all duration-200 ease-out
+              animate-in fade-in slide-in-from-top-5
+              focus:outline-none
+            "
+          >
 
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-              <div className="flex items-center gap-2">
+            {/* Header */}
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="font-semibold">Notifications</h3>
+              <div className="flex gap-2">
                 {unreadCount > 0 && (
-                  <button
-                    onClick={handleMarkAllAsRead}
-                    className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                    title="Mark all as read"
-                  >
-                    <CheckCheck className="w-4 h-4" />
-                    Mark all read
+                  <button onClick={handleMarkAllAsRead} className="text-sm hover:text-black">
+                    <CheckCheck className="w-4 h-4 inline mr-1" /> Mark all
                   </button>
                 )}
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
+                <button onClick={() => setIsOpen(false)}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
+            {/* Body */}
             <div className="overflow-y-auto flex-1">
-              {loading ? (
-                <div className="p-8 text-center text-gray-500">Loading notifications...</div>
-              ) : notifications.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">No notifications</div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification._id}
-                      className={`p-4 border-l-4 ${getNotificationColor(notification.type, notification.priority)} ${
-                        !notification.isRead ? 'font-medium' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            {getNotificationIcon(notification.type)}
-                            <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
-                          </div>
-                          <p className="text-sm text-gray-700">{notification.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                        {!notification.isRead && (
-                          <button
-                            onClick={() => handleMarkAsRead(notification._id)}
-                            className="p-1 hover:bg-gray-200 rounded"
-                            title="Mark as read"
-                          >
-                            <Check className="w-4 h-4 text-gray-600" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {loading && <div className="p-6 text-center">Loading...</div>}
+              {!loading && notifications.length === 0 && (
+                <div className="p-6 text-center text-gray-500">No notifications</div>
               )}
+              {!loading && notifications.map(n => (
+                <div
+                  key={n._id}
+                  className={`p-4 border-l-4 ${getNotificationColor(n.type, n.priority)} ${!n.isRead && 'font-medium'}`}
+                >
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        {getNotificationIcon(n.type)}
+                        <h4 className="text-sm">{n.title}</h4>
+                      </div>
+                      <p className="text-sm">{n.message}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(n.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {!n.isRead && (
+                      <button onClick={() => handleMarkAsRead(n._id)} title="Mark as read">
+                        <Check className="w-4 h-4 text-gray-600" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
+
           </div>
         </>
       )}
     </div>
   );
 }
-
