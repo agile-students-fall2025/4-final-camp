@@ -13,7 +13,7 @@ const itemSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Camera', 'Laptop', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other'],
+    enum: ['Camera', 'Audio', 'Lighting', 'Computer', 'Accessory', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other'],
   },
   facility: {
     type: mongoose.Schema.Types.ObjectId,
