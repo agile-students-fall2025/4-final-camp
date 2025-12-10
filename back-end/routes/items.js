@@ -258,6 +258,98 @@ router.delete("/:id", authenticate, authorize('staff', 'admin'), validateId, asy
   }
 });
 
+// GET /api/items/:id/suggested - Get related/suggested items based on category and tags
+router.get("/:id/suggested", optionalAuth, validateId, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 4 } = req.query;
+
+    // Get the original item
+    const originalItem = await Item.findById(id);
+    if (!originalItem) {
+      return res.status(404).json({ 
+        error: 'Not Found',
+        message: 'Item not found' 
+      });
+    }
+
+    // Find related items: same category, same facility, or matching tags
+    // Exclude the original item
+    const query = {
+      _id: { $ne: id },
+      isActive: true,
+      status: 'available',
+      $or: [
+        { category: originalItem.category },
+        { facility: originalItem.facility },
+        { tags: { $in: originalItem.tags || [] } }
+      ]
+    };
+
+    // Get suggested items, prioritizing same category
+    let suggestedItems = await Item.find(query)
+      .populate('facility', 'name location')
+      .limit(parseInt(limit) * 2) // Get more to allow sorting
+      .sort({ category: 1, createdAt: -1 });
+
+    // Score and sort suggestions
+    suggestedItems = suggestedItems.map(item => {
+      let score = 0;
+      if (item.category === originalItem.category) score += 3;
+      if (item.facility?.toString() === originalItem.facility?.toString()) score += 2;
+      if (item.tags?.some(tag => originalItem.tags?.includes(tag))) score += 1;
+      return { ...item.toObject(), relevanceScore: score };
+    });
+
+    // Sort by relevance score and limit
+    suggestedItems.sort((a, b) => b.relevanceScore - a.relevanceScore);
+    suggestedItems = suggestedItems.slice(0, parseInt(limit));
+
+    // Compute availability for each suggested item
+    const suggestionsWithAvailability = await Promise.all(suggestedItems.map(async (item) => {
+      const totalQty = item.quantity || 1;
+      const activeBorrowals = await Borrowal.countDocuments({
+        item: item._id,
+        status: { $in: ['active', 'overdue'] }
+      });
+      const activeReservations = await Reservation.countDocuments({
+        item: item._id,
+        status: 'active'
+      });
+      const availableQty = Math.max(0, totalQty - activeBorrowals - activeReservations);
+
+      return {
+        id: item._id,
+        name: item.name,
+        category: item.category,
+        facility: item.facility?.name || 'Unknown',
+        facilityId: item.facility?._id,
+        imageUrl: item.imageUrl,
+        status: availableQty > 0 ? 'available' : 'unavailable',
+        quantity: totalQty,
+        availableQuantity: availableQty,
+        description: item.description?.substring(0, 100) + (item.description?.length > 100 ? '...' : ''),
+        relevanceScore: item.relevanceScore
+      };
+    }));
+
+    res.json({
+      originalItem: {
+        id: originalItem._id,
+        name: originalItem.name,
+        category: originalItem.category
+      },
+      suggestions: suggestionsWithAvailability
+    });
+  } catch (error) {
+    console.error('Error getting suggested items:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get suggested items' 
+    });
+  }
+});
+
 module.exports = router;
 
 // [Task #502] Update: Modify item management routes
