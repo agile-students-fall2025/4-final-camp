@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { api } from '../services/api.js';
 
 export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistData }) {
+  const [waitlistError, setWaitlistError] = useState('');
+  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
+  const [currentWaitlistEntry, setCurrentWaitlistEntry] = useState(null);
+  const [loadingWaitlist, setLoadingWaitlist] = useState(true);
+
   if (!selectedItem) {
     onNavigate('filter');
     return null;
@@ -20,35 +26,108 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
   const availableQuantity = selectedItem.availableQuantity ?? (normalizedStatus === 'available' ? 1 : 0);
   const isAvailable = availableQuantity > 0;
 
+  // Check if user is already on waitlist for this item
+  useEffect(() => {
+    const checkWaitlist = async () => {
+      if (!selectedItem) return;
+      
+      setLoadingWaitlist(true);
+      try {
+        const itemId = selectedItem._id || selectedItem.id;
+        if (!itemId) {
+          setLoadingWaitlist(false);
+          return;
+        }
+
+        const response = await api.getWaitlist();
+        const waitlistEntries = response.waitlist || [];
+        
+        // Find if current item is in waitlist (normalize both to strings for comparison)
+        const itemIdStr = String(itemId);
+        const entry = waitlistEntries.find(
+          e => String(e.itemId) === itemIdStr
+        );
+        
+        // If entry exists but status is 'notified', it means item is available
+        // Don't show waitlist position in this case - user should reserve instead
+        if (entry && entry.status === 'notified') {
+          setCurrentWaitlistEntry(null); // Don't show waitlist info, item is available
+        } else {
+          setCurrentWaitlistEntry(entry || null);
+        }
+      } catch (err) {
+        // If user is not logged in or other error, just don't show waitlist info
+        setCurrentWaitlistEntry(null);
+      } finally {
+        setLoadingWaitlist(false);
+      }
+    };
+
+    checkWaitlist();
+  }, [selectedItem]);
+
   const handleReserve = () => {
     onNavigate('reserveDateTime');
   };
 
-  const handleJoinWaitlist = () => {
-    const waitlistNumber = `W-${Math.floor(Math.random() * 9000) + 1000}`;
-    const waitlist = {
-      number: waitlistNumber,
-      item: selectedItem.name,
-      facility: facilityName,
-      expectedBack: selectedItem.expectedBack || 'TBD'
-    };
-    setWaitlistData(waitlist);
-    onNavigate('waitlistConfirmed');
+  const handleJoinWaitlist = async () => {
+    setWaitlistError('');
+    setIsJoiningWaitlist(true);
+
+    try {
+      const itemId = selectedItem._id || selectedItem.id;
+      if (!itemId) {
+        throw new Error('Item ID not found');
+      }
+
+      const response = await api.joinWaitlist({ itemId });
+      
+      // Update the current waitlist entry with the new position
+      setCurrentWaitlistEntry({
+        itemId: itemId.toString(),
+        position: response.position,
+        item: selectedItem.name
+      });
+      
+      // Use the position from the backend response
+      const waitlist = {
+        position: response.position,
+        item: selectedItem.name,
+        facility: facilityName,
+        expectedBack: selectedItem.expectedBack || 'TBD'
+      };
+      
+      setWaitlistData(waitlist);
+      onNavigate('waitlistConfirmed');
+    } catch (err) {
+      const errMsg = err.message || '';
+      if (errMsg.includes('400') && (errMsg.includes('Already on waitlist') || errMsg.includes('already'))) {
+        setWaitlistError('You are already on the waitlist for this item.');
+      } else if (errMsg.includes('404')) {
+        setWaitlistError('Item not found. Please try again.');
+      } else if (errMsg.includes('401')) {
+        setWaitlistError('Please log in to join the waitlist.');
+      } else {
+        setWaitlistError('Failed to join waitlist. Please try again.');
+      }
+    } finally {
+      setIsJoiningWaitlist(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center items-start sm:space-x-4 space-y-2 sm:space-y-0">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => onNavigate('filter')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Item Detail</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Item Detail</h1>
           </div>
         </div>
       </div>
@@ -107,12 +186,30 @@ export default function ItemDetailPage({ onNavigate, selectedItem, setWaitlistDa
               </span>
             </div>
 
-            <button
-              onClick={handleJoinWaitlist}
-              className="w-full py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-            >
-              Join Waitlist
-            </button>
+            {waitlistError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{waitlistError}</p>
+              </div>
+            )}
+            
+            {loadingWaitlist ? (
+              <div className="w-full py-3 bg-gray-100 text-gray-500 font-semibold rounded-lg text-center">
+                Checking waitlist...
+              </div>
+            ) : currentWaitlistEntry ? (
+              <div className="w-full py-3 bg-violet-50 border-2 border-violet-200 rounded-lg text-center">
+                <p className="text-gray-700 font-semibold mb-1">You're on the waitlist!</p>
+                <p className="text-violet-700 font-bold text-lg">Position: #{currentWaitlistEntry.position}</p>
+              </div>
+            ) : (
+              <button
+                onClick={handleJoinWaitlist}
+                disabled={isJoiningWaitlist}
+                className="w-full py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isJoiningWaitlist ? 'Joining Waitlist...' : 'Join Waitlist'}
+              </button>
+            )}
           </div>
         )}
 
