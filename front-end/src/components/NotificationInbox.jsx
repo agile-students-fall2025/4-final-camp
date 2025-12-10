@@ -109,7 +109,22 @@ export default function NotificationInbox() {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] flex flex-col">
+            <div className="
+              fixed sm:absolute
+              inset-x-2 sm:inset-x-auto
+              sm:right-0
+              top-14 sm:top-12
+              w-auto sm:w-96
+              max-w-full
+              bg-white
+              rounded-lg
+              shadow-xl
+              border border-gray-200
+              z-50
+              max-h-[calc(100vh-6rem)]
+              flex flex-col
+            ">
+
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
               <div className="flex items-center gap-2">
