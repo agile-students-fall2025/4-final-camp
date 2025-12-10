@@ -18,8 +18,7 @@ University campuses often manage hundreds of items from cameras and lab kits to 
 ---
 
 ## Key Features
-
-- **Single Sign-On (SSO):** Seamless login with university NetID credentials.  
+ 
 - **Centralized Inventory Management:** Unified view of all available items across departments and facilitis.  
 - **Pre-Booking System:** Students can reserve items in advance with transparent availability.  
 - **Real-Time Notifications:**  
@@ -27,7 +26,6 @@ University campuses often manage hundreds of items from cameras and lab kits to 
   - Alerts for overdue returns.  
   - Notifications when desired items become available again.  
 - **Payment Integration:** Secure campus cash system for deposits, fines, or fees.  
-- **Ratings & Reviews:** Students can provide feedback on both equipment and staff service quality.  
 - **Cross-Platform Access:** Fully responsive web app accessible via mobile, tablet, or desktop.  
 
 ---
@@ -37,8 +35,7 @@ University campuses often manage hundreds of items from cameras and lab kits to 
 **CAMP** is designed for all campus community members who interact with shared resources, particularly:
 
 - **Students:** Borrowing cameras, laptops, lab kits, or sports gear.  
-- **Staff:** Managing item issuance, returns, and inventory across multiple departments.  
-- **Facility Managers:** Overseeing equipment usage, statistics, and accountability campus-wide.  
+- **Staff:** Managing item issuance, returns, and inventory across multiple departments.   
 
 ---
 
@@ -68,7 +65,6 @@ Developers
 - [Akshith Karthik](https://github.com/Ak1016-stack)
 - [Ashmit Mukherjee](https://github.com/ansester)
 
-_Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets experience in each role._
 ---
 
 ### Sprint 1 Roles:
@@ -102,6 +98,7 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 2: Ashmit Mukherjee
 - Dev 3: Akshith Karthik
 ---
+_Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets experience in each role._
 
 ## Project History
 
@@ -129,10 +126,10 @@ We welcome contributions to **CAMP!** Please refer to our `CONTRIBUTING.md` file
 Details will be updated as the project progresses to the development and deployment phase. Planned tools and frameworks include:
 
 - **Frontend:** React (with Tailwind CSS for UI)  
-- **Backend:** Flask or Node.js  
-- **Database:** PostgreSQL or Firebase  
-- **Authentication:** University SSO integration  
-- **Hosting:** Campus servers or AWS Cloud  
+- **Backend:** Node.js  
+- **Database:** MongoDB  
+- **Authentication:** JWT
+- **Hosting:** Digital Ocean
 
 ---
 
@@ -159,7 +156,7 @@ Developing **CAMP** involves tackling real-world software engineering challenges
 - Designing a **multi-role user system** (students vs. staff) with different permissions.  
 - Implementing **real-time item availability and notifications**.  
 - Ensuring **data consistency** across multiple departments and assets.  
-- Integrating **secure authentication** (SSO) and **payment systems**.  
+- Integrating **secure authentication** and **payment systems**.  
 - Delivering a **mobile-first UI** that remains intuitive despite complex functionality.  
 
 These challenges make **CAMP** both a technically engaging and impactful project that directly benefits the university community.
@@ -329,7 +326,6 @@ npm test
 - **Process Manager:** PM2
 - **Database:** MongoDB Atlas
 - **CI/CD:** GitHub Actions
-- **SSL:** Available (can be configured with Let's Encrypt)
 
 ### CI/CD Implementation
 
