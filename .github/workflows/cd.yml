@@ -40,7 +40,7 @@ jobs:
             # Check status
             pm2 status
             
-            echo "✅ Deployment completed successfully!"
+            echo "Deployment completed successfully"
       
       - name: Verify deployment
         run: |
@@ -51,9 +51,9 @@ jobs:
           response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.DROPLET_IP }}/api/health)
           
           if [ $response -eq 200 ]; then
-            echo "✅ Deployment verified - API is responding"
+            echo "Deployment verified - API is responding"
           else
-            echo "❌ Deployment verification failed - API returned status $response"
+            echo "Deployment verification failed - API returned status $response"
             exit 1
           fi
       
@@ -61,8 +61,8 @@ jobs:
         if: always()
         run: |
           if [ ${{ job.status }} == 'success' ]; then
-            echo "🚀 Deployment to production successful!"
+            echo "Deployment to production successful"
             echo "Live at: http://${{ secrets.DROPLET_IP }}"
           else
-            echo "❌ Deployment failed"
+            echo "Deployment failed"
           fi

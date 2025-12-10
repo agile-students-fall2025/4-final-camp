@@ -310,9 +310,7 @@ npm test
 
 ### Live Application
 
-The CAMP application is deployed and accessible at:
-
-**🌐 Live URL:** [http://167.99.121.69](http://167.99.121.69)
+**Live URL:** [http://167.99.121.69](http://167.99.121.69)
 
 ### Test Credentials
 
@@ -328,42 +326,36 @@ The CAMP application is deployed and accessible at:
 
 - **Server:** Digital Ocean Droplet (Ubuntu 24.04)
 - **Web Server:** Nginx (reverse proxy)
-- **Process Manager:** PM2 (keeps backend running)
-- **Database:** MongoDB Atlas (Cloud)
-- **CI/CD:** GitHub Actions (automated testing and deployment)
+- **Process Manager:** PM2
+- **Database:** MongoDB Atlas
+- **CI/CD:** GitHub Actions
 - **SSL:** Available (can be configured with Let's Encrypt)
 
-### Continuous Integration & Continuous Deployment
+### CI/CD Implementation
 
-**✅ Extra Credit Features Implemented:**
+**Extra Credit:** Both Continuous Integration and Continuous Deployment are implemented.
 
-#### Continuous Integration (CI)
-- Automated testing runs on every pull request
-- Tests backend on Node.js 18.x and 20.x
-- Builds and lints frontend code
-- Uploads code coverage reports
-- Status: ![CI](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/ci.yml/badge.svg)
+**Continuous Integration:**
+- Runs automated tests on every pull request
+- Tests on Node.js 18.x and 20.x
+- Builds and lints code
+- ![CI](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/ci.yml/badge.svg)
 
-#### Continuous Deployment (CD)
-- Automatically deploys to production when code is merged to master
-- Connects to droplet via SSH
-- Updates both frontend and backend
-- Restarts services and verifies deployment
-- Status: ![CD](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/cd.yml/badge.svg)
+**Continuous Deployment:**
+- Deploys automatically on merge to master
+- Updates backend and frontend
+- Restarts services
+- ![CD](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/cd.yml/badge.svg)
 
-**GitHub Actions Configuration:**
-- Workflows located in `.github/workflows/`
-- See [Workflows README](./.github/workflows/CICD-README.md) for setup instructions
+Configuration files: `.github/workflows/`
 
-### Deployment Infrastructure
+### Infrastructure
 
-The application is deployed with the following setup:
-
-1. **Frontend:** Built React app served by Nginx at `/`
-2. **Backend API:** Node.js/Express server proxied through Nginx at `/api`
-3. **Database:** MongoDB Atlas cluster with connection pooling
-4. **Process Management:** PM2 ensures backend stays running and restarts on crashes
-5. **Firewall:** UFW configured to allow HTTP, HTTPS, and SSH only
+1. Frontend served by Nginx at `/`
+2. Backend API proxied through Nginx at `/api`
+3. MongoDB Atlas for database
+4. PM2 for process management
+5. UFW firewall configured
 
 ### Updating the Deployment
 
@@ -411,7 +403,7 @@ pm2 logs camp-backend --lines 50 | grep -i mongo
 
 ---
 
-⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
+*CAMP — Simplifying campus borrowing, one platform at a time.*
 
 
 
