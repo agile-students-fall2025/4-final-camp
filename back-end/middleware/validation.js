@@ -68,14 +68,14 @@ const validateItemCreation = [
     .notEmpty().withMessage('Description is required'),
   body('category')
     .notEmpty().withMessage('Category is required')
-    .isIn(['Camera', 'Laptop', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other'])
+    .isIn(['Camera', 'Audio', 'Lighting', 'Computer', 'Accessory', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other'])
     .withMessage('Invalid category'),
   body('facility')
     .notEmpty().withMessage('Facility is required')
     .isMongoId().withMessage('Invalid facility ID'),
   body('condition')
     .optional()
-    .isIn(['excellent', 'good', 'fair', 'poor']).withMessage('Invalid condition'),
+    .isIn(['excellent', 'good', 'fair', 'poor', 'damaged', 'needs-repair']).withMessage('Invalid condition'),
   handleValidationErrors,
 ];
 
@@ -83,9 +83,9 @@ const validateItemUpdate = [
   param('id').isMongoId().withMessage('Invalid item ID'),
   body('name').optional().trim().notEmpty().withMessage('Item name cannot be empty'),
   body('description').optional().trim().notEmpty().withMessage('Description cannot be empty'),
-  body('category').optional().isIn(['Camera', 'Laptop', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other']),
+  body('category').optional().isIn(['Camera', 'Audio', 'Lighting', 'Computer', 'Accessory', 'Lab Equipment', 'Sports Gear', 'Musical Instrument', 'Other']),
   body('status').optional().isIn(['available', 'checked-out', 'reserved', 'maintenance', 'retired']),
-  body('condition').optional().isIn(['excellent', 'good', 'fair', 'poor']),
+  body('condition').optional().isIn(['excellent', 'good', 'fair', 'poor', 'damaged', 'needs-repair']),
   handleValidationErrors,
 ];
 
