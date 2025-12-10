@@ -58,15 +58,15 @@ export default function FilterAndSearchPage({ onNavigate, setSelectedItem }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => onNavigate('home')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">Browse Items</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Browse Items</h1>
           </div>
           
           {/* Search Bar */}
