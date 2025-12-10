@@ -326,61 +326,11 @@ The CAMP application is deployed and accessible at:
 - **Web Server:** Nginx (reverse proxy)
 - **Process Manager:** PM2 (keeps backend running)
 - **Database:** MongoDB Atlas (Cloud)
-- **SSL:** Available (can be configured with Let's Encrypt)
 
-### Deployment Infrastructure
 
-The application is deployed with the following setup:
 
-1. **Frontend:** Built React app served by Nginx at `/`
-2. **Backend API:** Node.js/Express server proxied through Nginx at `/api`
-3. **Database:** MongoDB Atlas cluster with connection pooling
-4. **Process Management:** PM2 ensures backend stays running and restarts on crashes
-5. **Firewall:** UFW configured to allow HTTP, HTTPS, and SSH only
 
-### Updating the Deployment
 
-To deploy new changes:
-
-```bash
-# SSH into the droplet
-ssh root@167.99.121.69
-
-# Navigate to project directory
-cd /var/www/4-final-camp
-
-# Pull latest changes
-git pull
-
-# Update backend
-cd back-end
-npm install --production
-pm2 restart camp-backend
-
-# Update frontend
-cd ../front-end
-npm install
-npm run build
-
-# Restart nginx
-systemctl restart nginx
-```
-
-### Monitoring
-
-```bash
-# View backend logs
-pm2 logs camp-backend
-
-# Check backend status
-pm2 status
-
-# Monitor nginx
-systemctl status nginx
-
-# Check MongoDB connection
-pm2 logs camp-backend --lines 50 | grep -i mongo
-```
 
 ---
 
