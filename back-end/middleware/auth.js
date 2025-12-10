@@ -7,8 +7,9 @@ const User = require('../models/User');
 const authenticate = async (req, res, next) => {
   // Skip authentication in test environment
   if (process.env.NODE_ENV === 'test') {
-    req.user = { _id: 'test_user_id', role: 'student' };
-    req.userId = 'test_user_id';
+    // Use a valid MongoDB ObjectId format (24 character hex string)
+    req.user = { _id: '507f1f77bcf86cd799439011', role: 'student' };
+    req.userId = '507f1f77bcf86cd799439011';
     req.userRole = 'student';
     return next();
   }
