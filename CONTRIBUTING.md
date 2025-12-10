@@ -51,124 +51,249 @@ Copy code
 
 ### Commit Messages
 Follow the format:
-<type>: <description>
+```
+<type>(<scope>): <subject>
+```
 
-bash
-Copy code
-**Types:** feat, fix, docs, style, refactor, test, chore  
-**Example:** `feat: implement staff overdue tracking`
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`  
+**Scope:** The component/feature affected (optional but recommended)  
+**Subject:** Brief description of the change  
+**Example:** `feat(auth): implement JWT refresh token endpoint`
 
 ### Workflow Steps
 ```bash
-git checkout main
-git pull origin main
+# Create and checkout a feature branch
 git checkout -b feature/add-dashboard
-# make changes
+
+# Make your changes and commit regularly
 git add .
-git commit -m "feat: add staff dashboard UI"
+git commit -m "feat(dashboard): add staff dashboard UI"
+
+# Push to remote
 git push origin feature/add-dashboard
-Then, open a Pull Request (PR) into the dev branch.
 
-⚙️ Development Environment Setup
-Prerequisites
-Node.js v18+
+# Open a Pull Request on GitHub
+# All PRs go to the master branch
+```
 
-MongoDB (local or Atlas)
+## ⚙️ Development Environment Setup
 
-Git
+### Prerequisites
+- Node.js v18+ and npm v9+
+- MongoDB Atlas account (or local MongoDB 6.0+)
+- Git
+- VS Code (recommended)
 
-VS Code (recommended)
+### Setup Steps
 
-Setup Steps
-bash
-Copy code
-git clone https://github.com/your-org/camp.git
-cd camp
+```bash
+# Clone the repository
+git clone https://github.com/agile-students-fall2025/4-final-camp.git
+cd 4-final-camp
+```
+
+**Backend Setup:**
+```bash
+cd back-end
 npm install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your MongoDB Atlas credentials
+nano .env
+
+# Start development server
+npm start
+```
+
+**Frontend Setup:**
+```bash
+cd ../front-end
+npm install --legacy-peer-deps
 npm run dev
-Create a .env file in the root directory:
+```
 
-ini
-Copy code
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/camp
-JWT_SECRET=your_secret_key
-Default URLs
-Frontend → http://localhost:3000
-Backend → http://localhost:5000
+### Environment Configuration
 
-💻 Coding Standards
-JavaScript & React
-Use ES6 syntax (const, let, arrow functions).
+**Backend `.env` example:**
+```env
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/camp
+JWT_SECRET=your_jwt_secret_key
+NODE_ENV=development
+PORT=8081
+```
 
-Prefer functional components and React hooks.
+**Frontend `.env` example:**
+```env
+REACT_APP_USE_MOCK=false
+REACT_APP_API_BASE=/api
+```
 
-Use camelCase for variables and PascalCase for components.
+### Default URLs
+- **Frontend:** http://localhost:3001
+- **Backend:** http://localhost:8081
+- **API Health Check:** http://localhost:8081/health
 
-Keep files short and focused on one responsibility.
+## 💻 Coding Standards
 
-Include comments where clarity is needed.
+### JavaScript & Node.js
+- Use ES6+ syntax (const/let, arrow functions, destructuring)
+- Prefer async/await over callbacks or promise chains
+- Use meaningful variable names (camelCase)
+- Keep functions focused on a single responsibility
+- Add JSDoc comments for functions and complex logic
 
-Formatting & Linting
-Use Prettier and ESLint:
+### React & Frontend
+- Use functional components with React hooks exclusively
+- Use PascalCase for component names
+- Keep component files focused (one component per file when possible)
+- Use meaningful prop names and include prop validation
+- Extract reusable components to reduce duplication
 
-bash
-Copy code
+### Backend Express.js
+- Use middleware for cross-cutting concerns (auth, validation, logging)
+- Keep route handlers clean; move business logic to models/services
+- Use proper HTTP status codes
+- Return consistent JSON error responses
+
+### Formatting & Linting
+
+**Frontend:**
+```bash
+cd front-end
 npm run lint
 npm run lint:fix
-🧩 How to Contribute
-Select or create an issue in the project board.
+```
 
-Move it to “In Progress.”
-
-Create a branch using naming conventions.
-
-Implement and test changes.
-
-Commit and push code.
-
-Submit a Pull Request to dev.
-
-Request at least one team review.
-
-🔍 Pull Request Process
-Before submitting a PR:
-
- Code follows style guidelines
-
- All tests pass locally
-
- Documentation updated if needed
-
- No console logs or debugging code
-
-After submitting:
-
-Reviewer provides feedback within 24 hours.
-
-Address feedback promptly.
-
-Use “Squash and Merge” for final integration.
-
-Delete branch after merging.
-
-🧪 Building and Testing
-Once test and build configurations are finalized, run:
-
-bash
-Copy code
-npm run build
+**Backend:**
+Code should follow project conventions. Run tests to catch issues:
+```bash
+cd back-end
 npm test
-Future CI/CD pipelines will automate linting, builds, and testing.
+```
+## 🧩 How to Contribute
 
-👥 Team
-Saad Iftikhar · Talal Naveed · Shaf Khalid · Akshith Karthik · Ashmit Mukherjee
+1. **Select or Create an Issue**
+   - Check the [GitHub Project Board](https://github.com/agile-students-fall2025/4-final-camp/projects)
+   - Find an unassigned task or create a new issue
+   - Assign yourself and add the appropriate sprint milestone
 
-💬 Questions?
-Review this document first.
+2. **Create a Feature Branch**
+   - Follow naming conventions: `feature/issue-description` or `fix/issue-description`
+   - Example: `feature/add-notification-system`
 
-Check existing GitHub issues.
+3. **Implement & Test Changes**
+   - Write code following our coding standards
+   - Test your changes locally
+   - Run linting and tests before committing
+   - Update relevant documentation
 
-Reach out via team chat for clarification.
+4. **Commit & Push**
+   - Commit with meaningful messages
+   - Push regularly; don't wait until the end
+   - Example: `git push origin feature/add-notification-system`
 
-Contact the Scrum Master if unresolved.
+5. **Submit a Pull Request**
+   - Open PR against the `master` branch
+   - Include a clear description of changes
+   - Reference the related issue (e.g., "Closes #42")
+   - Request at least one team member to review
+
+6. **Code Review**
+   - Address reviewer feedback promptly
+   - Re-request review after updates
+   - Keep discussions constructive and collaborative
+
+## 🔍 Pull Request Process
+
+### Before Submitting a PR, Verify:
+- [ ] Code follows our style guidelines
+- [ ] All tests pass locally (`npm test` in relevant directory)
+- [ ] No debugging code (console.logs, etc.)
+- [ ] Documentation updated if adding new features
+- [ ] Commit messages follow our convention
+- [ ] No sensitive credentials in code
+
+### PR Description Template
+```markdown
+## Description
+Brief explanation of the changes made.
+
+## Related Issue
+Closes #<issue-number>
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+How was this tested? Include any relevant test results.
+
+## Screenshots
+(if applicable)
+```
+
+### Review Process
+- Team members will review and provide feedback within 24 hours
+- Address feedback and push updates to the same branch
+- Once approved, maintainer will merge using "Squash and Merge"
+- Delete the feature branch after merging
+
+## 🧪 Building and Testing
+
+### Running Tests
+
+**Backend Tests:**
+```bash
+cd back-end
+npm test                    # Run all tests
+npm run test:coverage      # Run with coverage report
+npm test -- auth.test.js   # Run specific test file
+```
+
+**Frontend Build:**
+```bash
+cd front-end
+npm run build              # Create production build
+npm run lint               # Check code quality
+```
+
+### Test Coverage
+- Backend tests use Mocha, Chai, and Supertest
+- Aim for >80% code coverage on critical paths
+- All new features should include corresponding tests
+- Backend has 9 test suites covering major functionality
+
+### CI/CD Pipeline
+**Our project includes automated CI/CD:**
+- **CI:** Runs on every PR (tests, linting, build)
+- **CD:** Deploys to production on merge to master
+- Configuration in `.github/workflows/`
+
+View pipeline status in the README badges
+
+## 👥 Team Members
+- [Saad Iftikhar](https://github.com/saad-iftikhar)
+- [Talal Naveed](https://github.com/TalalNaveed)
+- [Shaf Khalid](https://github.com/Shaf5)
+- [Akshith Karthik](https://github.com/Ak1016-stack)
+- [Ashmit Mukherjee](https://github.com/ansester)
+
+**Current Sprint (Sprint 4):**
+- **Scrum Master:** Shaf Khalid
+- **Product Owner:** Saad Iftikhar
+
+For current role assignments, see the [README.md](./README.md#sprint-4-roles)
+
+## 💬 Questions or Issues?
+
+1. **Review this document** for answers
+2. **Check [existing GitHub issues](https://github.com/agile-students-fall2025/4-final-camp/issues)** for similar problems
+3. **Post in project discussions** or reach out via team chat
+4. **Contact the Scrum Master** if the issue is urgent or process-related
+
+---
+
+**Thank you for contributing to CAMP!** Your work directly impacts the university community. Let's build something great together. 🚀
