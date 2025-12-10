@@ -1,5 +1,8 @@
 # CAMP – Campus Asset Management Platform
 
+![CI Status](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/ci.yml/badge.svg)
+![CD Status](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/cd.yml/badge.svg)
+
 ## Product Vision Statement
 
 For students and campus staff who struggle with fragmented systems and manual processes for borrowing and managing equipment, **CAMP (Campus Asset Management Platform)** is a mobile-friendly web application that centralizes the borrowing, reserving, and tracking of campus assets across facilities such as the IM Lab, Arts Centre, and Library.  
@@ -276,6 +279,7 @@ npm test
 - **Testing:** Mocha, Chai, Supertest, c8 (Code Coverage)
 - **Build Tools:** Webpack, Babel, PostCSS
 - **Deployment:** Digital Ocean Droplet, Nginx, PM2
+- **CI/CD:** GitHub Actions
 
 ### Project Structure
 
@@ -306,9 +310,7 @@ npm test
 
 ### Live Application
 
-The CAMP application is deployed and accessible at:
-
-**🌐 Live URL:** [http://167.99.121.69](http://167.99.121.69)
+**Live URL:** [http://167.99.121.69](http://167.99.121.69)
 
 ### Test Credentials
 
@@ -324,17 +326,84 @@ The CAMP application is deployed and accessible at:
 
 - **Server:** Digital Ocean Droplet (Ubuntu 24.04)
 - **Web Server:** Nginx (reverse proxy)
-- **Process Manager:** PM2 (keeps backend running)
-- **Database:** MongoDB Atlas (Cloud)
+- **Process Manager:** PM2
+- **Database:** MongoDB Atlas
+- **CI/CD:** GitHub Actions
+- **SSL:** Available (can be configured with Let's Encrypt)
 
+### CI/CD Implementation
 
+**Extra Credit:** Both Continuous Integration and Continuous Deployment are implemented.
 
+**Continuous Integration:**
+- Runs automated tests on every pull request
+- Tests on Node.js 18.x and 20.x
+- Builds and lints code
+- ![CI](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/ci.yml/badge.svg)
 
+**Continuous Deployment:**
+- Deploys automatically on merge to master
+- Updates backend and frontend
+- Restarts services
+- ![CD](https://github.com/agile-students-fall2025/4-final-camp/actions/workflows/cd.yml/badge.svg)
 
+Configuration files: `.github/workflows/`
+
+### Infrastructure
+
+1. Frontend served by Nginx at `/`
+2. Backend API proxied through Nginx at `/api`
+3. MongoDB Atlas for database
+4. PM2 for process management
+5. UFW firewall configured
+
+### Updating the Deployment
+
+To deploy new changes:
+
+```bash
+# SSH into the droplet
+ssh root@167.99.121.69
+
+# Navigate to project directory
+cd /var/www/4-final-camp
+
+# Pull latest changes
+git pull
+
+# Update backend
+cd back-end
+npm install --production
+pm2 restart camp-backend
+
+# Update frontend
+cd ../front-end
+npm install
+npm run build
+
+# Restart nginx
+systemctl restart nginx
+```
+
+### Monitoring
+
+```bash
+# View backend logs
+pm2 logs camp-backend
+
+# Check backend status
+pm2 status
+
+# Monitor nginx
+systemctl status nginx
+
+# Check MongoDB connection
+pm2 logs camp-backend --lines 50 | grep -i mongo
+```
 
 ---
 
-⭐ *CAMP — Simplifying campus borrowing, one platform at a time.*
+*CAMP — Simplifying campus borrowing, one platform at a time.*
 
 
 
