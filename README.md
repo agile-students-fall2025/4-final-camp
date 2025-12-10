@@ -92,6 +92,14 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 3: Saad Iftikhar
 ---
 
+### Sprint 4 Roles:
+- Scrum Master: Shaf Khalid
+- Product Owner: Saad Iftikhar
+- Dev 1: Talal Naveed
+- Dev 2: Ashmit Mukherjee
+- Dev 3: Akshith Karthik
+---
+
 ## Project History
 
 **CAMP** was born out of a shared observation: many university facilities rely on separate or outdated systems for asset management. This leads to inefficiency, confusion, and wasted time for both students and staff.  
@@ -263,9 +271,11 @@ npm test
 ### Technology Stack
 
 - **Frontend:** React 19.1.1, Tailwind CSS 4.1.16, Webpack 5
-- **Backend:** Express.js 4.19.0, Node.js
-- **Testing:** Mocha, Chai, Supertest
+- **Backend:** Express.js 4.19.0, Node.js 20.19.6
+- **Database:** MongoDB Atlas (Cloud Database)
+- **Testing:** Mocha, Chai, Supertest, c8 (Code Coverage)
 - **Build Tools:** Webpack, Babel, PostCSS
+- **Deployment:** Digital Ocean Droplet, Nginx, PM2
 
 ### Project Structure
 
@@ -289,6 +299,38 @@ npm test
 - All credentials and sensitive information must be stored in `.env` files and never committed to version control
 - The frontend uses webpack dev server with proxy configuration to route `/api` requests to the backend on port 3000
 - Mock data is available for development without a database connection by setting `REACT_APP_USE_MOCK=true`
+
+---
+
+## Deployment
+
+### Live Application
+
+The CAMP application is deployed and accessible at:
+
+**🌐 Live URL:** [http://167.99.121.69](http://167.99.121.69)
+
+### Test Credentials
+
+**Student Account:**
+- Email: `si2356@univ.edu`
+- Password: `Password123!`
+
+**Staff Account:**
+- Email: `staff@univ.edu`
+- Password: `StaffPass123!`
+
+### Deployment Architecture
+
+- **Server:** Digital Ocean Droplet (Ubuntu 24.04)
+- **Web Server:** Nginx (reverse proxy)
+- **Process Manager:** PM2 (keeps backend running)
+- **Database:** MongoDB Atlas (Cloud)
+
+
+
+
+
 
 ---
 
