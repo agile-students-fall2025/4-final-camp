@@ -92,6 +92,14 @@ _Note: Scrum Master and Product Owner roles rotate each sprint so everyone gets 
 - Dev 3: Saad Iftikhar
 ---
 
+### Sprint 4 Roles:
+- Scrum Master: Shaf Khalid
+- Product Owner: Saad Iftikhar
+- Dev 1: Talal Naveed
+- Dev 2: Ashmit Mukherjee
+- Dev 3: Akshith Karthik
+---
+
 ## Project History
 
 **CAMP** was born out of a shared observation: many university facilities rely on separate or outdated systems for asset management. This leads to inefficiency, confusion, and wasted time for both students and staff.  
@@ -263,9 +271,11 @@ npm test
 ### Technology Stack
 
 - **Frontend:** React 19.1.1, Tailwind CSS 4.1.16, Webpack 5
-- **Backend:** Express.js 4.19.0, Node.js
-- **Testing:** Mocha, Chai, Supertest
+- **Backend:** Express.js 4.19.0, Node.js 20.19.6
+- **Database:** MongoDB Atlas (Cloud Database)
+- **Testing:** Mocha, Chai, Supertest, c8 (Code Coverage)
 - **Build Tools:** Webpack, Babel, PostCSS
+- **Deployment:** Digital Ocean Droplet, Nginx, PM2
 
 ### Project Structure
 
@@ -289,6 +299,88 @@ npm test
 - All credentials and sensitive information must be stored in `.env` files and never committed to version control
 - The frontend uses webpack dev server with proxy configuration to route `/api` requests to the backend on port 3000
 - Mock data is available for development without a database connection by setting `REACT_APP_USE_MOCK=true`
+
+---
+
+## Deployment
+
+### Live Application
+
+The CAMP application is deployed and accessible at:
+
+**🌐 Live URL:** [http://167.99.121.69](http://167.99.121.69)
+
+### Test Credentials
+
+**Student Account:**
+- Email: `si2356@univ.edu`
+- Password: `Password123!`
+
+**Staff Account:**
+- Email: `staff@univ.edu`
+- Password: `StaffPass123!`
+
+### Deployment Architecture
+
+- **Server:** Digital Ocean Droplet (Ubuntu 24.04)
+- **Web Server:** Nginx (reverse proxy)
+- **Process Manager:** PM2 (keeps backend running)
+- **Database:** MongoDB Atlas (Cloud)
+- **SSL:** Available (can be configured with Let's Encrypt)
+
+### Deployment Infrastructure
+
+The application is deployed with the following setup:
+
+1. **Frontend:** Built React app served by Nginx at `/`
+2. **Backend API:** Node.js/Express server proxied through Nginx at `/api`
+3. **Database:** MongoDB Atlas cluster with connection pooling
+4. **Process Management:** PM2 ensures backend stays running and restarts on crashes
+5. **Firewall:** UFW configured to allow HTTP, HTTPS, and SSH only
+
+### Updating the Deployment
+
+To deploy new changes:
+
+```bash
+# SSH into the droplet
+ssh root@167.99.121.69
+
+# Navigate to project directory
+cd /var/www/4-final-camp
+
+# Pull latest changes
+git pull
+
+# Update backend
+cd back-end
+npm install --production
+pm2 restart camp-backend
+
+# Update frontend
+cd ../front-end
+npm install
+npm run build
+
+# Restart nginx
+systemctl restart nginx
+```
+
+### Monitoring
+
+```bash
+# View backend logs
+pm2 logs camp-backend
+
+# Check backend status
+pm2 status
+
+# Monitor nginx
+systemctl status nginx
+
+# Check MongoDB connection
+pm2 logs camp-backend --lines 50 | grep -i mongo
+```
 
 ---
 
